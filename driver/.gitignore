@@ -1,0 +1,14 @@
+.init.o.cmd
+.main.o.cmd
+.skin_test_device.ko.cmd
+.skin_test_device.mod.o.cmd
+.skin_test_device.o.cmd
+.tmp_versions/
+Module.symvers
+init.o
+main.o
+modules.order
+skin_test_device.ko
+skin_test_device.mod.o
+skin_test_device.o
+skin_test_device.mod.c
