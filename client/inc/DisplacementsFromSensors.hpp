@@ -16,7 +16,7 @@
  * \tparam  SkinSensorIterator  Type of iterator over sensors. Templation necessary since SkinWare
  *                              provides different iterators when we're iterating over sensors coming
  *                              from a patch or a region or the whole object.
- * \tparam  targetMeshType      Optional. Type of mesh the values will be interpolated onto. By default
+ * \tparam  target_mesh_type    Optional. Type of mesh the values will be interpolated onto. By default
  *                              the sensors' values (after scaling) will be offered as-is, in the
  *                              "natural" mesh. It is however possible to interpolate them within this
  *                              class by using a custom interpolation method.
@@ -25,8 +25,8 @@
  */
 template <
   class SkinSensorIterator,
-  class targetMeshType = MeshNatural<MeshNodeVal1d>,
-  class interpolator = void
+  class target_mesh_type = MeshNatural<MeshNodeVal1d>,
+  class interpolator_type = enum class {}
 >
 class DisplacementsFromSensors {
   public:
@@ -58,16 +58,16 @@ class DisplacementsFromSensors {
     DisplacementsFromSensors(
       SkinSensorIterator sensors_begin,
       SkinSensorIterator sensors_end,
-      const MeshInterface<targetMeshType> & mesh,
-      const InterpolatorInterface<Interpolator, MeshNatural<MeshNodeVal1d>, targetMeshType> & interpolator
+      const target_mesh_type & mesh,
+      const interpolator_type & interpolator
     )
     {
       // FIXME  check if this static_assert can be rewritten to be more general.
       //        I don't forsee any other MeshNode types, but if they become necessary,
       //        it'll be necessary to add them to this static_assert.
       static_assert(
-           !std::is_same<targetMeshType, MeshNatural<MeshNodeVal1d> >::value
-        && !std::is_same<targetMeshType, MeshNatural<MeshNodeVal3d> >::value,
+           !std::is_same<target_mesh_type, MeshNatural<MeshNodeVal1d> >::value
+        && !std::is_same<target_mesh_type, MeshNatural<MeshNodeVal3d> >::value,
         "You cannot use the mesh-interpolation constructor on a MeshNatural!\n"
         "NOTE: It doesn't make sense, because there's no interpolation for a natural mesh."
       );

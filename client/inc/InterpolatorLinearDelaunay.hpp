@@ -14,14 +14,12 @@
 template <class sourceMeshType, class targetMeshType>
 class InterpolatorLinearDelaunay
   : public InterpolatorInterface<
-    InterpolatorLinearDelaunay<sourceMeshType, targetMeshType>,
-    sourceMeshType, targetMeshType
+    InterpolatorLinearDelaunay<sourceMeshType, targetMeshType>
   >
 {
   // FIXME do we need this friend declaration?
   friend class InterpolatorInterface<
-    InterpolatorLinearDelaunay<sourceMeshType, targetMeshType>,
-    sourceMeshType, targetMeshType
+    InterpolatorLinearDelaunay<sourceMeshType, targetMeshType>
   >;
   protected:
     /**
@@ -37,12 +35,18 @@ class InterpolatorLinearDelaunay
      * \brief Actual implementation of online phase of Linear Delaunay interpolation
      */
     double impl_interpolate(
-      const MeshInterface<sourceMeshType>& sourceMesh,
-      const MeshInterface<targetMeshType>& targetMesh,
+      const sourceMeshType& sourceMesh,
+      const targetMeshType& targetMesh,
       size_t targetNode
     )
     {
       return 1.;
     }
+};
+
+template <class sourceMeshType, class targetMeshType>
+struct InterpolatorImpl_traits<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType> > {
+  typedef sourceMeshType source_mesh_type;
+  typedef targetMeshType target_mesh_type;
 };
 #endif /* INTERPOLATORLINEARDELAUNAY_HPP */

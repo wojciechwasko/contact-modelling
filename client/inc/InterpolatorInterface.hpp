@@ -4,19 +4,24 @@
 #include <cstddef>
 
 #include "Point.hpp"
-#include "MeshInterface.hpp"
+
+template <class derived_t>
+struct InterpolatorImpl_traits;
 
 /**
  * \brief   Interface for interpolating values given over one mesh to another mesh.
- * \tparam  Implementation 
- * \tparam  sourceMeshType
- * \tparam  targetMeshType
+ * \tparam  Implementation Actual implementation of the interpolating algorithm
  *
  * Common mixin interface for interpolation methods. User will not instantiate this directly
  * but will use this interface for interacting with the interpolation algorithm
  */
-template <class Implementation, class sourceMeshType, class targetMeshType>
+template <class Implementation>
 class InterpolatorInterface {
+  typedef typename InterpolatorImpl_traits<Implementation>::source_mesh_type
+    source_mesh_type;
+  typedef typename InterpolatorImpl_traits<Implementation>::target_mesh_type
+    target_mesh_type;
+
   protected:
     /**
      * \brief   Actual interpolation function
@@ -29,8 +34,8 @@ class InterpolatorInterface {
      *          Rather, it returns the value.
      */
     double impl_interpolate(
-      const MeshInterface<sourceMeshType>& sourceMesh,
-      const MeshInterface<targetMeshType>& targetMesh,
+      const source_mesh_type& sourceMesh,
+      const target_mesh_type& targetMesh,
       size_t targetNode
     );
 
@@ -59,8 +64,8 @@ class InterpolatorInterface {
      *        value to the mesh, do it manually. 
      */
     double interpolateSingle(
-      const MeshInterface<sourceMeshType>& sourceMesh,
-      const MeshInterface<targetMeshType>& targetMesh,
+      const source_mesh_type& sourceMesh,
+      const target_mesh_type& targetMesh,
       size_t targetNode
     )
     {
@@ -77,8 +82,8 @@ class InterpolatorInterface {
      * the value to the node's 'val'. TODO what to do in 1d and 3d cases?
      */
     void interpolateBulk(
-      const MeshInterface<sourceMeshType>& sourceMesh,
-      MeshInterface<targetMeshType>& targetMesh
+      const source_mesh_type& sourceMesh,
+            target_mesh_type& targetMesh
     )
     {
       // TODO implement
