@@ -22,6 +22,15 @@ class InterpolatorInterface {
   typedef typename InterpolatorImpl_traits<Implementation>::target_mesh_type
     target_mesh_type;
 
+  static_assert(
+    std::is_same<
+      typename MeshImpl_traits<source_mesh_type>::node_type,
+      typename MeshImpl_traits<target_mesh_type>::node_type
+    >::value,
+    "You can't use interpolation over two meshes with different underlying node type"
+  );
+
+
   protected:
     /**
      * \brief   Actual interpolation function

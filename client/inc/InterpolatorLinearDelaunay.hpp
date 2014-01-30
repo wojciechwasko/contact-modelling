@@ -1,6 +1,8 @@
 #ifndef INTERPOLATORLINEARDELAUNAY_HPP
 #define INTERPOLATORLINEARDELAUNAY_HPP
 
+#include <type_traits>
+
 #include "InterpolatorInterface.hpp"
 
 /**

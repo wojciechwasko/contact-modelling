@@ -2,6 +2,7 @@
 
 #include "main.hpp"
 #include "MeshNodeVal1d.hpp"
+#include "MeshNodeVal3d.hpp"
 #include "MeshNatural.hpp"
 #include "MeshRegularSquare.hpp"
 #include "InterpolatorLinearDelaunay.hpp"
