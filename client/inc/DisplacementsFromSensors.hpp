@@ -11,15 +11,29 @@
 #include "InterpolatorInterface.hpp"
 
 
+/**
+ * \brief   A class to represent displacements (deflections?) read from the senors
+ * \tparam  SkinSensorIterator  Type of iterator over sensors. Templation necessary since SkinWare
+ *                              provides different iterators when we're iterating over sensors coming
+ *                              from a patch or a region or the whole object.
+ * \tparam  targetMeshType      Optional. Type of mesh the values will be interpolated onto. By default
+ *                              the sensors' values (after scaling) will be offered as-is, in the
+ *                              "natural" mesh. It is however possible to interpolate them within this
+ *                              class by using a custom interpolation method.
+ * \tparam  interpolator        Optional. Algorithm used to interpolate values from one mesh onto
+ *                              another. Used only if targetMeshType != MeshNormal
+ */
 template <
   class SkinSensorIterator,
   class targetMeshType = MeshNatural<MeshNodeVal1d>,
-  class Interpolator = void
+  class interpolator = void
 >
 class DisplacementsFromSensors {
   public:
     /**
      * \brief   Constructor for non-interpolated mesh.
+     * \param   sensors_begin   iterator pointing to the beginning of the sensors we'll be using
+     * \param   sensors_end     iterator pointing to the end of the sensors we'll be using
      *
      * With this constructor, a non-interpolated mesh will be used; sensor readings will be
      * provided as-is, in the original mesh corresponding to the physical layout of the 

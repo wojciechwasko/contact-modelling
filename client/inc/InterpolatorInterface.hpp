@@ -6,18 +6,41 @@
 #include "Point.hpp"
 #include "MeshInterface.hpp"
 
+/**
+ * \brief   Interface for interpolating values given over one mesh to another mesh.
+ * \tparam  Implementation 
+ * \tparam  sourceMeshType
+ * \tparam  targetMeshType
+ *
+ * Common mixin interface for interpolation methods. User will not instantiate this directly
+ * but will use this interface for interacting with the interpolation algorithm
+ */
 template <class Implementation, class sourceMeshType, class targetMeshType>
 class InterpolatorInterface {
   protected:
-    // non-defined implementations
+    /**
+     * \brief   Actual interpolation function
+     * \param   sourceMesh  mesh to take the "true" values from
+     * \param   targetMesh  mesh to interpolate the function in
+     * \param   targetNode  node in the target mesh to interpolate in
+     * \returns             Interpolated value
+     *
+     * \note    This method does *NOT* modify the actual values in the target mesh.
+     *          Rather, it returns the value.
+     */
     double impl_interpolate(
       const MeshInterface<sourceMeshType>& sourceMesh,
       const MeshInterface<targetMeshType>& targetMesh,
       size_t targetNode
     );
 
-    // defined default implementations
-    // will get called if not overriden in Implementation.
+    /**
+     * \brief   Optional offline step to be performed.
+     *
+     * \note    This method has a default empty implementation, so if there is
+     *          no offline computation to be done, the implementation class does
+     *          not have to override this method with empty impl_offline()
+     */
     void   impl_offline(void) {}
 
   public:
