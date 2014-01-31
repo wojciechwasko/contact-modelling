@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 #include "main.hpp"
 #include "Forces.hpp"
@@ -8,6 +9,7 @@
 #include "MeshRegularSquare.hpp"
 #include "InterpolatorLinearDelaunay.hpp"
 #include "DisplacementsFromSensors.hpp"
+#include "ResultantDisplacements.hpp"
 
 
 int main(int argc, char** argv) {
@@ -26,10 +28,16 @@ int main(int argc, char** argv) {
   > myInterpolator;
   myInterpolator i;
 
-  MeshRegularSquare<MeshNodeVal3d> force_mesh;
-  Forces<MeshRegularSquare<MeshNodeVal3d>> f(&force_mesh);
+  typedef MeshRegularSquare<MeshNodeVal3d> force_mesh_type;
+  std::unique_ptr<force_mesh_type> force_mesh(new force_mesh_type);
+  Forces<force_mesh_type> f(std::move(force_mesh));
+
+  typedef MeshRegularSquare<MeshNodeVal3d> res_disp_mesh_type;
+  std::unique_ptr<res_disp_mesh_type> res_disp_mesh(new res_disp_mesh_type);
+  ResultantDisplacements<res_disp_mesh_type> res_disp(std::move(res_disp_mesh));
 
   DisplacementsFromSensors<int, MeshRegularSquare<MeshNodeVal1d>, myInterpolator> disps2(1, 2, m, i);
   return 0;
 }
+
 
