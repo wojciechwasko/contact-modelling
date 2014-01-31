@@ -2,6 +2,7 @@
 #define DISPLACEMENTSFROMSENSORS_HPP
 
 #include <type_traits>
+#include "traits_helpers.hpp"
 
 #include "MeshInterface.hpp"
 #include "MeshNatural.hpp"
@@ -22,11 +23,15 @@
  *                              class by using a custom interpolation method.
  * \tparam  interpolator        Optional. Algorithm used to interpolate values from one mesh onto
  *                              another. Used only if targetMeshType != MeshNormal
+ *
  */
+using traits_helpers::EnableIf;
+using traits_helpers::DisableIf;
+using traits_helpers::none_placeholder;
 template <
   class SkinSensorIterator,
   class target_mesh_type = MeshNatural<MeshNodeVal1d>,
-  class interpolator_type = enum class {}
+  class interpolator_type = none_placeholder
 >
 class DisplacementsFromSensors {
   public:
@@ -39,6 +44,7 @@ class DisplacementsFromSensors {
      * provided as-is, in the original mesh corresponding to the physical layout of the 
      * skin sensors.
      */
+    template <typename I=interpolator_type, EnableIf<std::is_same<I, none_placeholder> >... >
     DisplacementsFromSensors(
       SkinSensorIterator sensors_begin,
       SkinSensorIterator sensors_end
@@ -55,6 +61,7 @@ class DisplacementsFromSensors {
      * a mesh determined by the physical skin sensors layout and then we have another mesh
      * with "virtual" readigs which come from interpolation by some specific metehod.
      */
+    template <typename I=interpolator_type, DisableIf<std::is_same<I, none_placeholder> >... >
     DisplacementsFromSensors(
       SkinSensorIterator sensors_begin,
       SkinSensorIterator sensors_end,
