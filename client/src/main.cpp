@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "main.hpp"
+#include "Forces.hpp"
 #include "MeshNodeVal1d.hpp"
 #include "MeshNodeVal3d.hpp"
 #include "MeshNatural.hpp"
@@ -24,6 +25,9 @@ int main(int argc, char** argv) {
     MeshRegularSquare<MeshNodeVal1d>
   > myInterpolator;
   myInterpolator i;
+
+  MeshRegularSquare<MeshNodeVal3d> force_mesh;
+  Forces<MeshRegularSquare<MeshNodeVal3d>> f(&force_mesh);
 
   DisplacementsFromSensors<int, MeshRegularSquare<MeshNodeVal1d>, myInterpolator> disps2(1, 2, m, i);
   return 0;
