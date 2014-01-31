@@ -17,13 +17,11 @@ template <class node_type>
 class MeshRegularSquare : public MeshInterface<MeshRegularSquare<node_type> >
 {
   friend class MeshInterface<MeshRegularSquare<node_type> >;
+  public:
+    INJECT_MESH_TRAITS_TYPEDEFS(MeshRegularSquare<node_type>)
+
   private:
-    typedef typename std::vector<node_type> container;
-    typedef typename container::iterator iterator;
-    typedef typename container::const_iterator const_iterator;
-    typedef typename MeshImpl_traits<MeshRegularSquare<node_type> >::reference             reference;
-    typedef typename MeshImpl_traits<MeshRegularSquare<node_type> >::const_reference const_reference;
-    container nodes;
+    container_type nodes;
     iterator begin() { return nodes.begin(); };
     iterator end()   { return nodes.end();   };
     const_iterator cbegin() const { return nodes.cbegin(); };
@@ -45,9 +43,14 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<node_type> >
  */
 template <class TNode>
 struct MeshImpl_traits<MeshRegularSquare<TNode> > {
-  typedef TNode node_type;
-  typedef TNode      &       reference;
-  typedef TNode const& const_reference;
+  typedef TNode                                  node_type;
+  typedef node_type      &                       reference;
+  typedef node_type const&                 const_reference;
+  typedef typename std::vector<node_type>            container_type;
+  typedef container_type      &        container_reference;
+  typedef container_type const&  container_const_reference;
+  typedef typename container_type::iterator                iterator;
+  typedef typename container_type::const_iterator    const_iterator;
 };
 
 #endif /* MESHREGULARSQUARE_HPP */

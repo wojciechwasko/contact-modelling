@@ -5,6 +5,21 @@
 
 #include "Point.hpp"
 
+/**
+ * \def COMMA
+ * A nifty hack to enable processing of multiple templated classes in macros.
+ * Inspired by http://stackoverflow.com/a/19841470/312650
+ */
+#ifndef COMMA
+#define COMMA ,
+#endif
+/**
+ * Injects common typedefs from InterpolatorImpl_traits
+ */
+#define INJECT_INTERPOLATOR_TRAITS_TYPEDEFS(name) \
+  typedef typename InterpolatorImpl_traits< name >::source_mesh_type source_mesh_type; \
+  typedef typename InterpolatorImpl_traits< name >::target_mesh_type target_mesh_type;
+
 template <class derived_t>
 struct InterpolatorImpl_traits;
 
@@ -17,10 +32,8 @@ struct InterpolatorImpl_traits;
  */
 template <class Implementation>
 class InterpolatorInterface {
-  typedef typename InterpolatorImpl_traits<Implementation>::source_mesh_type
-    source_mesh_type;
-  typedef typename InterpolatorImpl_traits<Implementation>::target_mesh_type
-    target_mesh_type;
+  public:
+    INJECT_INTERPOLATOR_TRAITS_TYPEDEFS(Implementation)
 
   static_assert(
     std::is_same<

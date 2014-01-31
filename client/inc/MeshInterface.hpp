@@ -5,8 +5,30 @@
 #include <cstddef>
 #include <algorithm>
 
+/**
+ * \def COMMA
+ * A nifty hack to enable processing of multiple templated classes in macros.
+ * Inspired by http://stackoverflow.com/a/19841470/312650
+ */
+#ifndef COMMA
+#define COMMA ,
+#endif
+/**
+ * Injects common typedefs from MeshImpl_traits
+ */
+#define INJECT_MESH_TRAITS_TYPEDEFS(name) \
+  typedef typename MeshImpl_traits< name >::reference                                   reference; \
+  typedef typename MeshImpl_traits< name >::const_reference                       const_reference; \
+  typedef typename MeshImpl_traits< name >::iterator                                     iterator; \
+  typedef typename MeshImpl_traits< name >::const_iterator                         const_iterator; \
+  typedef typename MeshImpl_traits< name >::container_type                         container_type; \
+  typedef typename MeshImpl_traits< name >::container_reference               container_reference; \
+  typedef typename MeshImpl_traits< name >::container_const_reference   container_const_reference; 
+
+
 template <class derived_t>
 struct MeshImpl_traits;
+
 /**
  * \brief   A mixin class to provide a common interface and various helper functions
  *
@@ -16,8 +38,7 @@ struct MeshImpl_traits;
 template <class Derived>
 class MeshInterface {
   public:
-    typedef typename MeshImpl_traits<Derived>::reference       reference;
-    typedef typename MeshImpl_traits<Derived>::const_reference const_reference;
+    INJECT_MESH_TRAITS_TYPEDEFS(Derived)
 
   protected:
     /**
@@ -85,13 +106,31 @@ class MeshInterface {
      * \brief Random access operator []
      * \note  This is not bound-checked.
      */
-    reference       operator[](size_t n)       { return static_cast<Derived*>(this)->impl_ra_nobounds(n); };
+    reference       operator[](size_t n)       {
+      return static_cast<Derived*>(this)->impl_ra_nobounds(n);
+    };
 
     /**
      * \brief Random access operator []. Const version.
      * \note  This is not bound-checked.
      */
-    const_reference operator[](size_t n) const { return static_cast<Derived*>(this)->impl_ra_nobounds(n); };
+    const_reference operator[](size_t n) const {
+      return static_cast<Derived*>(this)->impl_ra_nobounds(n);
+    };
+
+    /**
+     * \brief Extracts the underlying container
+     */
+    container_reference       getRawValues()       {
+      return static_cast<Derived*>(this)->nodes;
+    };
+
+    /**
+     * \brief Extracts the underlying container
+     */
+    container_const_reference getRawValues() const {
+      return static_cast<Derived*>(this)->nodes;
+    };
 };
 
 

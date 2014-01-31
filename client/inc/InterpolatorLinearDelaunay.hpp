@@ -23,6 +23,9 @@ class InterpolatorLinearDelaunay
   friend class InterpolatorInterface<
     InterpolatorLinearDelaunay<sourceMeshType, targetMeshType>
   >;
+  public:
+    INJECT_INTERPOLATOR_TRAITS_TYPEDEFS(InterpolatorLinearDelaunay<sourceMeshType COMMA targetMeshType>)
+
   protected:
     /**
      * \brief   Implementation of the offline step.
