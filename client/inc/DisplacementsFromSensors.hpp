@@ -1,6 +1,7 @@
 #ifndef DISPLACEMENTSFROMSENSORS_HPP
 #define DISPLACEMENTSFROMSENSORS_HPP
 
+#include <memory>
 #include <type_traits>
 #include "traits_helpers.hpp"
 
@@ -34,6 +35,10 @@ template <
   class interpolator_type = none_placeholder
 >
 class DisplacementsFromSensors {
+    typedef MeshNatural<typename target_mesh_type::node_type> source_mesh_type;
+    std::unique_ptr<source_mesh_type>   source_mesh_;
+    std::unique_ptr<target_mesh_type>   target_mesh_;
+    std::unique_ptr<interpolator_type> interpolator_;
   public:
     /**
      * \brief   Constructor for non-interpolated mesh.
@@ -65,9 +70,9 @@ class DisplacementsFromSensors {
     DisplacementsFromSensors(
       SkinSensorIterator sensors_begin,
       SkinSensorIterator sensors_end,
-      const target_mesh_type & mesh,
-      const interpolator_type & interpolator
-    )
+      std::unique_ptr<target_mesh_type> target_mesh,
+      std::unique_ptr<interpolator_type> interpolator
+    ) : target_mesh_(std::move(target_mesh)), interpolator_(std::move(interpolator))
     {
       // FIXME  check if this static_assert can be rewritten to be more general.
       //        I don't forsee any other MeshNode types, but if they become necessary,

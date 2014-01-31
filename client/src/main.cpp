@@ -14,29 +14,25 @@
 
 int main(int argc, char** argv) {
 
-  MeshNatural<MeshNodeVal1d> mn;
-  mn.for_each_node([](const MeshNodeVal1d& n) {
-    std::cout << n.x;
-  });
   DisplacementsFromSensors<int> disps1(1,2);
 
-
-  MeshRegularSquare<MeshNodeVal1d> m;
-  typedef InterpolatorLinearDelaunay<
-    MeshNatural<MeshNodeVal1d>,
-    MeshRegularSquare<MeshNodeVal1d>
-  > myInterpolator;
-  myInterpolator i;
-
+  typedef MeshRegularSquare<MeshNodeVal1d> inter_source_mesh_type;
+  typedef MeshNatural<MeshNodeVal1d> raw_source_mesh_type;
+  typedef InterpolatorLinearDelaunay<raw_source_mesh_type, inter_source_mesh_type> interpolator_type;
   typedef MeshRegularSquare<MeshNodeVal3d> force_mesh_type;
+  typedef MeshRegularSquare<MeshNodeVal3d> res_disp_mesh_type;
+
+  std::unique_ptr<inter_source_mesh_type> s_mesh(new inter_source_mesh_type);
+  std::unique_ptr<interpolator_type> interpolator(new interpolator_type);
   std::unique_ptr<force_mesh_type> force_mesh(new force_mesh_type);
+  std::unique_ptr<res_disp_mesh_type> res_disp_mesh(new res_disp_mesh_type);
+
+  DisplacementsFromSensors<int, inter_source_mesh_type, interpolator_type>
+    disps2(1, 2, std::move(s_mesh), std::move(interpolator));
   Forces<force_mesh_type> f(std::move(force_mesh));
 
-  typedef MeshRegularSquare<MeshNodeVal3d> res_disp_mesh_type;
-  std::unique_ptr<res_disp_mesh_type> res_disp_mesh(new res_disp_mesh_type);
   ResultantDisplacements<res_disp_mesh_type> res_disp(std::move(res_disp_mesh));
 
-  DisplacementsFromSensors<int, MeshRegularSquare<MeshNodeVal1d>, myInterpolator> disps2(1, 2, m, i);
   return 0;
 }
 
