@@ -17,6 +17,7 @@
  * Injects common typedefs from MeshImpl_traits
  */
 #define INJECT_MESH_TRAITS_TYPEDEFS(name) \
+  typedef typename MeshImpl_traits< name >::node_type                                   node_type; \
   typedef typename MeshImpl_traits< name >::reference                                   reference; \
   typedef typename MeshImpl_traits< name >::const_reference                       const_reference; \
   typedef typename MeshImpl_traits< name >::iterator                                     iterator; \

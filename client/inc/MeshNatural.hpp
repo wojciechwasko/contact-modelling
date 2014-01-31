@@ -12,12 +12,12 @@
  * Each node corresponds to one sensor in the skin, with (x,y)
  * values copied over.
  */
-template <class node_type>
-class MeshNatural : public MeshInterface<MeshNatural<node_type> >
+template <class TNode>
+class MeshNatural : public MeshInterface<MeshNatural<TNode> >
 {
-  friend class MeshInterface<MeshNatural<node_type> >;
+  friend class MeshInterface<MeshNatural<TNode> >;
   public:
-    INJECT_MESH_TRAITS_TYPEDEFS(MeshNatural<node_type>)
+    INJECT_MESH_TRAITS_TYPEDEFS(MeshNatural<TNode>)
 
   private:
     container_type nodes;

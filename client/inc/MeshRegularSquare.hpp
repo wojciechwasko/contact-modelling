@@ -13,12 +13,12 @@
  * of having to populate some internal std::vector. After all,
  * (x,y) positions are very easy to calculate on-the-fly.
  */
-template <class node_type>
-class MeshRegularSquare : public MeshInterface<MeshRegularSquare<node_type> >
+template <class TNode>
+class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
 {
-  friend class MeshInterface<MeshRegularSquare<node_type> >;
+  friend class MeshInterface<MeshRegularSquare<TNode> >;
   public:
-    INJECT_MESH_TRAITS_TYPEDEFS(MeshRegularSquare<node_type>)
+    INJECT_MESH_TRAITS_TYPEDEFS(MeshRegularSquare<TNode>)
 
   private:
     container_type nodes;
