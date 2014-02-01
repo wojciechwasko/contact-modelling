@@ -7,8 +7,7 @@
 
 #include "main.hpp"
 #include "Forces.hpp"
-#include "MeshNodeVal1d.hpp"
-#include "MeshNodeVal3d.hpp"
+#include "MeshNode.hpp"
 #include "MeshNatural.hpp"
 #include "MeshRegularSquare.hpp"
 #include "InterpolatorLinearDelaunay.hpp"
@@ -20,11 +19,11 @@ int main(int argc, char** argv) {
 
 
   typedef skin_module::skin_sensor_iterator skin_sensor_iterator;
-  typedef MeshRegularSquare<MeshNodeVal1d> inter_source_mesh_type;
-  typedef MeshNatural<MeshNodeVal1d, skin_sensor_iterator> raw_source_mesh_type;
+  typedef MeshRegularSquare<MeshNode<1>> inter_source_mesh_type;
+  typedef MeshNatural<MeshNode<1>, skin_sensor_iterator> raw_source_mesh_type;
   typedef InterpolatorLinearDelaunay<raw_source_mesh_type, inter_source_mesh_type> interpolator_type;
-  typedef MeshRegularSquare<MeshNodeVal3d> force_mesh_type;
-  typedef MeshRegularSquare<MeshNodeVal3d> res_disp_mesh_type;
+  typedef MeshRegularSquare<MeshNode<3>> force_mesh_type;
+  typedef MeshRegularSquare<MeshNode<3>> res_disp_mesh_type;
   typedef DisplacementsFromSensors<skin_sensor_iterator, raw_source_mesh_type, inter_source_mesh_type, interpolator_type> disps_from_sensors_type;
 
   skin_module module;

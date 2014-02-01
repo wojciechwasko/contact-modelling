@@ -7,8 +7,7 @@
 
 #include "MeshInterface.hpp"
 #include "MeshNatural.hpp"
-#include "MeshNodeVal1d.hpp"
-#include "MeshNodeVal3d.hpp"
+#include "MeshNode.hpp"
 
 #include "InterpolatorInterface.hpp"
 
@@ -31,8 +30,8 @@ using traits_helpers::DisableIf;
 using traits_helpers::none_placeholder;
 template <
   class SkinSensorIterator,
-  class source_mesh_type = MeshNatural<MeshNodeVal1d, SkinSensorIterator>,
-  class target_mesh_type = MeshNatural<MeshNodeVal1d, SkinSensorIterator>,
+  class source_mesh_type = MeshNatural<MeshNode<1>, SkinSensorIterator>,
+  class target_mesh_type = MeshNatural<MeshNode<1>, SkinSensorIterator>,
   class interpolator_type = none_placeholder
 >
 class DisplacementsFromSensors {
@@ -89,8 +88,8 @@ class DisplacementsFromSensors {
       //        I don't forsee any other MeshNode types, but if they become necessary,
       //        it'll be necessary to add them to this static_assert.
       static_assert(
-           !std::is_same<target_mesh_type, MeshNatural<MeshNodeVal1d, SkinSensorIterator> >::value
-        && !std::is_same<target_mesh_type, MeshNatural<MeshNodeVal3d, SkinSensorIterator> >::value,
+           !std::is_same<target_mesh_type, MeshNatural<MeshNode<1>, SkinSensorIterator> >::value
+        && !std::is_same<target_mesh_type, MeshNatural<MeshNode<3>, SkinSensorIterator> >::value,
         "You cannot use the mesh-interpolation constructor on a MeshNatural!\n"
         "NOTE: It doesn't make sense, because there's no interpolation for a natural mesh."
       );
