@@ -1,9 +1,11 @@
 #ifndef MESHINTERFACE_HPP
 #define MESHINTERFACE_HPP
 
-#include <vector>
 #include <cstddef>
 #include <algorithm>
+
+#include <Eigen/Dense>
+
 
 /**
  * \def COMMA
@@ -54,7 +56,7 @@ class MeshInterface {
      *
      * TODO   Aproppriately initialize the size of this container, based on type of Node (1D or 3D)
      */
-    std::vector<double> vals;
+    Eigen::VectorXd values_;
     /**
      * \brief   Implementation for random-access no bounds-checking access.
      */
@@ -64,6 +66,7 @@ class MeshInterface {
      */
     const_reference impl_ra_nobounds(size_t n) const;
 
+    MeshInterface(size_t no_nodes) : values_(node_type::val_dimensionality * no_nodes) {}
   public:
     /**
      * \brief Get number of nodes in the mesh.
@@ -120,17 +123,17 @@ class MeshInterface {
     };
 
     /**
-     * \brief Extracts the underlying container
+     * \brief Extracts the underlying values container
      */
-    container_reference       getRawValues()       {
-      return static_cast<Derived*>(this)->nodes;
+    Eigen::VectorXd const      getRawValues()       {
+      return static_cast<Derived*>(this)->values;
     };
 
     /**
-     * \brief Extracts the underlying container
+     * \brief Extracts the underlying values container
      */
-    container_const_reference getRawValues() const {
-      return static_cast<Derived*>(this)->nodes;
+    Eigen::VectorXd const&     getRawValues() const {
+      return static_cast<Derived*>(this)->values;
     };
 };
 

@@ -31,11 +31,23 @@ using traits_helpers::DisableIf;
 using traits_helpers::none_placeholder;
 template <
   class SkinSensorIterator,
-  class target_mesh_type = MeshNatural<MeshNodeVal1d>,
+  class source_mesh_type = MeshNatural<MeshNodeVal1d, SkinSensorIterator>,
+  class target_mesh_type = MeshNatural<MeshNodeVal1d, SkinSensorIterator>,
   class interpolator_type = none_placeholder
 >
 class DisplacementsFromSensors {
-    typedef MeshNatural<typename target_mesh_type::node_type> source_mesh_type;
+  // asserts
+  
+  // This one in particular does not allow setting target_mesh_type to whatever
+  // value when interpolator_type is none_placeholder (which, theoretically
+  // would be a valid situation), but then, there's no point in using
+  // target_mesh_type if you're not using an interpolator
+  static_assert(
+    std::is_same<typename source_mesh_type::node_type, typename target_mesh_type::node_type>::value,
+    "Error msg"
+  );
+
+
     std::unique_ptr<source_mesh_type>   source_mesh_;
     std::unique_ptr<target_mesh_type>   target_mesh_;
     std::unique_ptr<interpolator_type> interpolator_;
@@ -53,9 +65,8 @@ class DisplacementsFromSensors {
     DisplacementsFromSensors(
       SkinSensorIterator sensors_begin,
       SkinSensorIterator sensors_end
-    )
+    ) : source_mesh_(new source_mesh_type(sensors_begin, sensors_end))
     {
-      // TODO build MeshNatural
     }
 
 
@@ -78,8 +89,8 @@ class DisplacementsFromSensors {
       //        I don't forsee any other MeshNode types, but if they become necessary,
       //        it'll be necessary to add them to this static_assert.
       static_assert(
-           !std::is_same<target_mesh_type, MeshNatural<MeshNodeVal1d> >::value
-        && !std::is_same<target_mesh_type, MeshNatural<MeshNodeVal3d> >::value,
+           !std::is_same<target_mesh_type, MeshNatural<MeshNodeVal1d, SkinSensorIterator> >::value
+        && !std::is_same<target_mesh_type, MeshNatural<MeshNodeVal3d, SkinSensorIterator> >::value,
         "You cannot use the mesh-interpolation constructor on a MeshNatural!\n"
         "NOTE: It doesn't make sense, because there's no interpolation for a natural mesh."
       );

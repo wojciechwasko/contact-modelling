@@ -15,6 +15,12 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SKINWARE_LDFLAGS}")
 
 include_directories(${ContactModelling_SOURCE_DIR}/client/inc)
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
+
+find_package(Eigen3 REQUIRED)
+
+include_directories(${EIGEN3_INCLUDE_DIR})
+
 # From CMake manual:
 #   (We do not recommend using GLOB to collect a list of source files from your
 #   source tree. If no CMakeLists.txt file changes when a source is added or

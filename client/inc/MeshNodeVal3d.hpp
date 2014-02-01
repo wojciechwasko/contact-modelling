@@ -1,15 +1,17 @@
 #ifndef MESHNODEVAL3D_HPP
 #define MESHNODEVAL3D_HPP
 
+#include <array>
+#include <cstddef>
+
 /**
  * \brief   A "POD" struct to keep x,y coordinates of a node in the mesh; with 3D values (e.g. forces with all the components).
  */
 typedef struct MeshNodeVal3d {
+  const static size_t val_dimensionality = 3;
   double x;
   double y;
-  double* const val_x;
-  double* const val_y;
-  double* const val_z;
+  std::array<double*, 3> vals;
 } MeshNodeVal3d;
 
 

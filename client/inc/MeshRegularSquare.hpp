@@ -17,8 +17,12 @@ template <class TNode>
 class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
 {
   friend class MeshInterface<MeshRegularSquare<TNode> >;
+  typedef MeshInterface<MeshRegularSquare<TNode> > interface_type;
+  
   public:
     INJECT_MESH_TRAITS_TYPEDEFS(MeshRegularSquare<TNode>)
+
+    MeshRegularSquare() : interface_type(2) {}
 
   private:
     container_type nodes;
