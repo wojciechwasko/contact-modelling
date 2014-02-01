@@ -43,7 +43,8 @@ class DisplacementsFromSensors {
   // target_mesh_type if you're not using an interpolator
   static_assert(
     std::is_same<typename source_mesh_type::node_type, typename target_mesh_type::node_type>::value,
-    "Error msg"
+    "For DisplacementsFromSensors the source/target mesh node must be of the same type,"
+    "including the dimensionality!"
   );
 
 
