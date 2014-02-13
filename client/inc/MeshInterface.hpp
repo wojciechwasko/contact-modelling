@@ -42,6 +42,7 @@ template <class Derived>
 class MeshInterface {
   public:
     INJECT_MESH_TRAITS_TYPEDEFS(Derived)
+    typedef Eigen::VectorXd vals_vec_type;
 
   protected:
     /**
@@ -56,7 +57,7 @@ class MeshInterface {
      *
      * TODO   Aproppriately initialize the size of this container, based on type of Node (1D or 3D)
      */
-    Eigen::VectorXd values_;
+    vals_vec_type values_;
     /**
      * \brief   Implementation for random-access no bounds-checking access.
      */
@@ -69,14 +70,25 @@ class MeshInterface {
     MeshInterface(size_t no_nodes) : values_(node_type::val_dimensionality * no_nodes) {}
   public:
     /**
+     * \brief   Get a constant reference to the values vector.
+     */
+    const vals_vec_type& getValues() const { return values_; }
+
+    const_iterator cbegin() const { return static_cast<const Derived*>(this)->impl_cbegin(); }
+    const_iterator   cend() const { return static_cast<const Derived*>(this)->impl_cend();   }
+
+    iterator begin() { return static_cast<Derived*>(this)->impl_begin(); }
+    iterator   end() { return static_cast<Derived*>(this)->impl_end();   }
+
+    /**
+     * \brief   Get a reference to the values vector.
+     */
+    vals_vec_type& getValues() { return values_; }
+
+    /**
      * \brief Get number of nodes in the mesh.
      */
-    std::ptrdiff_t size() const {
-      return std::distance(
-        static_cast<Derived*>(this)->cbegin(),
-        static_cast<Derived*>(this)->cend()
-      );
-    };
+    std::ptrdiff_t size() const { return std::distance(cbegin(), cend()); }
 
     /**
      * \brief Iterate over node in the mesh, executing a function. Const version.
@@ -84,13 +96,7 @@ class MeshInterface {
      * \param   f   Function to be called for each node. Takes node Derived::node as argument
      */
     template <class F>
-    void for_each_node(F f) const {
-      std::for_each(
-        static_cast<Derived*>(this)->cbegin(),
-        static_cast<Derived*>(this)->cend(),
-        f
-      );
-    };
+    void for_each_node(F f) const { std::for_each(cbegin(), cend(), f); }
 
     /**
      * \brief Iterate over node in the mesh, executing a function.
@@ -98,13 +104,7 @@ class MeshInterface {
      * \param   f   Function to be called for each node. Takes node Derived::node as argument
      */
     template <class F>
-    void for_each_node(F f) {
-      std::for_each(
-        static_cast<Derived*>(this)->begin(),
-        static_cast<Derived*>(this)->end(),
-        f
-      );
-    };
+    void for_each_node(F f) { std::for_each(begin(), end(), f); }
 
     /**
      * \brief Random access operator []

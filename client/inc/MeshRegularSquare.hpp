@@ -26,15 +26,12 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
 
   private:
     container_type nodes;
-    iterator begin() { return nodes.begin(); };
-    iterator end()   { return nodes.end();   };
-    const_iterator cbegin() const { return nodes.cbegin(); };
-    const_iterator cend()   const { return nodes.cend();   };
-    reference       operator[](size_t n)       { return nodes[n]; };
-    const_reference operator[](size_t n) const { return nodes[n]; };
-    reference       at(size_t n)       { return nodes.at(n); };
-    const_reference at(size_t n) const { return nodes.at(n); };
-  public:
+    iterator impl_begin() { return nodes.begin(); };
+    iterator impl_end()   { return nodes.end();   };
+    const_iterator impl_cbegin() const { return nodes.cbegin(); };
+    const_iterator impl_cend()   const { return nodes.cend();   };
+    reference       impl_ra_nobounds(size_t n)       { return nodes[n]; };
+    const_reference impl_ra_nobounds(size_t n) const { return nodes[n]; };
 };
 
 /**
