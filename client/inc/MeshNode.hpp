@@ -18,7 +18,7 @@
  */
 template <std::size_t D>
 struct MeshNode {
-  const static size_t val_dimensionality = D;
+  constexpr static size_t val_dimensionality = D;
   double x;
   double y;
   std::array<double*, D> vals;

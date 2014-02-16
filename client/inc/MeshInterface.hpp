@@ -1,6 +1,7 @@
 #ifndef MESHINTERFACE_HPP
 #define MESHINTERFACE_HPP
 
+#include <memory>
 #include <cstddef>
 #include <algorithm>
 
@@ -42,21 +43,30 @@ template <class Derived>
 class MeshInterface {
   public:
     INJECT_MESH_TRAITS_TYPEDEFS(Derived)
+    typedef Eigen::VectorXd vals_vec_type;
 
   protected:
     /**
      * \brief   Values in the mesh'es nodes. Node's val/ (val_x, val_y, val_z) will
      * point to elements of this vector.
+     *
+     * \note  Implementations may (and will) take advantage of the fact that this data (values) will
+     *        remain at the same location in memory. Always. One major optimisation is that the
+     *        Nodes will contain pointers directly to the values instead of having to look them up
+     *        on each access. However, there is a downside - you CANNOT use move semantics or other
+     *        tricks (e.g. raw buffer initialisation) to speed up copying of data. The simplest
+     *        solution would be to simply get the new values and then iterate, copying data.
+     *        However, I'm thinking of passing this vector (reference to it, actually) to the skin
+     *        interface, which would write directly to this vector instead of returning a fresh one.
+     *
      * TODO   Think of enhancing encapsulation. The way I'm thinking to do it now is to 
      *        both write and read the values (vals) from Node stuct's pointers; hence,
      *        there's no granularity in access. A much better solution would allow the
      *        Interpolators/Algorithms to access the values rw, while the rest of the world,
      *        by ro. A solution somewhere in the middle would be to have additional ro pointers
      *        in the Node struct.
-     *
-     * TODO   Aproppriately initialize the size of this container, based on type of Node (1D or 3D)
      */
-    Eigen::VectorXd values_;
+    vals_vec_type values_;
     /**
      * \brief   Implementation for random-access no bounds-checking access.
      */
@@ -66,17 +76,21 @@ class MeshInterface {
      */
     const_reference impl_ra_nobounds(size_t n) const;
 
-    MeshInterface(size_t no_nodes) : values_(node_type::val_dimensionality * no_nodes) {}
+    MeshInterface(size_t no_nodes)
+      : values_(node_type::val_dimensionality * no_nodes)
+    {}
   public:
+
+    const_iterator cbegin() const { return static_cast<const Derived*>(this)->impl_cbegin(); }
+    const_iterator   cend() const { return static_cast<const Derived*>(this)->impl_cend();   }
+
+    iterator begin() { return static_cast<Derived*>(this)->impl_begin(); }
+    iterator   end() { return static_cast<Derived*>(this)->impl_end();   }
+
     /**
      * \brief Get number of nodes in the mesh.
      */
-    std::ptrdiff_t size() const {
-      return std::distance(
-        static_cast<Derived*>(this)->cbegin(),
-        static_cast<Derived*>(this)->cend()
-      );
-    };
+    std::ptrdiff_t size() const { return std::distance(cbegin(), cend()); }
 
     /**
      * \brief Iterate over node in the mesh, executing a function. Const version.
@@ -84,13 +98,7 @@ class MeshInterface {
      * \param   f   Function to be called for each node. Takes node Derived::node as argument
      */
     template <class F>
-    void for_each_node(F f) const {
-      std::for_each(
-        static_cast<Derived*>(this)->cbegin(),
-        static_cast<Derived*>(this)->cend(),
-        f
-      );
-    };
+    void for_each_node(F f) const { std::for_each(cbegin(), cend(), f); }
 
     /**
      * \brief Iterate over node in the mesh, executing a function.
@@ -98,13 +106,7 @@ class MeshInterface {
      * \param   f   Function to be called for each node. Takes node Derived::node as argument
      */
     template <class F>
-    void for_each_node(F f) {
-      std::for_each(
-        static_cast<Derived*>(this)->begin(),
-        static_cast<Derived*>(this)->end(),
-        f
-      );
-    };
+    void for_each_node(F f) { std::for_each(begin(), end(), f); }
 
     /**
      * \brief Random access operator []
@@ -123,17 +125,19 @@ class MeshInterface {
     };
 
     /**
-     * \brief Extracts the underlying values container
+     * \brief   Get a constant reference to the values vector.
      */
-    Eigen::VectorXd const      getRawValues()       {
-      return static_cast<Derived*>(this)->values;
+    const vals_vec_type& getValues() const
+    {
+      return values_;
     };
 
     /**
-     * \brief Extracts the underlying values container
+     * \brief   Get a reference to the values vector.
      */
-    Eigen::VectorXd const&     getRawValues() const {
-      return static_cast<Derived*>(this)->values;
+    vals_vec_type& getValues() 
+    {
+      return values_;
     };
 };
 

@@ -27,4 +27,6 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 #   removed then the generated build system cannot know when to ask CMake to
 #   regenerate.)
 add_executable(client 
-  main.cpp)
+  main.cpp
+  SensorValuesConverter.cpp  
+)
