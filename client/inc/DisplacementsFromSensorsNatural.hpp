@@ -11,14 +11,11 @@
 
 /**
  * \brief   A class to represent displacements (deflections?) read from the senors
- * \tparam  SkinSensorIterator  Type of iterator over sensors. Templation necessary since SkinWare
- *                              provides different iterators when we're iterating over sensors
- *                              coming from a patch or a region or the whole object.
  */
-template <class SkinSensorIterator>
+template <class SkinConnector>
 class DisplacementsFromSensorsNatural {
   public:
-    typedef MeshNatural<MeshNode<1>, SkinSensorIterator> mesh_type;
+    typedef MeshNatural<MeshNode<1>, SkinConnector> mesh_type;
     typedef typename mesh_type::vals_vec_type  vals_vec_type;
     typedef typename mesh_type::node_type      node_type;
 
@@ -32,9 +29,10 @@ class DisplacementsFromSensorsNatural {
      * skin sensors.
      */
     DisplacementsFromSensorsNatural(
-      SkinSensorIterator sensors_begin,
-      SkinSensorIterator sensors_end
-    ) : mesh_(new mesh_type(sensors_begin, sensors_end))
+      SkinConnector& skin_conn
+    ) :
+      mesh_(new mesh_type(skin_conn.sensors_begin(), skin_conn.sensors_end())),
+      skin_conn_(&skin_conn)
     {
     }
 
@@ -64,8 +62,11 @@ class DisplacementsFromSensorsNatural {
     typename mesh_type::iterator
     nodes_end()  { return mesh_->end(); }
 
+    void update() { skin_conn_->update(mesh_->getValues()); }
+
   private:
     std::unique_ptr<mesh_type> mesh_;
+    SkinConnector* skin_conn_;
 };
 
 #endif /* DISPLACEMENTSFROMSENSORSNATURAL_HPP */

@@ -1,6 +1,7 @@
 #ifndef MESHINTERFACE_HPP
 #define MESHINTERFACE_HPP
 
+#include <memory>
 #include <cstddef>
 #include <algorithm>
 
@@ -48,14 +49,22 @@ class MeshInterface {
     /**
      * \brief   Values in the mesh'es nodes. Node's val/ (val_x, val_y, val_z) will
      * point to elements of this vector.
+     *
+     * \note  Implementations may (and will) take advantage of the fact that this data (values) will
+     *        remain at the same location in memory. Always. One major optimisation is that the
+     *        Nodes will contain pointers directly to the values instead of having to look them up
+     *        on each access. However, there is a downside - you CANNOT use move semantics or other
+     *        tricks (e.g. raw buffer initialisation) to speed up copying of data. The simplest
+     *        solution would be to simply get the new values and then iterate, copying data.
+     *        However, I'm thinking of passing this vector (reference to it, actually) to the skin
+     *        interface, which would write directly to this vector instead of returning a fresh one.
+     *
      * TODO   Think of enhancing encapsulation. The way I'm thinking to do it now is to 
      *        both write and read the values (vals) from Node stuct's pointers; hence,
      *        there's no granularity in access. A much better solution would allow the
      *        Interpolators/Algorithms to access the values rw, while the rest of the world,
      *        by ro. A solution somewhere in the middle would be to have additional ro pointers
      *        in the Node struct.
-     *
-     * TODO   Aproppriately initialize the size of this container, based on type of Node (1D or 3D)
      */
     vals_vec_type values_;
     /**
@@ -67,23 +76,16 @@ class MeshInterface {
      */
     const_reference impl_ra_nobounds(size_t n) const;
 
-    MeshInterface(size_t no_nodes) : values_(node_type::val_dimensionality * no_nodes) {}
+    MeshInterface(size_t no_nodes)
+      : values_(node_type::val_dimensionality * no_nodes)
+    {}
   public:
-    /**
-     * \brief   Get a constant reference to the values vector.
-     */
-    const vals_vec_type& getValues() const { return values_; }
 
     const_iterator cbegin() const { return static_cast<const Derived*>(this)->impl_cbegin(); }
     const_iterator   cend() const { return static_cast<const Derived*>(this)->impl_cend();   }
 
     iterator begin() { return static_cast<Derived*>(this)->impl_begin(); }
     iterator   end() { return static_cast<Derived*>(this)->impl_end();   }
-
-    /**
-     * \brief   Get a reference to the values vector.
-     */
-    vals_vec_type& getValues() { return values_; }
 
     /**
      * \brief Get number of nodes in the mesh.
@@ -123,17 +125,19 @@ class MeshInterface {
     };
 
     /**
-     * \brief Extracts the underlying values container
+     * \brief   Get a constant reference to the values vector.
      */
-    Eigen::VectorXd const      getRawValues()       {
-      return static_cast<Derived*>(this)->values;
+    const vals_vec_type& getValues() const
+    {
+      return values_;
     };
 
     /**
-     * \brief Extracts the underlying values container
+     * \brief   Get a reference to the values vector.
      */
-    Eigen::VectorXd const&     getRawValues() const {
-      return static_cast<Derived*>(this)->values;
+    vals_vec_type& getValues() 
+    {
+      return values_;
     };
 };
 

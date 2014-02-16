@@ -14,20 +14,21 @@
  * Each node corresponds to one sensor in the skin, with (x,y)
  * values copied over.
  */
-template <class TNode, class SkinSensorIterator>
-class MeshNatural : public MeshInterface<MeshNatural<TNode, SkinSensorIterator> >
+template <class TNode, class SkinConnector>
+class MeshNatural : public MeshInterface<MeshNatural<TNode, SkinConnector> >
 {
-  SkinSensorIterator sensors_begin_;
-  SkinSensorIterator   sensors_end_;
+  typedef typename SkinConnector::sensor_iterator sensor_iterator;
+  sensor_iterator sensors_begin_;
+  sensor_iterator   sensors_end_;
 
-  friend class MeshInterface<MeshNatural<TNode, SkinSensorIterator> >;
-  typedef MeshInterface<MeshNatural<TNode, SkinSensorIterator> > interface_type;
+  friend class MeshInterface<MeshNatural<TNode, SkinConnector> >;
+  typedef MeshInterface<MeshNatural<TNode, SkinConnector> > interface_type;
 
   public:
-    INJECT_MESH_TRAITS_TYPEDEFS(MeshNatural<TNode COMMA SkinSensorIterator>)
+    INJECT_MESH_TRAITS_TYPEDEFS(MeshNatural<TNode COMMA SkinConnector>)
     MeshNatural(
-      SkinSensorIterator sensors_begin,
-      SkinSensorIterator sensors_end
+      sensor_iterator sensors_begin,
+      sensor_iterator sensors_end
     ) :
       interface_type(skin_helpers::distance(sensors_begin, sensors_end)),
       sensors_begin_(sensors_begin),
@@ -65,8 +66,8 @@ class MeshNatural : public MeshInterface<MeshNatural<TNode, SkinSensorIterator> 
  * > (including nested scopes). A template-parameter shall not have
  * > the same name as the template name.
  */
-template <class TNode, class SkinSensorIterator>
-struct MeshImpl_traits<MeshNatural<TNode, SkinSensorIterator> > {
+template <class TNode, class SkinConnector>
+struct MeshImpl_traits<MeshNatural<TNode, SkinConnector> > {
   typedef TNode                                  node_type;
   typedef node_type      &                       reference;
   typedef node_type const&                 const_reference;

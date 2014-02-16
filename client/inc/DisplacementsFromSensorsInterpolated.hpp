@@ -14,16 +14,13 @@
 
 /**
  * \brief   A class to represent displacements (deflections?) read from the senors
- * \tparam  SkinSensorIterator  Type of iterator over sensors. Templation necessary since SkinWare
- *                              provides different iterators when we're iterating over sensors
- *                              coming from a patch or a region or the whole object.
  * \tparam  target_mesh_type    Type of mesh the values will be interpolated onto. Note that the
  *                              dimensionality of the values must be == 1
  * \tparam  interpolator        Algorithm used to interpolate values from one mesh onto another.
  *
  */
 template <
-  class SkinSensorIterator,
+  class SkinConnector,
   class target_mesh_type,
   class interpolator_type
 >
@@ -35,7 +32,8 @@ class DisplacementsFromSensorsInterpolated {
     "must be equal to 1. (Those are the sensors we're using)"
   );
 
-    typedef MeshNatural<MeshNode<1>, SkinSensorIterator> source_mesh_type;
+    typedef MeshNatural<MeshNode<1>, SkinConnector> source_mesh_type;
+    SkinConnector* skin_conn_;
     std::unique_ptr<source_mesh_type>   source_mesh_;
     std::unique_ptr<target_mesh_type>   target_mesh_;
     std::unique_ptr<interpolator_type> interpolator_;
@@ -51,12 +49,12 @@ class DisplacementsFromSensorsInterpolated {
      * with "virtual" readigs which come from interpolation by some specific metehod.
      */
     DisplacementsFromSensorsInterpolated(
-      SkinSensorIterator sensors_begin,
-      SkinSensorIterator sensors_end,
+      SkinConnector& skin_conn,
       std::unique_ptr<target_mesh_type> target_mesh,
       std::unique_ptr<interpolator_type> interpolator
     ) : 
-      source_mesh_(new source_mesh_type(sensors_begin, sensors_end)),
+      skin_conn_(&skin_conn),
+      source_mesh_(new source_mesh_type(skin_conn.sensors_begin(), skin_conn.sensors_end())),
       target_mesh_(std::move(target_mesh)),
       interpolator_(std::move(interpolator))
     {
@@ -64,8 +62,8 @@ class DisplacementsFromSensorsInterpolated {
       //        I don't forsee any other MeshNode types, but if they become necessary,
       //        it'll be necessary to add them to this static_assert.
       static_assert(
-           !std::is_same<target_mesh_type, MeshNatural<MeshNode<1>, SkinSensorIterator> >::value
-        && !std::is_same<target_mesh_type, MeshNatural<MeshNode<3>, SkinSensorIterator> >::value,
+           !std::is_same<target_mesh_type, MeshNatural<MeshNode<1>, SkinConnector> >::value
+        && !std::is_same<target_mesh_type, MeshNatural<MeshNode<3>, SkinConnector> >::value,
         "You cannot use the mesh-interpolation constructor on a MeshNatural!\n"
         "NOTE: It doesn't make sense, because there's no interpolation for a natural mesh."
       );
@@ -94,6 +92,13 @@ class DisplacementsFromSensorsInterpolated {
     nodes_begin()  { return target_mesh_->begin(); }
     typename target_mesh_type::iterator
     nodes_end()  { return target_mesh_->end(); }
+
+    void update()
+    {
+      skin_conn_->update(source_mesh_->getValues());
+
+      // TODO perform interpolation
+    }
 };
 
 
