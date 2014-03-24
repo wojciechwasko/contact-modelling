@@ -194,28 +194,6 @@
 /*                                                                           */
 /*****************************************************************************/
 
-/* For single precision (which will save some memory and reduce paging),     */
-/*   define the symbol SINGLE by using the -DSINGLE compiler switch or by    */
-/*   writing "#define SINGLE" below.                                         */
-/*                                                                           */
-/* For double precision (which will allow you to refine meshes to a smaller  */
-/*   edge length), leave SINGLE undefined.                                   */
-/*                                                                           */
-/* Double precision uses more memory, but improves the resolution of the     */
-/*   meshes you can generate with Triangle.  It also reduces the likelihood  */
-/*   of a floating exception due to overflow.  Finally, it is much faster    */
-/*   than single precision on 64-bit architectures like the DEC Alpha.  I    */
-/*   recommend double precision unless you want to generate a mesh for which */
-/*   you do not have enough memory.                                          */
-
-/* #define SINGLE */
-
-#ifdef SINGLE
-#define REAL float
-#else /* not SINGLE */
-#define REAL double
-#endif /* not SINGLE */
-
 /* If yours is not a Unix system, define the NO_TIMER compiler switch to     */
 /*   remove the Unix-specific timing code.                                   */
 
