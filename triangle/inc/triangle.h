@@ -248,6 +248,10 @@
 /*                                                                           */
 /*****************************************************************************/
 
+#ifdef __cplusplus
+extern "C"{
+#endif 
+
 #define ANSI_DECLARATORS
 #define REAL double
 #define VOID void
@@ -291,3 +295,7 @@ void trifree(VOID *memptr);
 void triangulate();
 void trifree();
 #endif /* not ANSI_DECLARATORS */
+
+#ifdef __cplusplus
+}
+#endif
