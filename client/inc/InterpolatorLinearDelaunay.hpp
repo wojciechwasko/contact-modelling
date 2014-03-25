@@ -4,6 +4,7 @@
 #include <type_traits>
 
 #include "InterpolatorInterface.hpp"
+#include "Delaunay.hpp"
 
 /**
  * \brief   Implementation of a linear Delaunay triangulation-based interpolation
@@ -26,26 +27,31 @@ class InterpolatorLinearDelaunay
   public:
     INJECT_INTERPOLATOR_TRAITS_TYPEDEFS(InterpolatorLinearDelaunay<sourceMeshType COMMA targetMeshType>)
 
-  protected:
-    /**
-     * \brief   Implementation of the offline step.
-     *
-     * Delaunay triangulation will be performed here.
-     */
-    void impl_offline(void)
-    {
+  InterpolatorLinearDelaunay(const sourceMeshType& source_mesh, const targetMeshType& target_mesh)
+  {
+    triangulate(source_mesh);
+  }
 
-    }
+  protected:
     /**
      * \brief Actual implementation of online phase of Linear Delaunay interpolation
      */
     double impl_interpolate(
       const sourceMeshType& sourceMesh,
       const targetMeshType& targetMesh,
-      size_t targetNode
+      typename targetMeshType::node_type& node
     )
     {
-      return 1.;
+      return 1.4;
+    }
+
+  private:
+    /**
+     * \brief   Implementation of the triangulation, to be performed offline.
+     */
+    void triangulate(const sourceMeshType& source_mesh)
+    {
+      Delaunay<typename sourceMeshType::const_iterator> dt(source_mesh.cbegin(), source_mesh.cend());
     }
 };
 

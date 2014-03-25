@@ -43,8 +43,13 @@ class InterpolatorInterface {
     "You can't use interpolation over two meshes with different underlying node type"
   );
 
+  static_assert(
+    MeshImpl_traits<target_mesh_type>::node_type::val_dimensionality == 1,
+    "Interpolation is not (yet) implemented for >1D"
+  );
 
   protected:
+    InterpolatorInterface() {}
     /**
      * \brief   Actual interpolation function
      * \param   sourceMesh  mesh to take the "true" values from
@@ -58,29 +63,29 @@ class InterpolatorInterface {
     double impl_interpolate(
       const source_mesh_type& sourceMesh,
       const target_mesh_type& targetMesh,
-      size_t targetNode
+      typename target_mesh_type::node_type& node
     );
 
-    /**
-     * \brief   Optional offline step to be performed.
-     *
-     * \note    This method has a default empty implementation, so if there is
-     *          no offline computation to be done, the implementation class does
-     *          not have to override this method with empty impl_offline()
-     */
-    void   impl_offline(void) {}
+//    /**
+//     * \brief   Optional offline step to be performed.
+//     *
+//     * \note    This method has a default empty implementation, so if there is
+//     *          no offline computation to be done, the implementation class does
+//     *          not have to override this method with empty impl_offline()
+//     */
+//    void   impl_offline(void) {}
 
   public:
-    /**
-     * \brief   interface method for doing any offline preparation
-     */
-    void offline(void) { static_cast<Implementation*>(this)->impl_offline(); };
+//    /**
+//     * \brief   interface method for doing any offline preparation
+//     */
+//    void offline(void) { static_cast<Implementation*>(this)->impl_offline(); };
 
     /**
      * \brief   interface method for performing the interpolation in one node
      * \param   sourceMesh  source mesh with current values
      * \param   targetMesh  target mesh
-     * \param   p           2D point in which we'd like to know the value
+     * \param   targetNode  node in the target mesh to interpolate in
      *
      * \note  This method does *NOT* modify the targetMesh in any way; if you want to save the returned
      *        value to the mesh, do it manually. 
@@ -88,11 +93,11 @@ class InterpolatorInterface {
     double interpolateSingle(
       const source_mesh_type& sourceMesh,
       const target_mesh_type& targetMesh,
-      size_t targetNode
+      typename target_mesh_type::node_type& node
     )
     {
       return static_cast<Implementation*>(this)
-        ->impl_interpolate(sourceMesh, targetMesh, targetNode); 
+        ->impl_interpolate(sourceMesh, targetMesh, node); 
     }
 
     /**
@@ -109,6 +114,12 @@ class InterpolatorInterface {
     )
     {
       // TODO implement
+      std::for_each(
+        targetMesh.begin(),
+        targetMesh.end(),
+        [&] (typename target_mesh_type::node_type& n) {
+          *(n.vals[0]) = interpolateSingle(sourceMesh, targetMesh, n); 
+        });
     }
 };
 

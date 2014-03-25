@@ -62,6 +62,8 @@ class DisplacementsFromSensorsNatural {
     typename mesh_type::iterator
     nodes_end()  { return mesh_->end(); }
 
+    const mesh_type& getMesh() const { return *mesh_; }
+
     void update() { skin_conn_->update(mesh_->getValues()); }
 
   private:
