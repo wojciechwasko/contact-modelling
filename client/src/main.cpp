@@ -53,13 +53,10 @@ int main(int argc, char** argv)
   std::unique_ptr<interpolated_mesh_type>
     s_mesh(new interpolated_mesh_type(disps_natural.getMesh(), 0.001));
   // interpolator used to go from a natural mesh to the interpolated.
-  std::unique_ptr<interpolator_type>
-    interpolator(new interpolator_type(disps_natural.getMesh(), *s_mesh));
   // "interpolated" sensor readings
   interpolated_disps_from_sensors_type disps_interpolated(
       *skin_conn,
-      std::move(s_mesh),
-      std::move(interpolator)
+      std::move(s_mesh)
   );
 
   // forces mesh

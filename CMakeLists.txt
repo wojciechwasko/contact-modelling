@@ -5,6 +5,7 @@ if("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 directory and build there (cd build/ && cmake .. && make)")
 endif("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 
+ENABLE_TESTING()
 add_subdirectory (triangle)
 add_subdirectory (data)
 add_subdirectory (client) 

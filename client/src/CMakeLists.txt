@@ -1,3 +1,4 @@
+set(CMAKE_BUILD_TYPE Debug)
 # to busy to write a full find-libraries script for CMake. Who knows, maybe
 # later?
 execute_process(
@@ -23,7 +24,7 @@ include_directories(${Boost_INCLUDE_DIR})
 
 link_directories(${Boost_LIBRARY_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SKINWARE_CXXFLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SKINWARE_CXXFLAGS} -O0 -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SKINWARE_LDFLAGS}")
 
 # From CMake manual:
@@ -33,10 +34,11 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SKINWARE_LDFLAGS}")
 #   regenerate.)
 add_executable(client 
   main.cpp
-  SensorValuesConverter.cpp  
 )
 
 target_link_libraries(client
   triangle
   ${Boost_LIBRARIES}
 )
+
+ADD_SUBDIRECTORY(test)

@@ -17,7 +17,8 @@ namespace helpers {
         plotdata.push_back({n.x,n.y,*(n.vals[0])});
       });
       Gnuplot gp("gnuplot -persist");  
-      gp << "splot '-' u 1:2:3 with lines title '" << title << "'\n";
+      gp << "set isosamples 60\n";
+      gp << "splot '-' u 1:2:3 with points title '" << title << "'\n";
       gp.send1d(plotdata);
     }
   }

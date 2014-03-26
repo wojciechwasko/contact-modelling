@@ -50,13 +50,12 @@ class DisplacementsFromSensorsInterpolated {
      */
     DisplacementsFromSensorsInterpolated(
       SkinConnector& skin_conn,
-      std::unique_ptr<target_mesh_type> target_mesh,
-      std::unique_ptr<interpolator_type> interpolator
+      std::unique_ptr<target_mesh_type> target_mesh
     ) : 
       skin_conn_(&skin_conn),
       source_mesh_(new source_mesh_type(skin_conn.sensors_begin(), skin_conn.sensors_end())),
       target_mesh_(std::move(target_mesh)),
-      interpolator_(std::move(interpolator))
+      interpolator_(new interpolator_type(*source_mesh_, *target_mesh_))
     {
       // FIXME  check if this static_assert can be rewritten to be more general.
       //        I don't forsee any other MeshNode types, but if they become necessary,

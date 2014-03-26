@@ -1,6 +1,7 @@
 #ifndef INTERPOLATORLINEARDELAUNAY_HPP
 #define INTERPOLATORLINEARDELAUNAY_HPP
 
+#include <iostream>
 #include <cmath>
 #include <type_traits>
 #include <vector>
@@ -69,7 +70,7 @@ class InterpolatorLinearDelaunay
       typedef typename targetMeshType::node_type target_node_type;
 
       DelaunayImpl dt(source_mesh_->cbegin(), source_mesh_->cend());
-      target_points_meta_.reserve(dt.getNoTriangles());
+      target_points_meta_.reserve(target_mesh_->size());
 
       std::for_each(target_mesh_->cbegin(), target_mesh_->cend(), [&] (target_node_type const& n) {
         target_points_meta_.push_back(dt.getTriangleInfoForPoint(n));        
@@ -93,20 +94,38 @@ class InterpolatorLinearDelaunay
       const TargetPointMeta& meta = target_points_meta_[node_index];
 
       if (std::get<DelaunayImpl::FAIL>(meta)) {
-        if (POSMP == PointsOutsideSourceMeshPolicy::InterpolateToZero)
+        if (POSMP == PointsOutsideSourceMeshPolicy::InterpolateToZero) {
           return 0;
-        else
+        } else
           throw std::runtime_error("I was asked to interpolate a point outside of the mesh, but I don't have a policy for that");
       }
 
-      const double val0 = *((*source_mesh_)[std::get<DelaunayImpl::N0>(meta)].vals[0]);
-      const double val1 = *((*source_mesh_)[std::get<DelaunayImpl::N1>(meta)].vals[0]);
-      const double val2 = *((*source_mesh_)[std::get<DelaunayImpl::N2>(meta)].vals[0]);
+      const size_t n0  = std::get<DelaunayImpl::N0>(meta);
+      const size_t n1  = std::get<DelaunayImpl::N1>(meta);
+      const size_t n2  = std::get<DelaunayImpl::N2>(meta);
+
+      const double val0 = source_mesh_->getValue(n0);
+      const double val1 = source_mesh_->getValue(n1);
+      const double val2 = source_mesh_->getValue(n2);
+
+      //const double val0 = *((*source_mesh_)[std::get<DelaunayImpl::N0>(meta)].vals[0]);
+      //const double val1 = *((*source_mesh_)[std::get<DelaunayImpl::N1>(meta)].vals[0]);
+      //const double val2 = *((*source_mesh_)[std::get<DelaunayImpl::N2>(meta)].vals[0]);
 
       const double ksi0 = std::get<DelaunayImpl::KSI0>(meta);
       const double ksi1 = std::get<DelaunayImpl::KSI1>(meta);
       const double ksi2 = std::get<DelaunayImpl::KSI2>(meta);
-      return ksi0 * val0 + ksi1 * val1 + ksi2 * val2;
+      const double ret = ksi0 * val0 + ksi1 * val1 + ksi2 * val2;
+      std::cout << "ksi0: " << ksi0 << ", ";
+      std::cout << "ksi1: " << ksi1 << ", ";
+      std::cout << "ksi2: " << ksi2 << ", ";
+      std::cout << std::endl;
+      std::cout << "val0: " << val0 << ", ";
+      std::cout << "val1: " << val1 << ", ";
+      std::cout << "val2: " << val2 << ", ";
+      std::cout << std::endl;
+      std::cout << "returning " << ret << std::endl;
+      return ret;
     }
 
   private:

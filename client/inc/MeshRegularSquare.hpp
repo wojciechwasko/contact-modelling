@@ -62,29 +62,31 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
       : interface_type(calculate_no_nodes(x0, y0, x1, y1, d))
     {
       nodes.reserve(calculate_no_nodes(x0,y0,x1,y1,d));
+
+      const size_t nx       = calculate_no_nodes_1D(x0, x1, d);
+      const double diff_x   = nx * d - (x1 - x0);
+      const double x_origin = x0 - diff_x / 2.;
+
+      const size_t ny       = calculate_no_nodes_1D(y0, y1, d);
+      const double diff_y   = ny * d - (y1 - y0);
+      const double y_origin = y0 - diff_y / 2.;
+
       size_t v_ind = 0;
-
-      const size_t nx = calculate_no_nodes_1D(x0, x1, d);
-      const double diff_x = nx * d - (x1 - x0);
-      double x = x0 - diff_x / 2.;
-
-      const size_t ny = calculate_no_nodes_1D(y0, y1, d);
-      const double diff_y = ny * d - (y1 - y0);
-      double y = y0 - diff_y / 2.;
-
-      for (size_t ix = 0; ix < nx; ++ix) {
-        for (size_t iy = 0; iy < ny; ++iy) {
+      double y = y_origin;
+      for (size_t iy = 0; iy < ny; ++iy) {
+        double x = x_origin;
+        for (size_t ix = 0; ix < nx; ++ix) {
           node_type n;
           n.x = x;
           n.y = y;
           x += d;
-          y += d;
           for (size_t i = 0; i < n.val_dimensionality; ++i) {
             n.vals[i] = &(this->values_[v_ind]);
             ++v_ind;
           }
           nodes.push_back(n);
         }
+        y += d;
       }
     }
 

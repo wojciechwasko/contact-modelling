@@ -193,25 +193,26 @@ class Delaunay
       std::get<KSI2>(ret)  = -1;
 
       int n0,n1,n2;
-      double area_whole,ksi0,ksi1,ksi2;
+      double area_whole,area0,area1,area2;
       for (size_t i = 0; i < triangles_.size(); ++i) {
         n0 = triangles_[i][0];
         n1 = triangles_[i][1];
         n2 = triangles_[i][2];
-        area_whole = triangles_areas_[i];
-        ksi0 = area_triangle(p, nodes_[n1], nodes_[n2]) / area_whole;
-        ksi1 = area_triangle(nodes_[n0], p, nodes_[n2]) / area_whole;
-        ksi2 = area_triangle(nodes_[n0], nodes_[n1], p) / area_whole;
+        //area_whole = triangles_areas_[i];
+        area_whole = area_triangle(nodes_[n0], nodes_[n1], nodes_[n2]);
+        area0 = area_triangle(p, nodes_[n1], nodes_[n2]);
+        area1 = area_triangle(nodes_[n0], p, nodes_[n2]);
+        area2 = area_triangle(nodes_[n0], nodes_[n1], p);
 
-        if (ksi0 >= 0 && ksi1 >= 0 && ksi2 >= 0) {
+        if (area0 + area1 + area2 == area_whole) {
           // the point is inside the triangle, on its edge or coincident with one of its vertices
           std::get<FAIL>(ret)  = false;
           std::get<N0>(ret) = n0;
           std::get<N1>(ret) = n1;
           std::get<N2>(ret) = n2;
-          std::get<KSI0>(ret)  = ksi0;
-          std::get<KSI1>(ret)  = ksi1;
-          std::get<KSI2>(ret)  = ksi2;
+          std::get<KSI0>(ret)  = area0 / area_whole;
+          std::get<KSI1>(ret)  = area1 / area_whole;
+          std::get<KSI2>(ret)  = area2 / area_whole;
           break;
         }
       }

@@ -44,6 +44,7 @@ class MeshInterface {
   public:
     INJECT_MESH_TRAITS_TYPEDEFS(Derived)
     typedef Eigen::VectorXd vals_vec_type;
+    typedef double val_type;
 
   protected:
     /**
@@ -114,7 +115,7 @@ class MeshInterface {
      */
     reference       operator[](size_t n)       {
       return static_cast<Derived*>(this)->impl_ra_nobounds(n);
-    };
+    }
 
     /**
      * \brief Random access operator []. Const version.
@@ -122,7 +123,7 @@ class MeshInterface {
      */
     const_reference operator[](size_t n) const {
       return static_cast<const Derived*>(this)->impl_ra_nobounds(n);
-    };
+    }
 
     /**
      * \brief   Get a constant reference to the values vector.
@@ -130,7 +131,7 @@ class MeshInterface {
     const vals_vec_type& getValues() const
     {
       return values_;
-    };
+    }
 
     /**
      * \brief   Get a reference to the values vector.
@@ -138,7 +139,11 @@ class MeshInterface {
     vals_vec_type& getValues() 
     {
       return values_;
-    };
+    }
+
+    val_type getValue(size_t n) const {
+      return values_[n];
+    }
 };
 
 
