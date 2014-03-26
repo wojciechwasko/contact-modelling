@@ -96,8 +96,7 @@ class DisplacementsFromSensorsInterpolated {
     void update()
     {
       skin_conn_->update(source_mesh_->getValues());
-
-      // TODO perform interpolation
+      interpolator_->interpolateBulk();
     }
 };
 
