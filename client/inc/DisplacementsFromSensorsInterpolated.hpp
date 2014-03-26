@@ -69,6 +69,8 @@ class DisplacementsFromSensorsInterpolated {
       );
     }
 
+     const source_mesh_type& getSourceMesh() const { return *source_mesh_; }
+     const target_mesh_type& getTargetMesh() const { return *target_mesh_; }
     /**
      * \brief   Get a constant reference to the values vector.
      * \note    In the interpolated case, this corresponds to the interpolated

@@ -15,6 +15,8 @@
 #include "DisplacementsFromSensorsInterpolated.hpp"
 #include "ResultantDisplacements.hpp"
 
+#include "helpers/plot.hpp"
+
 typedef SkinConnector<skin_object>
   skin_connector_type;
 typedef MeshNatural<MeshNode<1>, skin_connector_type>
@@ -72,6 +74,7 @@ int main(int argc, char** argv)
 
   std::cout << "Requesting new data.\n";
   disps_interpolated.update();
+  disps_natural.update();
   std::cout << "New data available.\n";
 
   std::for_each(
@@ -80,6 +83,10 @@ int main(int argc, char** argv)
     [&](const interpolated_disps_from_sensors_type::node_type & n) {
       //std::cout <<  "x: " << n.x << ",\ty: " << n.y << ",\tvalue: " << *n.vals[0] << "\n";
     });
+
+  using helpers::plot::plotMesh;
+  plotMesh(disps_interpolated.getSourceMesh(), "natural");
+  plotMesh(disps_interpolated.getTargetMesh(), "interpolated");
 
   std::cout << "Finishing!\n";
   return 0;

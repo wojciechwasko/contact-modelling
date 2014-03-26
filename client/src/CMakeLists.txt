@@ -10,14 +10,18 @@ execute_process(
   OUTPUT_VARIABLE SKINWARE_LDFLAGS
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-include_directories(${ContactModelling_SOURCE_DIR}/client/inc)
-include_directories(${ContactModelling_SOURCE_DIR}/triangle/inc)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
-
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules")
 find_package(Eigen3 REQUIRED)
 
+FIND_PACKAGE( Boost 1.54 COMPONENTS iostreams system filesystem REQUIRED )
+include_directories(${ContactModelling_SOURCE_DIR}/client/inc)
+include_directories(${ContactModelling_SOURCE_DIR}/triangle/inc)
+include_directories(${ContactModelling_SOURCE_DIR}/gnuplot-iostream/inc)
 include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIR})
+
+link_directories(${Boost_LIBRARY_DIR})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SKINWARE_CXXFLAGS} -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SKINWARE_LDFLAGS}")
@@ -34,4 +38,5 @@ add_executable(client
 
 target_link_libraries(client
   triangle
+  ${Boost_LIBRARIES}
 )
