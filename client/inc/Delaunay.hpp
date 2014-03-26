@@ -143,6 +143,8 @@ class Delaunay
 
     }
 
+    size_t getNoTriangles() const { return triangles_.size(); }
+
     /// for meaning of fields, refer to PointInTriangleMetaIndex
     typedef std::tuple<bool, int, int, int, double, double, double> PointInTriangleMeta;
     /**
@@ -150,9 +152,9 @@ class Delaunay
      */
     enum PointInTriangleMetaIndex {
       FAIL,  /// whether the point is outside ALL triangles. true if the point is not inside the triangulation
-      N0_ID, /// ID of 0th node of the triangle
-      N1_ID, /// ID of 1st node of the triangle
-      N2_ID, /// ID of 2nd node of the triangle
+      N0,    /// ID of 0th node of the triangle
+      N1,    /// ID of 1st node of the triangle
+      N2,    /// ID of 2nd node of the triangle
       KSI0,  /// barycentric coordinate w.r.t. 0th node
       KSI1,  /// barycentric coordinate w.r.t. 1st node
       KSI2   /// barycentric coordinate w.r.t. 2nd node
@@ -178,14 +180,14 @@ class Delaunay
      * triangulation to be convex and such. I figured since this is not an online step, there's not
      * much point in spending too much time optimising this method.
      */
-    PointInTriangleMeta get_triangle_for_point(const point_type& p)
+    PointInTriangleMeta getTriangleInfoForPoint(const point_type& p)
     {
       using helpers::geometry::area_triangle;
       PointInTriangleMeta ret;
       std::get<FAIL>(ret)  = true;
-      std::get<N0_ID>(ret) = -1;
-      std::get<N1_ID>(ret) = -1;
-      std::get<N2_ID>(ret) = -1;
+      std::get<N0>(ret) = -1;
+      std::get<N1>(ret) = -1;
+      std::get<N2>(ret) = -1;
       std::get<KSI0>(ret)  = -1;
       std::get<KSI1>(ret)  = -1;
       std::get<KSI2>(ret)  = -1;
@@ -204,9 +206,9 @@ class Delaunay
         if (ksi0 >= 0 && ksi1 >= 0 && ksi2 >= 0) {
           // the point is inside the triangle, on its edge or coincident with one of its vertices
           std::get<FAIL>(ret)  = false;
-          std::get<N0_ID>(ret) = n0;
-          std::get<N1_ID>(ret) = n1;
-          std::get<N2_ID>(ret) = n2;
+          std::get<N0>(ret) = n0;
+          std::get<N1>(ret) = n1;
+          std::get<N2>(ret) = n2;
           std::get<KSI0>(ret)  = ksi0;
           std::get<KSI1>(ret)  = ksi1;
           std::get<KSI2>(ret)  = ksi2;

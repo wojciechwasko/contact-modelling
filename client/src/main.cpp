@@ -21,7 +21,7 @@ typedef MeshNatural<MeshNode<1>, skin_connector_type>
   raw_mesh_type;
 typedef MeshRegularSquare<MeshNode<1>>
   interpolated_mesh_type;
-typedef InterpolatorLinearDelaunay<raw_mesh_type, interpolated_mesh_type>
+typedef InterpolatorLinearDelaunay<raw_mesh_type, interpolated_mesh_type, PointsOutsideSourceMeshPolicy::InterpolateToZero>
   interpolator_type;
 typedef MeshRegularSquare<MeshNode<3>>
   force_mesh_type;

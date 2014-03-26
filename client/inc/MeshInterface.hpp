@@ -121,7 +121,7 @@ class MeshInterface {
      * \note  This is not bound-checked.
      */
     const_reference operator[](size_t n) const {
-      return static_cast<Derived*>(this)->impl_ra_nobounds(n);
+      return static_cast<const Derived*>(this)->impl_ra_nobounds(n);
     };
 
     /**
