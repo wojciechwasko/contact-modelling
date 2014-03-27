@@ -72,21 +72,21 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
       const double y_origin = y0 - diff_y / 2.;
 
       size_t v_ind = 0;
-      double y = y_origin;
-      for (size_t iy = 0; iy < ny; ++iy) {
-        double x = x_origin;
-        for (size_t ix = 0; ix < nx; ++ix) {
+      double x = x_origin;
+      for (size_t ix = 0; ix < nx; ++ix) {
+        double y = y_origin;
+        for (size_t iy = 0; iy < ny; ++iy) {
           node_type n;
           n.x = x;
           n.y = y;
-          x += d;
           for (size_t i = 0; i < n.val_dimensionality; ++i) {
             n.vals[i] = &(this->values_[v_ind]);
             ++v_ind;
           }
           nodes.push_back(n);
+          y += d;
         }
-        y += d;
+        x += d;
       }
     }
 

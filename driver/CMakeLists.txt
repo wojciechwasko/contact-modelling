@@ -2,12 +2,6 @@
 
 SET(CUSTOM_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/driver-build")
 
-add_custom_target(
-  driver
-  ALL
-  COMMAND make
-  WORKING_DIRECTORY ${CUSTOM_BUILD_DIR}
-)
 
 add_custom_target(
   driver-copy
@@ -17,5 +11,11 @@ add_custom_target(
     ${CUSTOM_BUILD_DIR}
 )
 
-add_dependencies(driver driver-copy)
+add_custom_target(
+  driver
+  ALL
+  COMMAND make
+  WORKING_DIRECTORY ${CUSTOM_BUILD_DIR}
+)
 
+ADD_DEPENDENCIES(driver driver-copy)

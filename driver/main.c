@@ -4,6 +4,7 @@
 #include <linux/proc_fs.h>
 
 #include "init.h"
+#include "simulated_input.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Shahbaz Youssefi");
@@ -52,8 +53,10 @@ static void busy(bool b)
 static int acquire(skink_sensor_layer *layer, skink_sensor_id *skinmap, uint8_t buffer)
 {
 	skink_sensor_id i;
-	for (i = 0; i < layer->sensors_count; ++i)
-		layer->sensors[skinmap[i]].response[buffer] = (_last_start[layer->id_in_device]+i)%(SKINK_SENSOR_RESPONSE_MAX+1);
+	for (i = 0; i < layer->sensors_count; ++i) {
+		layer->sensors[skinmap[i]].response[buffer] = 
+      simulated_input[i];
+  }
 	_last_start[layer->id_in_device] += SPEED;
 	return SKINK_SUCCESS;
 }
