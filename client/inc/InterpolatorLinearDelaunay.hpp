@@ -116,15 +116,6 @@ class InterpolatorLinearDelaunay
       const double ksi1 = std::get<DelaunayImpl::KSI1>(meta);
       const double ksi2 = std::get<DelaunayImpl::KSI2>(meta);
       const double ret = ksi0 * val0 + ksi1 * val1 + ksi2 * val2;
-      std::cout << "ksi0: " << ksi0 << ", ";
-      std::cout << "ksi1: " << ksi1 << ", ";
-      std::cout << "ksi2: " << ksi2 << ", ";
-      std::cout << std::endl;
-      std::cout << "val0: " << val0 << ", ";
-      std::cout << "val1: " << val1 << ", ";
-      std::cout << "val2: " << val2 << ", ";
-      std::cout << std::endl;
-      std::cout << "returning " << ret << std::endl;
       return ret;
     }
 

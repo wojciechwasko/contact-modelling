@@ -204,7 +204,11 @@ class Delaunay
         area1 = area_triangle(nodes_[n0], p, nodes_[n2]);
         area2 = area_triangle(nodes_[n0], nodes_[n1], p);
 
-        if (area0 + area1 + area2 == area_whole) {
+        // hack to verify if the problems with interpolation stem from roundoff error.
+        // In fact, they do. Now I have to find a more robust solution, since this 10e-10 is UGLY.
+        const double eps = 10e-10;
+        const double sum_area = area0+area1+area2;
+        if (sum_area > area_whole-eps && sum_area < area_whole + eps) {
           // the point is inside the triangle, on its edge or coincident with one of its vertices
           std::get<FAIL>(ret)  = false;
           std::get<N0>(ret) = n0;

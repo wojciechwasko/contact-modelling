@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 
   using helpers::plot::plotMesh;
   plotMesh(disps_interpolated.getSourceMesh(), "natural");
-  plotMesh(disps_interpolated.getTargetMesh(), "interpolated");
+  plotMesh(disps_interpolated.getTargetMesh(), "interpolated", true);
 
   std::cout << "Finishing!\n";
   return 0;
