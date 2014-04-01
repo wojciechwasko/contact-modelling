@@ -23,7 +23,7 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
   typedef MeshInterface<MeshRegularSquare<TNode> > interface_type;
   
   public:
-    INJECT_MESH_TRAITS_TYPEDEFS(MeshRegularSquare<TNode>)
+    INJECT_MESH_INTERFACE_TYPES(MeshRegularSquare<TNode>)
 
     /**
      * \brief   Constructor for a regular square mesh spanning a mesh of sensors -- from a "Natural
@@ -61,8 +61,6 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
     MeshRegularSquare(double x0, double y0, double x1, double y1, double d)
       : interface_type(calculate_no_nodes(x0, y0, x1, y1, d))
     {
-      nodes.reserve(calculate_no_nodes(x0,y0,x1,y1,d));
-
       const size_t nx       = calculate_no_nodes_1D(x0, x1, d);
       const double diff_x   = nx * d - (x1 - x0);
       const double x_origin = x0 - diff_x / 2.;
@@ -71,34 +69,21 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
       const double diff_y   = ny * d - (y1 - y0);
       const double y_origin = y0 - diff_y / 2.;
 
-      size_t v_ind = 0;
+      size_t in = 0;
       double x = x_origin;
       for (size_t ix = 0; ix < nx; ++ix) {
         double y = y_origin;
         for (size_t iy = 0; iy < ny; ++iy) {
-          node_type n;
-          n.x = x;
-          n.y = y;
-          for (size_t i = 0; i < n.val_dimensionality; ++i) {
-            n.vals[i] = &(this->values_[v_ind]);
-            ++v_ind;
-          }
-          nodes.push_back(n);
+          this->node(in).x = x;
+          this->node(in).y = y;
           y += d;
+          ++in;
         }
         x += d;
       }
     }
 
   private:
-    container_type nodes;
-    iterator impl_begin() { return nodes.begin(); };
-    iterator impl_end()   { return nodes.end();   };
-    const_iterator impl_cbegin() const { return nodes.cbegin(); };
-    const_iterator impl_cend()   const { return nodes.cend();   };
-    reference       impl_ra_nobounds(size_t n)       { return nodes[n]; };
-    const_reference impl_ra_nobounds(size_t n) const { return nodes[n]; };
-
     /**
      * \brief   How many nodes in total. The mesh is supposed to contain the x0,x1,y0,y1 points
      */

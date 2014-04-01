@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <type_traits>
+#include <stdexcept>
+
 #include "traits_helpers.hpp"
 
 #include "MeshInterface.hpp"
@@ -27,7 +29,7 @@ template <
 class DisplacementsFromSensorsInterpolated {
   // asserts
   static_assert(
-    target_mesh_type::node_type::val_dimensionality == 1,
+    target_mesh_type::node_type::D == 1,
     "For DisplacementsFromSensorsInterpolated, the dimensionality of the target mesh "
     "must be equal to 1. (Those are the sensors we're using)"
   );
@@ -38,7 +40,7 @@ class DisplacementsFromSensorsInterpolated {
     std::unique_ptr<target_mesh_type>   target_mesh_;
     std::unique_ptr<interpolator_type> interpolator_;
   public:
-    typedef typename target_mesh_type::vals_vec_type  vals_vec_type;
+    typedef typename target_mesh_type::values_container  values_container;
     typedef typename target_mesh_type::node_type      node_type;
 
     /**
@@ -54,8 +56,12 @@ class DisplacementsFromSensorsInterpolated {
     ) : 
       skin_conn_(&skin_conn),
       source_mesh_(new source_mesh_type(skin_conn.sensors_begin(), skin_conn.sensors_end())),
-      target_mesh_(std::move(target_mesh)),
-      interpolator_(new interpolator_type(*source_mesh_, *target_mesh_))
+      target_mesh_(
+        (target_mesh) ?
+          std::move(target_mesh) :
+          throw std::runtime_error("DisplacementsFromSensorsInterpolated: passed empty target mesh unique_ptr!")
+      ),
+      interpolator_(new interpolator_type(source_mesh_.get(), target_mesh_.get()))
     {
       // FIXME  check if this static_assert can be rewritten to be more general.
       //        I don't forsee any other MeshNode types, but if they become necessary,
@@ -68,35 +74,33 @@ class DisplacementsFromSensorsInterpolated {
       );
     }
 
-     const source_mesh_type& getSourceMesh() const { return *source_mesh_; }
-     const target_mesh_type& getTargetMesh() const { return *target_mesh_; }
+    const source_mesh_type& getSourceMesh() const
+    {
+      return *source_mesh_;
+    }
+
+    const target_mesh_type& getTargetMesh() const
+    {
+      return *target_mesh_;
+    }
+
     /**
      * \brief   Get a constant reference to the values vector.
      * \note    In the interpolated case, this corresponds to the interpolated
      *          values.
      */
-    const vals_vec_type& getVals() const { return target_mesh_->getVals(); };
+    const values_container& getVals() const { return target_mesh_->getVals(); };
 
     /**
      * \brief   Get a reference to the values vector.
      * \note    In the interpolated case, this corresponds to the interpolated
      *          values.
      */
-    vals_vec_type& getVals() { return target_mesh_->getVals(); };
-
-    const typename target_mesh_type::const_iterator
-    nodes_cbegin() const { return target_mesh_->cbegin(); }
-    const typename target_mesh_type::const_iterator
-    nodes_cend() const { return target_mesh_->cend(); }
-
-    typename target_mesh_type::iterator
-    nodes_begin()  { return target_mesh_->begin(); }
-    typename target_mesh_type::iterator
-    nodes_end()  { return target_mesh_->end(); }
+    values_container& getVals() { return target_mesh_->getVals(); };
 
     void update()
     {
-      skin_conn_->update(source_mesh_->getValues());
+      skin_conn_->update(source_mesh_->getRawValues());
       interpolator_->interpolateBulk();
     }
 };

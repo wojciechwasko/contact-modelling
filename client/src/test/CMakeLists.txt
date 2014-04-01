@@ -7,6 +7,13 @@ ADD_EXECUTABLE(test_geometry test_geometry.cpp)
 TARGET_LINK_LIBRARIES(test_geometry ${Boost_LIBRARIES})
 ADD_TEST(test_geometry test_geometry)
 
+ADD_EXECUTABLE(test_erase_by_indices test_erase_by_indices.cpp)
+TARGET_LINK_LIBRARIES(test_erase_by_indices ${Boost_LIBRARIES})
+ADD_TEST(test_erase_by_indices test_erase_by_indices)
+
+
+
 ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPENDS
   test_geometry
+  test_erase_by_indices
 )

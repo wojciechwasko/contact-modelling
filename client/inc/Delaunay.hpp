@@ -19,38 +19,19 @@
 
 /**
  * \brief   Adapter for the delaunay triangulation.
- * \tparam  point_iterator_type   iterators of this type will be used for accessing the points.
- *
- * Four things are assumed about the iterators:
- * 1. they employ operator==
- * 2. they are deterministic, iterating by ++-ing the begin iterator till ==end will result in the
- * same sequence every time.
- * 3. they are unique for a given sequence
- *
- * For perfomance, it would be quite nice to have them be random-access, since we're using
- * std::distance(begin, iterator) as the hash for our internal representations and using non-random
- * access iterators will result in a loooot of unnecessary iterations over the container. Anyway,
- * the alternative would be to use the address of the element the iterator refers to as the hash but
- * that's not robust w.r.t. relocations. bugzzz.
- *
- * TODO maybe issue a warning (compile-time?) about non-random access iterators being used, by using
- * typeid(iterator_traits::iterator_category) != typeid(std::random_access_iterator_tag)
- *
- * About the points, their type (decltype(*begin), where begin is of point_iterator_type type), must
- * merely have .x and .y members. (Will probably think of supporting .x() .y() callable members
- * later on) 
  */
-template <class point_iterator_type>
+template <class Mesh>
 class Delaunay
 {
-    typedef typename std::iterator_traits<point_iterator_type>::value_type point_type;
-    std::vector<point_type> nodes_;
+    typedef typename Mesh::node_type node_type;
+    std::vector<node_type> nodes_;
+
     // technically, it'd be more sound to use size_t, but let's stick with the convention of
     // Triangle library
-    typedef std::array<int,3> triangle_type;
-    std::vector<triangle_type> triangles_;
-    std::vector<double> triangles_areas_;
-    size_t no_triangles_;
+    typedef std::array<int,3>   triangle_type;
+    std::vector<triangle_type>  triangles_;
+    std::vector<double>         triangles_areas_;
+    size_t                      no_triangles_;
 
   public:
     /**
@@ -61,15 +42,15 @@ class Delaunay
      * The constructor performs the actual triangulation (in this aspect, it is similar to CGAL's
      * interface.)
      */
-    Delaunay(point_iterator_type begin, point_iterator_type end)
+    Delaunay(const Mesh& mesh)
     {
       using helpers::memory::delguard;
       using helpers::geometry::area_triangle;
 
       // copy nodes over for our internal use
-      nodes_.insert(nodes_.begin(), begin, end);
+      nodes_.insert(nodes_.begin(), mesh.nodes_cbegin(), mesh.nodes_cend());
 
-      size_t no_points = std::distance(begin, end);
+      size_t no_points = mesh.no_nodes();
       struct triangulateio in, out;
       // z - number stuff from 0, not from 1
       // B - no boundary markers in the output
@@ -100,7 +81,7 @@ class Delaunay
       in.regionlist              = (double *) NULL;
       // fill points
       auto point_from_array = in.pointlist;
-      std::for_each(begin, end, [&](const point_type& p) {
+      std::for_each(mesh.nodes_cbegin(), mesh.nodes_cend(), [&](const typename Mesh::node_type& p) {
         *point_from_array = p.x;
         ++point_from_array;
         *point_from_array = p.y;
@@ -140,7 +121,6 @@ class Delaunay
         );
         n0 += 3; n1 += 3; n2 += 3;
       }
-
     }
 
     size_t getNoTriangles() const { return triangles_.size(); }
@@ -162,6 +142,7 @@ class Delaunay
 
     /**
      * \brief Check which triangle a point is inside of (if any).
+     * \tparam MeshPoint  type for the query point. *NOTE* query points are from a different mesh!
      * \param p   query point 
      * \return  metadata on the relative position.
      *
@@ -180,7 +161,8 @@ class Delaunay
      * triangulation to be convex and such. I figured since this is not an online step, there's not
      * much point in spending too much time optimising this method.
      */
-    PointInTriangleMeta getTriangleInfoForPoint(const point_type& p)
+    template <class MeshPoint>
+    PointInTriangleMeta getTriangleInfoForPoint(const MeshPoint& p)
     {
       using helpers::geometry::area_triangle;
       PointInTriangleMeta ret;
