@@ -1,27 +1,21 @@
 #ifndef INTERPOLATORLINEARDELAUNAY_HPP
 #define INTERPOLATORLINEARDELAUNAY_HPP
 
-#include <iostream>
 #include <cmath>
 #include <type_traits>
 #include <vector>
 #include <stdexcept>
 
+#include <boost/any.hpp>
+
 #include "InterpolatorInterface.hpp"
 #include "Delaunay.hpp"
-
-namespace PointsOutsideSourceMeshPolicy {
-  enum PointsOutsideSourceMeshPolicy {
-    InterpolateToZero,
-    RemoveFromMesh
-  };
-}
 
 /**
  * \brief   Implementation of a linear Delaunay triangulation-based interpolation
  * \tparam  sourceMeshType  type of the "input", "real" mesh. Almost always MeshNatural. But still...
  * \tparam  targetMeshType  type of mesh we'd like to interpolate onto.
- * \tparam  POSMP           Policy - what to do with points in the target mesh which are outside of
+ * \tparam  NIPP            Policy - what to do with points in the target mesh which are outside of
  *                          the triangulation area of the source mesh. By default, their value will
  *                          be set to zero (InterpolateToZero); It is also possible to remove those
  *                          points from the target mesh.
@@ -38,79 +32,67 @@ namespace PointsOutsideSourceMeshPolicy {
 template <
   class sourceMeshType,
   class targetMeshType,
-  PointsOutsideSourceMeshPolicy::PointsOutsideSourceMeshPolicy POSMP = PointsOutsideSourceMeshPolicy::InterpolateToZero
+  NIPP::NIPP policy = NIPP::InterpolateToZero
 >
 class InterpolatorLinearDelaunay
-  : public InterpolatorInterface<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, POSMP>>
+  : public InterpolatorInterface<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, policy>>
 {
-  // ASSERTIONS
-  static_assert(POSMP != PointsOutsideSourceMeshPolicy::RemoveFromMesh, "Removing points from target mesh is not yet implemented.");
-  // ASSERTIONS -- end
 
   // FRIEND DECLARATIONS
-  friend class InterpolatorInterface<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, POSMP>>;
+  friend class InterpolatorInterface<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, policy>>;
   // FRIEND DECLARATIONS -- end
   
     // PRIVATE TYPEDEFS
-    typedef Delaunay<typename sourceMeshType::const_iterator> DelaunayImpl;
-    typedef typename DelaunayImpl::PointInTriangleMeta TargetPointMeta;
+    typedef InterpolatorInterface<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, policy>> interface_type;
+    typedef Delaunay<sourceMeshType> DelaunayImpl;
 
     // PRIVATE MEMBERS DECLARATIONS
-    const sourceMeshType *source_mesh_;
-    targetMeshType *target_mesh_;
-
-    std::vector<TargetPointMeta> target_points_meta_;
 
   public:
-    INJECT_INTERPOLATOR_TRAITS_TYPEDEFS(InterpolatorLinearDelaunay<sourceMeshType COMMA targetMeshType COMMA POSMP>)
+    INJECT_INTERPOLATOR_TRAITS_TYPEDEFS(InterpolatorLinearDelaunay<sourceMeshType COMMA targetMeshType COMMA policy>)
 
-    InterpolatorLinearDelaunay(const sourceMeshType& source_mesh, targetMeshType& target_mesh)
-      : source_mesh_(&source_mesh), target_mesh_(&target_mesh)
+    InterpolatorLinearDelaunay(const sourceMeshType* source_mesh, targetMeshType* target_mesh)
+      : interface_type(source_mesh, target_mesh)
     {
-      typedef typename targetMeshType::node_type target_node_type;
+      auto s_mesh = this->getSourceMesh();
+      auto t_mesh = this->getTargetMesh();
+      DelaunayImpl dt(*s_mesh);
+      std::vector<size_t> nonInterpolableNodes;
 
-      DelaunayImpl dt(source_mesh_->cbegin(), source_mesh_->cend());
-      target_points_meta_.reserve(target_mesh_->size());
+      for (size_t n = 0; n < t_mesh->no_nodes(); ++n) {
+        auto meta = dt.getTriangleInfoForPoint(t_mesh->node(n));
+        t_mesh->setMetadata(n, meta);
+        if (std::get<DelaunayImpl::FAIL>(meta)) {
+          nonInterpolableNodes.push_back(n);
+        }
+      }
 
-      std::for_each(target_mesh_->cbegin(), target_mesh_->cend(), [&] (target_node_type const& n) {
-        target_points_meta_.push_back(dt.getTriangleInfoForPoint(n));        
-      });
+      this->applyNIPP(nonInterpolableNodes);
     }
 
   protected:
     /**
-     * \brief Internal use. Get a reference to the target mesh.
-     */
-    targetMeshType & getTargetMesh() { return *target_mesh_; }
-
-    /**
      * \brief Actual implementation of online phase of Linear Delaunay interpolation
      */
-    double impl_interpolate(
-      typename targetMeshType::const_iterator n_it
-    )
+    double impl_interpolate(size_t n)
     {
-      size_t node_index = std::distance(target_mesh_->cbegin(), n_it);
-      const TargetPointMeta& meta = target_points_meta_[node_index];
+      // this line might throw a boost::bad_any_cast in case of failure
+      // TODO recover from failure and do something meaningful
+      const typename DelaunayImpl::PointInTriangleMeta& meta =
+          boost::any_cast<const typename DelaunayImpl::PointInTriangleMeta&>(this->getTargetMesh()->getMetadata(n));
 
       if (std::get<DelaunayImpl::FAIL>(meta)) {
-        if (POSMP == PointsOutsideSourceMeshPolicy::InterpolateToZero) {
-          return 0;
-        } else
-          throw std::runtime_error("I was asked to interpolate a point outside of the mesh, but I don't have a policy for that");
+        throw std::runtime_error("This is not supposed to happen! Interpolator implementation cannot be asked"
+          " to interpolate a non-interpolable point. Contact the authors.");
       }
 
       const size_t n0  = std::get<DelaunayImpl::N0>(meta);
       const size_t n1  = std::get<DelaunayImpl::N1>(meta);
       const size_t n2  = std::get<DelaunayImpl::N2>(meta);
 
-      const double val0 = source_mesh_->getValue(n0);
-      const double val1 = source_mesh_->getValue(n1);
-      const double val2 = source_mesh_->getValue(n2);
-
-      //const double val0 = *((*source_mesh_)[std::get<DelaunayImpl::N0>(meta)].vals[0]);
-      //const double val1 = *((*source_mesh_)[std::get<DelaunayImpl::N1>(meta)].vals[0]);
-      //const double val2 = *((*source_mesh_)[std::get<DelaunayImpl::N2>(meta)].vals[0]);
+      const double val0 = this->getSourceMesh()->getValue(n0, 0);
+      const double val1 = this->getSourceMesh()->getValue(n1, 0);
+      const double val2 = this->getSourceMesh()->getValue(n2, 0);
 
       const double ksi0 = std::get<DelaunayImpl::KSI0>(meta);
       const double ksi1 = std::get<DelaunayImpl::KSI1>(meta);
@@ -122,9 +104,10 @@ class InterpolatorLinearDelaunay
   private:
 };
 
-template <class sourceMeshType, class targetMeshType>
-struct InterpolatorImpl_traits<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType> > {
+template <class sourceMeshType, class targetMeshType, NIPP::NIPP policy_val>
+struct InterpolatorImpl_traits<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, policy_val> > {
   typedef sourceMeshType source_mesh_type;
   typedef targetMeshType target_mesh_type;
+  constexpr static NIPP::NIPP policy = policy_val;
 };
 #endif /* INTERPOLATORLINEARDELAUNAY_HPP */

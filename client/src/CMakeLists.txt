@@ -13,13 +13,11 @@ execute_process(
 )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules")
-find_package(Eigen3 REQUIRED)
 
 FIND_PACKAGE( Boost 1.54 COMPONENTS iostreams system filesystem REQUIRED )
 include_directories(${ContactModelling_SOURCE_DIR}/client/inc)
 include_directories(${ContactModelling_SOURCE_DIR}/triangle/inc)
 include_directories(${ContactModelling_SOURCE_DIR}/gnuplot-iostream/inc)
-include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIR})
 
 link_directories(${Boost_LIBRARY_DIR})

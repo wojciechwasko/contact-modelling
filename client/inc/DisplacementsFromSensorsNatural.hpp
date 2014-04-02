@@ -16,7 +16,7 @@ template <class SkinConnector>
 class DisplacementsFromSensorsNatural {
   public:
     typedef MeshNatural<MeshNode<1>, SkinConnector> mesh_type;
-    typedef typename mesh_type::vals_vec_type  vals_vec_type;
+    typedef typename mesh_type::values_container  values_container;
     typedef typename mesh_type::node_type      node_type;
 
     /**
@@ -41,30 +41,30 @@ class DisplacementsFromSensorsNatural {
      * \note    In the interpolated case, this corresponds to the interpolated
      *          values.
      */
-    const vals_vec_type& getVals() const { return mesh_->getVals(); }
+    const values_container& getVals() const { return mesh_->getVals(); }
 
     /**
      * \brief   Get a reference to the values vector.
      * \note    In the interpolated case, this corresponds to the interpolated
      *          values.
      */
-    vals_vec_type& getVals() { return mesh_->getVals(); };
+    values_container& getVals() { return mesh_->getVals(); };
 
-    const typename mesh_type::const_iterator
+    const typename mesh_type::nodes_const_iterator
     nodes_cbegin() const { return mesh_->cbegin(); }
 
-    const typename mesh_type::const_iterator
+    const typename mesh_type::nodes_const_iterator
     nodes_cend() const { return mesh_->cend(); }
 
-    typename mesh_type::iterator
+    typename mesh_type::nodes_iterator
     nodes_begin()  { return mesh_->begin(); }
 
-    typename mesh_type::iterator
+    typename mesh_type::nodes_iterator
     nodes_end()  { return mesh_->end(); }
 
     const mesh_type& getMesh() const { return *mesh_; }
 
-    void update() { skin_conn_->update(mesh_->getValues()); }
+    void update() { skin_conn_->update(mesh_->getRawValues()); }
 
   private:
     std::unique_ptr<mesh_type> mesh_;

@@ -2,9 +2,21 @@
 #define INTERPOLATORINTERFACE_HPP
 
 #include <cstddef>
+#include <stdexcept>
+#include <algorithm>
 
-#include "helpers/iterate.hpp"
-#include "Point.hpp"
+/**
+ * Non-Interpolable Point Policy
+ */
+namespace NIPP {
+  /**
+   * Non-Interpolable Point Policy
+   */
+  enum NIPP {
+    InterpolateToZero,
+    RemoveFromMesh
+  };
+}
 
 /**
  * \def COMMA
@@ -45,23 +57,58 @@ class InterpolatorInterface {
   );
 
   static_assert(
-    MeshImpl_traits<target_mesh_type>::node_type::val_dimensionality == 1,
+    MeshImpl_traits<target_mesh_type>::node_type::D == 1,
     "Interpolation is not (yet) implemented for >1D"
   );
 
   protected:
-    InterpolatorInterface() {}
+    InterpolatorInterface(const source_mesh_type* source_mesh, target_mesh_type* target_mesh)
+      : source_mesh_(source_mesh), target_mesh_(target_mesh)
+    {
+    }
+
+    /**
+     * \brief   Internal use. Called by child classes after metadata has been gathered, to apply
+     *          NonInterpolablePointPolicy
+     * \param   nonInterpolableNodes  a vector of nodes which cannot be interpolated
+     */
+    void applyNIPP(const std::vector<size_t>& nonInterpolableNodes)
+    {
+      bad_points_ = nonInterpolableNodes;
+      // sort
+      std::sort(bad_points_.begin(), bad_points_.end());
+      // make unique
+      bad_points_.erase(std::unique(bad_points_.begin(), bad_points_.end()), bad_points_.end());
+
+      if (policy_ == NIPP::RemoveFromMesh) {
+        this->getTargetMesh()->erase(bad_points_);
+        bad_points_.clear();
+      } else if (policy_ == NIPP::InterpolateToZero) {
+        // do nothing, essentially. This will be applied online 
+      } else {
+        throw std::runtime_error("Unrecognized Non-interpolable Point Policy.");
+      }
+    }
+
     /**
      * \brief   Actual interpolation function
-     * \param   targetNode  node in the target mesh to interpolate in
-     * \returns             Interpolated value
+     * \param   n   node in the target mesh to interpolate in
+     * \returns     Interpolated value
      *
      * \note    This method does *NOT* modify the actual values in the target mesh.
      *          Rather, it returns the value.
      */
-    double impl_interpolate(
-      typename target_mesh_type::const_iterator node
-    );
+    double impl_interpolate(size_t n);
+
+    /**
+     * \brief Internal use. Get a reference to the target mesh.
+     */
+    target_mesh_type* getTargetMesh() { return target_mesh_; }
+
+    /**
+     * \brief Internal use. Get a reference to the source mesh.
+     */
+    const source_mesh_type* getSourceMesh() const { return source_mesh_; }
 
   public:
     /**
@@ -73,12 +120,17 @@ class InterpolatorInterface {
      * \note  This method does *NOT* modify the targetMesh in any way; if you want to save the returned
      *        value to the mesh, do it manually. 
      */
-    double interpolateSingle(
-      typename target_mesh_type::const_iterator node
-    )
+    double interpolateSingle(size_t n)
     {
+      if (
+        policy_ == NIPP::InterpolateToZero &&
+        std::binary_search(bad_points_.begin(), bad_points_.end(), n)
+      ) {
+        return 0;
+      }
+
       return static_cast<Implementation*>(this)
-        ->impl_interpolate(node); 
+        ->impl_interpolate(n); 
     }
 
     /**
@@ -91,15 +143,21 @@ class InterpolatorInterface {
      */
     void interpolateBulk()
     {
-      using helpers::iterate::for_each_it;
-      target_mesh_type & targetMesh = static_cast<Implementation*>(this)->getTargetMesh();
-      for_each_it(
-        targetMesh.begin(),
-        targetMesh.end(),
-        [&] (typename target_mesh_type::iterator& n_it) {
-          *(n_it->vals[0]) = interpolateSingle(n_it); 
-        });
+      target_mesh_type* targetMesh = getTargetMesh();
+      for (size_t n = 0; n < targetMesh->size(); ++n) {
+        targetMesh->setValue(n, 0, interpolateSingle(n));
+      }
     }
+
+  private:
+    constexpr static NIPP::NIPP policy_ = InterpolatorImpl_traits<Implementation>::policy;
+    const source_mesh_type *const source_mesh_;
+          target_mesh_type *const target_mesh_;
+    /**
+     * \brief   A vector of nodes' IDs in the target mesh which cannot be interpolated.
+     * \note    This vector can be assumed to be sorted. (so that we can use binary_search)
+     */
+    std::vector<size_t> bad_points_;
 };
 
 

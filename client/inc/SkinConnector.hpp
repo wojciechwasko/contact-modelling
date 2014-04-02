@@ -7,8 +7,8 @@
 #include <string>
 #include <utility>
 #include <stdexcept>
-
-#include <Eigen/Dense>
+#include <vector>
+#include <algorithm>
 
 #include "skin_sensor.h"
 
@@ -17,10 +17,6 @@
 
 /**
  * \brief   Interface abstracting SkinWare.
- *
- * \note  This class uses Eigen::VectorXd directly, without templating over different possible vector
- *        types. This reduces the flexibility of the code but on the other hand allows to reduce
- *        vector rewriting overhead.
  */
 template <class SensorsSource>
 class SkinConnector {
@@ -89,7 +85,7 @@ class SkinConnector {
     sensor_iterator sensors_begin() { return s_begin_; }
     sensor_iterator sensors_end()   { return s_end_;   } 
 
-    void update(Eigen::VectorXd& target_vec)
+    void update(std::vector<double>& target_vec)
     {
       const int req_res = s_reader_->request(sensor_layer_);
       switch (req_res) {
@@ -108,9 +104,9 @@ class SkinConnector {
       });
     }
 
-    Eigen::VectorXd update()
+    std::vector<double> update()
     {
-      Eigen::VectorXd ret(no_sensors_);
+      std::vector<double> ret(no_sensors_);
       update(ret);
       return ret;
     }

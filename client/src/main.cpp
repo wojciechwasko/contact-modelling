@@ -23,7 +23,7 @@ typedef MeshNatural<MeshNode<1>, skin_connector_type>
   raw_mesh_type;
 typedef MeshRegularSquare<MeshNode<1>>
   interpolated_mesh_type;
-typedef InterpolatorLinearDelaunay<raw_mesh_type, interpolated_mesh_type, PointsOutsideSourceMeshPolicy::InterpolateToZero>
+typedef InterpolatorLinearDelaunay<raw_mesh_type, interpolated_mesh_type, NIPP::RemoveFromMesh>
   interpolator_type;
 typedef MeshRegularSquare<MeshNode<3>>
   force_mesh_type;
@@ -73,13 +73,6 @@ int main(int argc, char** argv)
   disps_interpolated.update();
   disps_natural.update();
   std::cout << "New data available.\n";
-
-  std::for_each(
-    disps_interpolated.nodes_cbegin(),
-    disps_interpolated.nodes_cend(),
-    [&](const interpolated_disps_from_sensors_type::node_type & n) {
-      //std::cout <<  "x: " << n.x << ",\ty: " << n.y << ",\tvalue: " << *n.vals[0] << "\n";
-    });
 
   using helpers::plot::plotMesh;
   plotMesh(disps_interpolated.getSourceMesh(), "natural");

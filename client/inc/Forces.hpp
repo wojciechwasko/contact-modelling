@@ -1,6 +1,7 @@
 #ifndef FORCES_HPP
 #define FORCES_HPP
 
+#include <stdexcept>
 #include <memory>
 
 #include "MeshInterface.hpp"
@@ -14,8 +15,7 @@
 template <class mesh_type>
 class Forces {
     std::unique_ptr<mesh_type> mesh_;
-    typedef typename mesh_type::container_reference             container_reference;
-    typedef typename mesh_type::container_const_reference container_const_reference;
+    typedef typename mesh_type::values_container             values_container;
   public:
     /**
      * \brief   Default constructor
@@ -23,9 +23,11 @@ class Forces {
      *                the mesh. This param has to be std::move'd into here if
      *                you're constructing from an lvalue (a "non-temp").
      */
-    Forces(std::unique_ptr<mesh_type> mesh) : mesh_(std::move(mesh)) {}
-          container_reference getRawValues() const { return mesh_->getRawValues(); }
-    container_const_reference getRawValues()       { return mesh_->getRawValues(); }
+    Forces(std::unique_ptr<mesh_type> mesh)
+      : mesh_((mesh) ? std::move(mesh) : throw std::runtime_error("Forces: Passed empty mesh unique_ptr"))
+    {}
+    const values_container& getRawValues() const { return mesh_->getRawValues(); }
+    values_container& getRawValues()       { return mesh_->getRawValues(); }
 
 };
 

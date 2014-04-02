@@ -18,18 +18,15 @@ namespace helpers {
       std::ofstream out(tempstr);
       out.precision(10);
 
-      std::vector<std::array<double,3>> plotdata;
-      plotdata.reserve(mesh.size());
-      double lastX = *(mesh.cbegin()->vals[0]);
-      mesh.for_each_node([&] (typename Mesh::const_reference n) {
-        plotdata.push_back({n.x,n.y,*(n.vals[0])});
-
-        if (n.x != lastX) {
+      double lastX = mesh.getValue(0,0);
+      for (size_t in = 0; in < mesh.size(); ++in) {
+        const typename Mesh::node_type& node = mesh.node(in);
+        if (node.x != lastX) {
           out << std::endl;
-          lastX = n.x;
+          lastX = node.x;
         }
-        out << n.x << " " << n.y << " " << *(n.vals[0]) << std::endl;
-      });
+        out << node.x << " " << node.y << " " << mesh.getValue(in,0) << std::endl;
+      }
       Gnuplot gp("gnuplot -persist");  
       gp << "set isosamples 60\n";
       gp << "set xlabel 'x'\n";

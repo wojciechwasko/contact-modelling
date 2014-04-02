@@ -1,12 +1,14 @@
 #ifndef MESHINTERFACE_HPP
 #define MESHINTERFACE_HPP
 
+#include <array>
 #include <memory>
 #include <cstddef>
 #include <algorithm>
 
-#include <Eigen/Dense>
+#include <boost/any.hpp>
 
+#include "helpers/container_algorithms.hpp"
 
 /**
  * \def COMMA
@@ -19,15 +21,17 @@
 /**
  * Injects common typedefs from MeshImpl_traits
  */
-#define INJECT_MESH_TRAITS_TYPEDEFS(name) \
-  typedef typename MeshImpl_traits< name >::node_type                                   node_type; \
-  typedef typename MeshImpl_traits< name >::reference                                   reference; \
-  typedef typename MeshImpl_traits< name >::const_reference                       const_reference; \
-  typedef typename MeshImpl_traits< name >::iterator                                     iterator; \
-  typedef typename MeshImpl_traits< name >::const_iterator                         const_iterator; \
-  typedef typename MeshImpl_traits< name >::container_type                         container_type; \
-  typedef typename MeshImpl_traits< name >::container_reference               container_reference; \
-  typedef typename MeshImpl_traits< name >::container_const_reference   container_const_reference; 
+#define INJECT_MESH_TRAITS_TYPEDEFS(name) 
+
+#define INJECT_MESH_INTERFACE_TYPES(name) \
+  using typename MeshInterface< name >::node_type; \
+  using typename MeshInterface< name >::nodes_container; \
+  using typename MeshInterface< name >::nodes_iterator; \
+  using typename MeshInterface< name >::nodes_const_iterator; \
+  using typename MeshInterface< name >::value_type; \
+  using typename MeshInterface< name >::values_container; \
+  using typename MeshInterface< name >::metadata_type; \
+  using typename MeshInterface< name >::metadata_container;
 
 
 template <class derived_t>
@@ -38,27 +42,174 @@ struct MeshImpl_traits;
  *
  * While it doesn't seem crucial right now, it'll come in handy when
  * we have to implement functions like extractROI and such.
+ *
+ * As we add more functionality to this class, it might turn out that "MeshBase" would've been more
+ * appropriate, but it's merely a name. Plus, "*Base" strongly indicates a vertical, classical
+ * inheritance, not a mixin-based polymorphism.
  */
 template <class Derived>
 class MeshInterface {
   public:
-    INJECT_MESH_TRAITS_TYPEDEFS(Derived)
-    typedef Eigen::VectorXd vals_vec_type;
-    typedef double val_type;
+    typedef typename MeshImpl_traits<Derived>::node_type  node_type;
+    typedef std::vector<node_type>                        nodes_container;
+    typedef typename nodes_container::iterator            nodes_iterator;
+    typedef typename nodes_container::const_iterator      nodes_const_iterator;
+    typedef double                                        value_type;
+    typedef std::vector<value_type>                       values_container;
+    typedef boost::any                                    metadata_type;
+    typedef std::vector<boost::any>                       metadata_container;
+
+    /**
+     * \brief   Get number of nodes in the mesh.
+     */
+    size_t no_nodes() const { return nodes_.size(); }
+    /**
+     * \brief   Get number of nodes in the mesh.
+     */
+    size_t size() const { return no_nodes(); }
+
+
+    /**
+     * \brief   Get non-const iterator to the bein of nodes.
+     */
+    nodes_iterator nodes_begin() { return nodes_.begin(); }
+
+    /**
+     * \brief   Get const iterator to the begin of nodes.
+     */
+    nodes_const_iterator nodes_cbegin() const { return nodes_.cbegin(); }
+
+    /**
+     * \brief   Get non-const iterator to the end of nodes.
+     */
+    nodes_iterator nodes_end() { return nodes_.end(); }
+
+    /**
+     * \brief   Get const iterator to the end of nodes.
+     */
+    nodes_const_iterator nodes_cend() const { return nodes_.cend(); }
+
+    /**
+     * \brief   Get a reference to the node at position i, const version.
+     * \note    This is not bound-checked.
+     */
+    const node_type& node(size_t i) const { return nodes_[i]; }
+
+    /**
+     * \brief   Get a reference to the node at position i, non-const version.
+     * \note    This is not bound-checked.
+     */
+    node_type& node(size_t i) { return nodes_[i]; }
+
+    /**
+     * \brief   Get bulk access to the values vector (const version)
+     *
+     */
+    const values_container& getRawValues() const
+    {
+      return values_;
+    }
+
+    /**
+     * \brief   Get bulk access to the values vector (non-const version)
+     *
+     */
+    values_container& getRawValues() 
+    {
+      return values_;
+    }
+
+    /**
+     * \brief   Return a local copy of values for node i
+     * \param   i   ID (number of the node)
+     * \note    This is not bound-checked
+     * \note    This is not very efficient, since we're making a local copy and returning it.
+     *
+     * In future, if needed, it might be implement something resembling Eigen's ::block()
+     * functionality to allow the returned types to be used as lvalues.
+     */
+    std::array<value_type, node_type::D> getValues(size_t i) const
+    {
+      std::array<value_type, node_type::D> ret;
+      for (size_t it = 0; it < node_type::D; ++it)
+        ret[it] = values_[i*node_type::D + it];
+      return ret;
+    }
+
+    /**
+     * \brief   Get vi-th value for i-th node.
+     * \param   i   ID (number) of the node
+     * \param   vi  which value from the node to get
+     * \note    This is not bound-checked.
+     */
+    value_type getValue(size_t i, size_t vi) const
+    {
+      return values_[i*node_type::D + vi];
+    }
+
+    /**
+     * \brief   Set vi-th value for i-th node.
+     * \param   i   ID (number) of the node
+     * \param   vi  which value from the node to get
+     * \param   v   value to be set
+     * \note    This is not bound-checked.
+     */
+    void setValue(size_t i, size_t vi, value_type v)
+    {
+      values_[i*node_type::D + vi] = v;
+    }
+
+    /**
+     * \brief   Get a const reference to the metadata of a node at position i.
+     * \note    This is not bound-checked.
+     */
+    const metadata_type& getMetadata(const size_t i) const
+    {
+      return metadata_[i];
+    }
+
+    /**
+     * \brief   Set the metadata of a node at position i.
+     * \note    This is not bound-checked.
+     */
+    void setMetadata(const size_t i, const metadata_type& rhs) {
+      metadata_[i] = rhs;
+    };
+
+    /**
+     * \brief   Remove points (and their associated values and metadata) from the mesh
+     * \param   indices  A sorted vector of unique IDs of points to be erased
+     */
+    void erase(const std::vector<size_t>& indices)
+    {
+      using helpers::container_algorithms::erase_by_indices;
+      erase_by_indices(nodes_,      indices);
+      erase_by_indices(metadata_,   indices);
+      erase_by_indices(values_,     indices, node_type::D);
+    }
 
   protected:
     /**
-     * \brief   Values in the mesh'es nodes. Node's val/ (val_x, val_y, val_z) will
-     * point to elements of this vector.
+     * \brief   Constructor.
+     * \param   no_nodes  Number of nodes in the mesh.
      *
-     * \note  Implementations may (and will) take advantage of the fact that this data (values) will
-     *        remain at the same location in memory. Always. One major optimisation is that the
-     *        Nodes will contain pointers directly to the values instead of having to look them up
-     *        on each access. However, there is a downside - you CANNOT use move semantics or other
-     *        tricks (e.g. raw buffer initialisation) to speed up copying of data. The simplest
-     *        solution would be to simply get the new values and then iterate, copying data.
-     *        However, I'm thinking of passing this vector (reference to it, actually) to the skin
-     *        interface, which would write directly to this vector instead of returning a fresh one.
+     * The number of nodes in the mesh is used for preallocation of memory.
+     * \note    The memory (values inside vectors) is *NOT* initialized (in case of primitive types)
+     *          or initialized by default constructors (in case of non-POD style data). Since by C++
+     *          rules, a base class is guaranteed to be fully constructed by the time the derived
+     *          class' constructor is called, the derived class' constructor can rely the values
+     *          being there in the vectors, i.e. should not push_back (or whatever the interface
+     *          will be called) new nodes.
+     */
+    MeshInterface(size_t no_nodes)
+      : values_(node_type::D * no_nodes),
+        nodes_(no_nodes),
+        metadata_(no_nodes)
+    {}
+
+  private:
+    /**
+     * \brief   Values in the mesh'es nodes. 
      *
      * TODO   Think of enhancing encapsulation. The way I'm thinking to do it now is to 
      *        both write and read the values (vals) from Node stuct's pointers; hence,
@@ -67,83 +218,31 @@ class MeshInterface {
      *        by ro. A solution somewhere in the middle would be to have additional ro pointers
      *        in the Node struct.
      */
-    vals_vec_type values_;
+    values_container           values_;
+
     /**
-     * \brief   Implementation for random-access no bounds-checking access.
+     * \brief   A vector of nodes in the mesh
      */
-    reference       impl_ra_nobounds(size_t n);
+    nodes_container  nodes_;
+    
     /**
-     * \brief   Implementation for random-access no bounds-checking access. (const version).
-     */
-    const_reference impl_ra_nobounds(size_t n) const;
-
-    MeshInterface(size_t no_nodes)
-      : values_(node_type::val_dimensionality * no_nodes)
-    {}
-  public:
-
-    const_iterator cbegin() const { return static_cast<const Derived*>(this)->impl_cbegin(); }
-    const_iterator   cend() const { return static_cast<const Derived*>(this)->impl_cend();   }
-
-    iterator begin() { return static_cast<Derived*>(this)->impl_begin(); }
-    iterator   end() { return static_cast<Derived*>(this)->impl_end();   }
-
-    /**
-     * \brief Get number of nodes in the mesh.
-     */
-    std::ptrdiff_t size() const { return std::distance(cbegin(), cend()); }
-
-    /**
-     * \brief Iterate over node in the mesh, executing a function. Const version.
+     * \brief   A vector of metadata. 
      *
-     * \param   f   Function to be called for each node. Takes node Derived::node as argument
-     */
-    template <class F>
-    void for_each_node(F f) const { std::for_each(cbegin(), cend(), f); }
-
-    /**
-     * \brief Iterate over node in the mesh, executing a function.
+     * \note    We're using boost::any for sake of generality. At time of instantiation of the mesh,
+     *          we don't know what is the type of the metadata to be stored here. This field is
+     *          intended to be primarily used by interpolators, to store data such as the
+     *          barycentric coordinates and IDs of the corresponding nodes constituting e.g. a
+     *          Delaunay triangle in the source mesh.
      *
-     * \param   f   Function to be called for each node. Takes node Derived::node as argument
+     * \note    Data will be removed from this vector if a node is removed from the mesh. On the
+     *          other hand, if this is a target mesh and a node is removed from a source mesh and
+     *          the IDs of nodes from the source mesh are stored inside metadata, this class has (in
+     *          principle) no way of knowing this and will not update accordingly. That is to say
+     *          that if you store IDs of nodes from some other mesh, this will not be updated if
+     *          you remove nodes from the other mesh. I guess this behaviour is to be expected, but
+     *          I felt it needed to be pointed out explicitly.
      */
-    template <class F>
-    void for_each_node(F f) { std::for_each(begin(), end(), f); }
-
-    /**
-     * \brief Random access operator []
-     * \note  This is not bound-checked.
-     */
-    reference       operator[](size_t n)       {
-      return static_cast<Derived*>(this)->impl_ra_nobounds(n);
-    }
-
-    /**
-     * \brief Random access operator []. Const version.
-     * \note  This is not bound-checked.
-     */
-    const_reference operator[](size_t n) const {
-      return static_cast<const Derived*>(this)->impl_ra_nobounds(n);
-    }
-
-    /**
-     * \brief   Get a constant reference to the values vector.
-     */
-    const vals_vec_type& getValues() const
-    {
-      return values_;
-    }
-
-    /**
-     * \brief   Get a reference to the values vector.
-     */
-    vals_vec_type& getValues() 
-    {
-      return values_;
-    }
-
-    val_type getValue(size_t n) const {
-      return values_[n];
-    }
+    metadata_container metadata_;
 };
 
 
