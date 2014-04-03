@@ -11,9 +11,13 @@ ADD_EXECUTABLE(test_erase_by_indices test_erase_by_indices.cpp)
 TARGET_LINK_LIBRARIES(test_erase_by_indices ${Boost_LIBRARIES})
 ADD_TEST(test_erase_by_indices test_erase_by_indices)
 
+ADD_EXECUTABLE(test_alg_interface test_alg_interface.cpp)
+TARGET_LINK_LIBRARIES(test_alg_interface ${Boost_LIBRARIES})
+ADD_TEST(test_alg_interface test_alg_interface)
 
 
 ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPENDS
   test_geometry
   test_erase_by_indices
+  test_alg_interface
 )
