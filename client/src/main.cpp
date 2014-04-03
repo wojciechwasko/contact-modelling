@@ -2,6 +2,8 @@
 #include <memory>
 #include <stdexcept>
 
+#include <boost/any.hpp>
+
 
 #include "main.hpp"
 #include "SkinConnector.hpp"
@@ -14,6 +16,8 @@
 #include "DisplacementsFromSensorsNatural.hpp"
 #include "DisplacementsFromSensorsInterpolated.hpp"
 #include "ResultantDisplacements.hpp"
+#include "AlgDisplacementsToForces.hpp"
+#include "AlgForcesToDisplacements.hpp"
 
 #include "helpers/plot.hpp"
 
@@ -33,6 +37,10 @@ typedef DisplacementsFromSensorsNatural<skin_connector_type>
   natural_disps_from_sensors_type;
 typedef DisplacementsFromSensorsInterpolated<skin_connector_type, interpolated_mesh_type, interpolator_type>
   interpolated_disps_from_sensors_type;
+typedef Forces<force_mesh_type> forces_type;
+typedef ResultantDisplacements<resulting_disp_mesh_type> resultant_displacements_type;
+typedef AlgDisplacementsToForces<interpolated_disps_from_sensors_type, forces_type> alg_interpolated_disps_to_forces_type;
+typedef AlgForcesToDisplacements<forces_type, resultant_displacements_type> alg_forces_to_disps;
 
 int main(int argc, char** argv)
 {
@@ -62,12 +70,22 @@ int main(int argc, char** argv)
   // forces mesh
   std::unique_ptr<force_mesh_type>
     force_mesh(new force_mesh_type(disps_natural.getMesh(), 0.01));
-  Forces<force_mesh_type> f(std::move(force_mesh));
+  forces_type f(std::move(force_mesh));
 
   // displacemetns obtained from (displacements) -> (forces) -> (displacements)
   std::unique_ptr<resulting_disp_mesh_type>
     resulting_disp_mesh(new resulting_disp_mesh_type(disps_natural.getMesh(), 0.01));
-  ResultantDisplacements<resulting_disp_mesh_type> res_disp(std::move(resulting_disp_mesh));
+  resultant_displacements_type res_disp(std::move(resulting_disp_mesh));
+
+  boost::any cache_disps_to_forces = alg_interpolated_disps_to_forces_type::offline( 
+    disps_interpolated,
+    f
+  );
+
+  boost::any cache_forces_to_disps = alg_forces_to_disps::offline( 
+    f,
+    res_disp
+  );
 
   std::cout << "Requesting new data.\n";
   disps_interpolated.update();

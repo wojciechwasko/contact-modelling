@@ -89,14 +89,14 @@ class DisplacementsFromSensorsInterpolated {
      * \note    In the interpolated case, this corresponds to the interpolated
      *          values.
      */
-    const values_container& getVals() const { return target_mesh_->getVals(); };
+    const values_container& getRawValues() const { return target_mesh_->getRawValues(); };
 
     /**
      * \brief   Get a reference to the values vector.
      * \note    In the interpolated case, this corresponds to the interpolated
      *          values.
      */
-    values_container& getVals() { return target_mesh_->getVals(); };
+    values_container& getRawValues() { return target_mesh_->getRawValues(); };
 
     void update()
     {
