@@ -14,8 +14,8 @@ execute_process(
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules")
 
-FIND_PACKAGE( Boost 1.54 COMPONENTS iostreams system filesystem REQUIRED )
-FIND_PACKAGE ( Armadillo 2.4.2 REQUIRED)
+FIND_PACKAGE(Boost 1.54 COMPONENTS iostreams system filesystem REQUIRED)
+FIND_PACKAGE(Armadillo 2.4.2 REQUIRED)
 
 
 include_directories(${ContactModelling_SOURCE_DIR}/client/inc)
@@ -24,8 +24,6 @@ include_directories(${ContactModelling_SOURCE_DIR}/gnuplot-iostream/inc)
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(${Armadillo_INCLUDE_DIR})
 
-link_directories(${Boost_LIBRARY_DIR})
-link_directories(${Armadillo_LIBRARY_DIR})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SKINWARE_CXXFLAGS} -O0 -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SKINWARE_LDFLAGS}")
@@ -42,7 +40,7 @@ add_executable(client
 target_link_libraries(client
   triangle
   ${Boost_LIBRARIES}
-  ${Armadillo_LIBRARIES}
+  ${ARMADILLO_LIBRARIES}
 )
 
 ADD_SUBDIRECTORY(test)

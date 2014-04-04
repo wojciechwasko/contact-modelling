@@ -1,6 +1,8 @@
 #ifndef ALGINTERFACE_HPP
 #define ALGINTERFACE_HPP
 
+#include <type_traits>
+
 #include <boost/any.hpp>
 
 /**
@@ -15,7 +17,13 @@
 #define INJECT_ALG_INTERFACE_TYPES(name) \
   using typename AlgInterface< name >::input_type; \
   using typename AlgInterface< name >::output_type; \
-  using typename AlgInterface< name >::precomputed_type;
+  using typename AlgInterface< name >::params_type; \
+  using typename AlgInterface< name >::precomputed_type; \
+  using typename AlgInterface< name >::input_cref; \
+  using typename AlgInterface< name >::output_cref; \
+  using typename AlgInterface< name >::params_cref; \
+  using typename AlgInterface< name >::precomputed_cref; \
+  using typename AlgInterface< name >::output_ref; 
 
 template <class Derived>
 struct Alg_traits
@@ -43,20 +51,37 @@ struct Alg_traits
 template <class Derived>
 class AlgInterface {
   public:
-    typedef typename Alg_traits<Derived>::precomputed_type    precomputed_type;
     typedef typename Alg_traits<Derived>::input_type          input_type;
     typedef typename Alg_traits<Derived>::output_type         output_type;
+    typedef typename Alg_traits<Derived>::params_type         params_type;
+    typedef typename Alg_traits<Derived>::precomputed_type    precomputed_type;
+
+    typedef typename std::add_lvalue_reference<const input_type>::type        input_cref;
+    typedef typename std::add_lvalue_reference<const output_type>::type       output_cref;
+    typedef typename std::add_lvalue_reference<const params_type>::type       params_cref;
+    typedef typename std::add_lvalue_reference<const precomputed_type>::type  precomputed_cref;
+
+    typedef typename std::add_lvalue_reference<output_type>::type       output_ref;
   protected:
     AlgInterface() {};
     /**
      * \brief   To be overriden by implementation (Derived class).
      */
-    static precomputed_type impl_offline(const input_type& input, const output_type& output);
+    static precomputed_type impl_offline(
+      input_cref  input,
+      output_cref output,
+      params_cref params
+    );
 
     /**
      * \brief   To be overriden by implementation (Derived class).
      */
-    static void impl_run(const input_type& input, output_type& output, const precomputed_type& precomputed);
+    static void impl_run(
+      input_cref  input,
+      output_ref  output,
+      params_cref params,
+      precomputed_cref precomputed
+    );
 
   public:
     /**
@@ -69,9 +94,13 @@ class AlgInterface {
      * into boost::any since there's an interface to run() which accepts boost::any as a parameter
      * and performs the any_cast.
      */
-    static precomputed_type offline(const input_type& input, const output_type& output)
+    static precomputed_type offline(
+      input_cref  input,
+      output_cref output,
+      params_cref params
+    )
     {
-      return Derived::impl_offline(input, output);
+      return Derived::impl_offline(input, output, params);
     }
 
     /**
@@ -81,9 +110,14 @@ class AlgInterface {
      * \param   precomputed   Precomputed data returned from a previous call to offline()
      *
      */
-    static void run(const input_type& input, output_type& output, const precomputed_type& precomputed)
+    static void run(
+      input_cref  input,
+      output_ref  output,
+      params_cref params,
+      precomputed_cref precomputed
+    )
     {
-      Derived::impl_run(input, output, precomputed); 
+      Derived::impl_run(input, output, params, precomputed); 
     }
 
     /**
@@ -95,9 +129,19 @@ class AlgInterface {
      *
      * This method performs boost::any_cast and calls the regular run().
      */
-    static void run(const input_type& input, output_type& output, const boost::any& precomputed)
+    static void run(
+      input_cref  input,
+      output_ref  output,
+      params_cref params,
+      typename std::add_lvalue_reference<const boost::any>::type  precomputed
+    )
     {
-      AlgInterface::run(input, output, boost::any_cast<const precomputed_type&>(precomputed));
+      AlgInterface::run(
+        input,
+        output,
+        params,
+        boost::any_cast<precomputed_cref>(precomputed)
+      );
     }
 };
 

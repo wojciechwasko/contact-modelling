@@ -77,14 +77,19 @@ int main(int argc, char** argv)
     resulting_disp_mesh(new resulting_disp_mesh_type(disps_natural.getMesh(), 0.01));
   resultant_displacements_type res_disp(std::move(resulting_disp_mesh));
 
+  alg_forces_to_disps::params_type                    params_forces_to_disps;
+  alg_interpolated_disps_to_forces_type::params_type  params_disps_to_forces;
+
   boost::any cache_disps_to_forces = alg_interpolated_disps_to_forces_type::offline( 
     disps_interpolated,
-    f
+    f,
+    params_disps_to_forces
   );
 
   boost::any cache_forces_to_disps = alg_forces_to_disps::offline( 
     f,
-    res_disp
+    res_disp,
+    params_forces_to_disps
   );
 
   std::cout << "Requesting new data.\n";
