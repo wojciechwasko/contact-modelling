@@ -49,15 +49,12 @@ class InterpolatorInterface {
     INJECT_INTERPOLATOR_TRAITS_TYPEDEFS(Implementation)
 
   static_assert(
-    std::is_same<
-      typename MeshImpl_traits<source_mesh_type>::node_type,
-      typename MeshImpl_traits<target_mesh_type>::node_type
-    >::value,
-    "You can't use interpolation over two meshes with different underlying node type"
+    source_mesh_type::D == target_mesh_type::D,
+    "You can't use interpolation over two meshes with different dimensionality"
   );
 
   static_assert(
-    MeshImpl_traits<target_mesh_type>::node_type::D == 1,
+    target_mesh_type::D == 1,
     "Interpolation is not (yet) implemented for >1D"
   );
 

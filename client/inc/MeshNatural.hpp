@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <cstddef>
+#include <stdexcept>
 #include <vector>
 #include <iterator>
 #include <algorithm>
@@ -10,21 +11,36 @@
 #include "skin_helpers.hpp"
 #include "MeshInterface.hpp"
 
+template <size_t dim>
+class MeshNatural;
+
+/**
+ * \brief type traits for Natural mesh.
+ */
+template <size_t dim>
+struct MeshImpl_traits<MeshNatural<dim> > {
+
+};
+
 /**
  * \brief   Mesh created from Skin's sensors.
+ * \tparam  dim   dimensionality of the values stored in the node.
+ * 
+ * \note  All the algorithms in this library consider that if D == 1, we consider forces in the "z"
+ *        direction.
  *
  * Each node corresponds to one sensor in the skin, with (x,y)
  * values copied over.
  */
-template <class TNode>
-class MeshNatural : public MeshInterface<MeshNatural<TNode> >
+template <size_t dim>
+class MeshNatural : public MeshInterface<MeshNatural<dim>,dim>
 {
 
-  friend class MeshInterface<MeshNatural<TNode> >;
-  typedef MeshInterface<MeshNatural<TNode>> interface_type;
+  friend class MeshInterface<MeshNatural<dim>,dim>;
+  typedef MeshInterface<MeshNatural<dim>,dim> interface_type;
 
   public:
-    INJECT_MESH_TRAITS_TYPEDEFS(MeshNatural<TNode>)
+    INJECT_MESH_INTERFACE_TYPES(MeshNatural<dim> COMMA dim)
 
     template <class SensorIterator>
     MeshNatural(
@@ -63,29 +79,17 @@ class MeshNatural : public MeshInterface<MeshNatural<TNode> >
     double maxX() const { return max_x_; }
     double maxY() const { return max_y_; }
 
+  protected:
+    const double impl_node_area(size_t i) const
+    {
+      throw std::runtime_error("Node areas for Natural Mesh are not yet implemented. "
+        "Do it if you have the time! :D");
+    }
+
+
   private:
     double min_x_;    double min_y_;
     double max_x_;    double max_y_;
-};
-
-/**
- * \brief type traits for Natural mesh.
- *
- * \note Sorry for the weird TNode/node_type naming, but 14.6.1/7:
- * > A template-parameter shall not be redeclared within its scope
- * > (including nested scopes). A template-parameter shall not have
- * > the same name as the template name.
- */
-template <class TNode>
-struct MeshImpl_traits<MeshNatural<TNode> > {
-  typedef TNode                                  node_type;
-  typedef node_type      &                       reference;
-  typedef node_type const&                 const_reference;
-  typedef typename std::vector<node_type>            container_type;
-  typedef container_type      &        container_reference;
-  typedef container_type const&  container_const_reference;
-  typedef typename container_type::iterator                iterator;
-  typedef typename container_type::const_iterator    const_iterator;
 };
 
 

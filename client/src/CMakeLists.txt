@@ -25,7 +25,7 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(${Armadillo_INCLUDE_DIR})
 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SKINWARE_CXXFLAGS} -O0 -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SKINWARE_CXXFLAGS} -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SKINWARE_LDFLAGS}")
 
 # From CMake manual:
