@@ -56,12 +56,12 @@ class AlgInterface {
     typedef typename Alg_traits<Derived>::params_type         params_type;
     typedef typename Alg_traits<Derived>::precomputed_type    precomputed_type;
 
-    typedef typename std::add_lvalue_reference<const input_type>::type        input_cref;
-    typedef typename std::add_lvalue_reference<const output_type>::type       output_cref;
-    typedef typename std::add_lvalue_reference<const params_type>::type       params_cref;
-    typedef typename std::add_lvalue_reference<const precomputed_type>::type  precomputed_cref;
+    typedef const input_type&        input_cref;
+    typedef const output_type&       output_cref;
+    typedef const params_type&       params_cref;
+    typedef const precomputed_type&  precomputed_cref;
 
-    typedef typename std::add_lvalue_reference<output_type>::type       output_ref;
+    typedef output_type&       output_ref;
   protected:
     AlgInterface() {};
     /**
@@ -133,7 +133,7 @@ class AlgInterface {
       input_cref  input,
       output_ref  output,
       params_cref params,
-      typename std::add_lvalue_reference<const boost::any>::type  precomputed
+      const boost::any&  precomputed
     )
     {
       AlgInterface::run(

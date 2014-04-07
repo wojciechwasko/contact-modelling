@@ -16,32 +16,29 @@
  * Each node corresponds to one sensor in the skin, with (x,y)
  * values copied over.
  */
-template <class TNode, class SkinConnector>
-class MeshNatural : public MeshInterface<MeshNatural<TNode, SkinConnector> >
+template <class TNode>
+class MeshNatural : public MeshInterface<MeshNatural<TNode> >
 {
-  typedef typename SkinConnector::sensor_iterator sensor_iterator;
-  sensor_iterator sensors_begin_;
-  sensor_iterator   sensors_end_;
 
-  friend class MeshInterface<MeshNatural<TNode, SkinConnector> >;
-  typedef MeshInterface<MeshNatural<TNode, SkinConnector> > interface_type;
+  friend class MeshInterface<MeshNatural<TNode> >;
+  typedef MeshInterface<MeshNatural<TNode>> interface_type;
 
   public:
-    INJECT_MESH_TRAITS_TYPEDEFS(MeshNatural<TNode COMMA SkinConnector>)
+    INJECT_MESH_TRAITS_TYPEDEFS(MeshNatural<TNode>)
+
+    template <class SensorIterator>
     MeshNatural(
-      sensor_iterator sensors_begin,
-      sensor_iterator sensors_end
+      SensorIterator sensors_begin,
+      SensorIterator sensors_end
     ) :
-      interface_type(skin_helpers::distance(sensors_begin, sensors_end)),
-      sensors_begin_(sensors_begin),
-      sensors_end_(sensors_end)
+      interface_type(skin_helpers::distance(sensors_begin, sensors_end))
     {
       double min_x = std::numeric_limits<double>::max();
       double min_y = std::numeric_limits<double>::max();
       double max_x = std::numeric_limits<double>::min();
       double max_y = std::numeric_limits<double>::min();
       size_t n = 0;
-      for (sensor_iterator it = sensors_begin_; it != sensors_end_; ++it) {
+      for (SensorIterator it = sensors_begin; it != sensors_end; ++it) {
         const double x = (*it).relative_position[0];
         const double y = (*it).relative_position[1];
         this->node(n).x = x;
@@ -79,8 +76,8 @@ class MeshNatural : public MeshInterface<MeshNatural<TNode, SkinConnector> >
  * > (including nested scopes). A template-parameter shall not have
  * > the same name as the template name.
  */
-template <class TNode, class SkinConnector>
-struct MeshImpl_traits<MeshNatural<TNode, SkinConnector> > {
+template <class TNode>
+struct MeshImpl_traits<MeshNatural<TNode> > {
   typedef TNode                                  node_type;
   typedef node_type      &                       reference;
   typedef node_type const&                 const_reference;

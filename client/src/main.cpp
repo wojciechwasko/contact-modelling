@@ -13,9 +13,6 @@
 #include "MeshNatural.hpp"
 #include "MeshRegularSquare.hpp"
 #include "InterpolatorLinearDelaunay.hpp"
-#include "DisplacementsFromSensorsNatural.hpp"
-#include "DisplacementsFromSensorsInterpolated.hpp"
-#include "ResultantDisplacements.hpp"
 #include "AlgDisplacementsToForces.hpp"
 #include "AlgForcesToDisplacements.hpp"
 
@@ -23,24 +20,19 @@
 
 typedef SkinConnector<skin_object>
   skin_connector_type;
-typedef MeshNatural<MeshNode<1>, skin_connector_type>
-  raw_mesh_type;
+typedef MeshNatural<MeshNode<1>>
+  natural_mesh_type;
 typedef MeshRegularSquare<MeshNode<1>>
   interpolated_mesh_type;
-typedef InterpolatorLinearDelaunay<raw_mesh_type, interpolated_mesh_type, NIPP::RemoveFromMesh>
+typedef InterpolatorLinearDelaunay<natural_mesh_type, interpolated_mesh_type, NIPP::RemoveFromMesh>
   interpolator_type;
 typedef MeshRegularSquare<MeshNode<3>>
-  force_mesh_type;
+  forces_type;
 typedef MeshRegularSquare<MeshNode<3>>
-  resulting_disp_mesh_type;
-typedef DisplacementsFromSensorsNatural<skin_connector_type>
-  natural_disps_from_sensors_type;
-typedef DisplacementsFromSensorsInterpolated<skin_connector_type, interpolated_mesh_type, interpolator_type>
-  interpolated_disps_from_sensors_type;
-typedef Forces<force_mesh_type> forces_type;
-typedef ResultantDisplacements<resulting_disp_mesh_type> resultant_displacements_type;
-typedef AlgDisplacementsToForces<interpolated_disps_from_sensors_type, forces_type> alg_interpolated_disps_to_forces_type;
-typedef AlgForcesToDisplacements<forces_type, resultant_displacements_type> alg_forces_to_disps;
+  resulting_disps_type;
+
+typedef AlgDisplacementsToForces<interpolated_mesh_type, forces_type> alg_interpolated_disps_to_forces_type;
+typedef AlgForcesToDisplacements<forces_type, resulting_disps_type> alg_forces_to_disps;
 
 int main(int argc, char** argv)
 {
@@ -55,51 +47,51 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  natural_disps_from_sensors_type disps_natural(*skin_conn);
+  // Natural mesh, used "as-is"
+  natural_mesh_type natural_mesh_1(skin_conn->sensors_begin(), skin_conn->sensors_end());
 
-  // "interpolated" mesh
-  std::unique_ptr<interpolated_mesh_type>
-    s_mesh(new interpolated_mesh_type(disps_natural.getMesh(), 0.001));
-  // interpolator used to go from a natural mesh to the interpolated.
-  // "interpolated" sensor readings
-  interpolated_disps_from_sensors_type disps_interpolated(
-      *skin_conn,
-      std::move(s_mesh)
-  );
+  // Natural mesh, used for creation and further interpolating to a RegularMesh
+  // later on, I'll probably have the interpolation algorithms spit out the precomputed
+  // metadata/cache to be kept outside of the mesh and one will be able to use the same mesh
+  // wherever they wish to. Only issue is that, based on the policy, some metadata/cache would have
+  // to be deleted as well... I have to wrap my head around this once the headache is over.
+  natural_mesh_type natural_mesh_2(skin_conn->sensors_begin(), skin_conn->sensors_end());
+  
+  interpolated_mesh_type interpolated_mesh(natural_mesh_2, 0.001);
 
-  // forces mesh
-  std::unique_ptr<force_mesh_type>
-    force_mesh(new force_mesh_type(disps_natural.getMesh(), 0.01));
-  forces_type f(std::move(force_mesh));
+  interpolator_type interpolator(&natural_mesh_2, &interpolated_mesh);
 
-  // displacemetns obtained from (displacements) -> (forces) -> (displacements)
-  std::unique_ptr<resulting_disp_mesh_type>
-    resulting_disp_mesh(new resulting_disp_mesh_type(disps_natural.getMesh(), 0.01));
-  resultant_displacements_type res_disp(std::move(resulting_disp_mesh));
+  // TODO implement clone() method with various additions, e.g. shift the mesh to be cloned
+  // in the x,y directions (useful for the elastic linear model)
+  // NOTE such clone() method would not be a replacement for the copy-ctor; it'd have to support
+  // cloning Nodes of different dimensionality
+  forces_type forces(natural_mesh_2, 0.0011);
+  resulting_disps_type resulting_disps(natural_mesh_2, 0.0012);
 
   alg_forces_to_disps::params_type                    params_forces_to_disps;
   alg_interpolated_disps_to_forces_type::params_type  params_disps_to_forces;
 
   boost::any cache_disps_to_forces = alg_interpolated_disps_to_forces_type::offline( 
-    disps_interpolated,
-    f,
+    interpolated_mesh,
+    forces,
     params_disps_to_forces
   );
 
   boost::any cache_forces_to_disps = alg_forces_to_disps::offline( 
-    f,
-    res_disp,
+    forces,
+    resulting_disps,
     params_forces_to_disps
   );
 
   std::cout << "Requesting new data.\n";
-  disps_interpolated.update();
-  disps_natural.update();
+  skin_conn->update(natural_mesh_1.getRawValues());
+  skin_conn->update(natural_mesh_2.getRawValues());
+  interpolator.interpolateBulk();
   std::cout << "New data available.\n";
 
   using helpers::plot::plotMesh;
-  plotMesh(disps_interpolated.getSourceMesh(), "natural");
-  plotMesh(disps_interpolated.getTargetMesh(), "interpolated", true);
+  plotMesh(natural_mesh_2, "natural");
+  plotMesh(interpolated_mesh, "interpolated", true);
 
   std::cout << "Finishing!\n";
   return 0;

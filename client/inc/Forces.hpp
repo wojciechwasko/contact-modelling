@@ -15,8 +15,8 @@
 template <class mesh_type>
 class Forces {
     std::unique_ptr<mesh_type> mesh_;
-    typedef typename mesh_type::values_container             values_container;
   public:
+    typedef typename mesh_type::values_container             values_container;
     /**
      * \brief   Default constructor
      * \param   mesh  std::unique_ptr to the mesh. This class takes ownership of

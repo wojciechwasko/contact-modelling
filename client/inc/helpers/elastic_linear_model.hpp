@@ -1,6 +1,7 @@
 #ifndef LINEAR_MODEL_HPP
 #define LINEAR_MODEL_HPP
 
+#include <stdexcept>
 #include <type_traits>
 
 #include "external/armadillo.hpp"
@@ -21,6 +22,37 @@ namespace helpers {
       double skinThickness;
     } skin_properties;
 
+    namespace impl {
+      /**
+       * \brief   Runtime checks for creating the forces to displacements matrix.
+       *
+       * For the first issue found, this function will throw a std::runtime_error with an
+       * appropriate message.
+       *
+       * Sometimes, those check could be done at compile time, but the moment we introduce
+       * dynamically (e.g. SkinWare-) generated mesh or a Rectangular mesh spanning it, we enter the
+       * dynamic realm.
+       */
+      template <class F, class D>
+      void sanity_checks_forces_to_displacements(
+        const F& f,
+        const D& d
+      )
+      {
+        const typename F::values_container& f_vals = f.getRawValues();
+        const typename D::values_container& d_vals = d.getRawValues();
+
+//        if (F::node_type::D != 3 && F::node_type::D != 1)
+//          throw std::runtime_error("F's nodes have an unsupported dimensionality.");
+//        if (D::node_type::D != 3 && D::node_type::D != 1)
+//          throw std::runtime_error("D's nodes have an unsupported dimensionality.");
+//
+//        if (F::node_type::D == 3 && f_vals.size() % 3 != 0)
+//          throw std::runtime_error("F's nodes have a dimensionality of 3, but the number of values is not "
+//              "divisible by 3.");
+      }
+    };
+
     /**
      * \brief   Calculate a matrix, which post-multiplied by the forces vector will yield the
      *          displacements vector.
@@ -39,6 +71,10 @@ namespace helpers {
     )
     {
       arma::mat ret;
+      const typename F::values_container& f_vals = f.getRawValues();
+      const typename D::values_container& d_vals = d.getRawValues();
+      impl::sanity_checks_forces_to_displacements(f,d);
+
       // TODO fill the matrix
       return ret;
     }
