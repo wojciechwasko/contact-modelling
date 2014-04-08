@@ -8,6 +8,7 @@
 
 #include <boost/any.hpp>
 
+#include "MeshNode.hpp"
 #include "helpers/container_algorithms.hpp"
 
 /**
@@ -18,11 +19,10 @@
 #ifndef COMMA
 #define COMMA ,
 #endif
-/**
- * Injects common typedefs from MeshImpl_traits
- */
-#define INJECT_MESH_TRAITS_TYPEDEFS(name) 
 
+/**
+ * Injects chosen typedefs defined in MeshInterface
+ */
 #define INJECT_MESH_INTERFACE_TYPES(name) \
   using typename MeshInterface< name >::node_type; \
   using typename MeshInterface< name >::nodes_container; \
@@ -47,17 +47,19 @@ struct MeshImpl_traits;
  * appropriate, but it's merely a name. Plus, "*Base" strongly indicates a vertical, classical
  * inheritance, not a mixin-based polymorphism.
  */
-template <class Derived>
+template <class Derived, size_t dim>
 class MeshInterface {
   public:
-    typedef typename MeshImpl_traits<Derived>::node_type  node_type;
-    typedef std::vector<node_type>                        nodes_container;
-    typedef typename nodes_container::iterator            nodes_iterator;
-    typedef typename nodes_container::const_iterator      nodes_const_iterator;
-    typedef double                                        value_type;
-    typedef std::vector<value_type>                       values_container;
-    typedef boost::any                                    metadata_type;
-    typedef std::vector<boost::any>                       metadata_container;
+    constexpr static size_t D = dim;
+
+    typedef MeshNode                                   node_type;
+    typedef std::vector<node_type>                     nodes_container;
+    typedef typename nodes_container::iterator         nodes_iterator;
+    typedef typename nodes_container::const_iterator   nodes_const_iterator;
+    typedef double                                     value_type;
+    typedef std::vector<value_type>                    values_container;
+    typedef boost::any                                 metadata_type;
+    typedef std::vector<boost::any>                    metadata_container;
 
     /**
      * \brief   Get number of nodes in the mesh.
@@ -95,6 +97,16 @@ class MeshInterface {
      */
     const node_type& node(size_t i) const { return nodes_[i]; }
 
+    /** 
+     * \brief   Return the area a node is "responsible" for.
+     *
+     * For MeshNatural, this would be the area of Voronoi cell, for RegularSquare, dx*dy etc.
+     */
+    const double node_area(size_t i) const
+    {
+      return static_cast<const Derived *>(this)->impl_node_area(i);
+    }
+
     /**
      * \brief   Get a reference to the node at position i, non-const version.
      * \note    This is not bound-checked.
@@ -128,11 +140,11 @@ class MeshInterface {
      * In future, if needed, it might be implement something resembling Eigen's ::block()
      * functionality to allow the returned types to be used as lvalues.
      */
-    std::array<value_type, node_type::D> getValues(size_t i) const
+    std::array<value_type, D> getValues(size_t i) const
     {
-      std::array<value_type, node_type::D> ret;
-      for (size_t it = 0; it < node_type::D; ++it)
-        ret[it] = values_[i*node_type::D + it];
+      std::array<value_type, D> ret;
+      for (size_t it = 0; it < D; ++it)
+        ret[it] = values_[i*D + it];
       return ret;
     }
 
@@ -144,7 +156,7 @@ class MeshInterface {
      */
     value_type getValue(size_t i, size_t vi) const
     {
-      return values_[i*node_type::D + vi];
+      return values_[i*D + vi];
     }
 
     /**
@@ -156,7 +168,7 @@ class MeshInterface {
      */
     void setValue(size_t i, size_t vi, value_type v)
     {
-      values_[i*node_type::D + vi] = v;
+      values_[i*D + vi] = v;
     }
 
     /**
@@ -185,7 +197,7 @@ class MeshInterface {
       using helpers::container_algorithms::erase_by_indices;
       erase_by_indices(nodes_,      indices);
       erase_by_indices(metadata_,   indices);
-      erase_by_indices(values_,     indices, node_type::D);
+      erase_by_indices(values_,     indices, D);
     }
 
   protected:
@@ -202,7 +214,7 @@ class MeshInterface {
      *          will be called) new nodes.
      */
     MeshInterface(size_t no_nodes)
-      : values_(node_type::D * no_nodes),
+      : values_(D * no_nodes),
         nodes_(no_nodes),
         metadata_(no_nodes)
     {}

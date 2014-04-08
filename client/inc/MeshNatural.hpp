@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <cstddef>
+#include <stdexcept>
 #include <vector>
 #include <iterator>
 #include <algorithm>
@@ -10,38 +11,50 @@
 #include "skin_helpers.hpp"
 #include "MeshInterface.hpp"
 
+template <size_t dim>
+class MeshNatural;
+
+/**
+ * \brief type traits for Natural mesh.
+ */
+template <size_t dim>
+struct MeshImpl_traits<MeshNatural<dim> > {
+
+};
+
 /**
  * \brief   Mesh created from Skin's sensors.
+ * \tparam  dim   dimensionality of the values stored in the node.
+ * 
+ * \note  All the algorithms in this library consider that if D == 1, we consider forces in the "z"
+ *        direction.
  *
  * Each node corresponds to one sensor in the skin, with (x,y)
  * values copied over.
  */
-template <class TNode, class SkinConnector>
-class MeshNatural : public MeshInterface<MeshNatural<TNode, SkinConnector> >
+template <size_t dim>
+class MeshNatural : public MeshInterface<MeshNatural<dim>,dim>
 {
-  typedef typename SkinConnector::sensor_iterator sensor_iterator;
-  sensor_iterator sensors_begin_;
-  sensor_iterator   sensors_end_;
 
-  friend class MeshInterface<MeshNatural<TNode, SkinConnector> >;
-  typedef MeshInterface<MeshNatural<TNode, SkinConnector> > interface_type;
+  friend class MeshInterface<MeshNatural<dim>,dim>;
+  typedef MeshInterface<MeshNatural<dim>,dim> interface_type;
 
   public:
-    INJECT_MESH_TRAITS_TYPEDEFS(MeshNatural<TNode COMMA SkinConnector>)
+    INJECT_MESH_INTERFACE_TYPES(MeshNatural<dim> COMMA dim)
+
+    template <class SensorIterator>
     MeshNatural(
-      sensor_iterator sensors_begin,
-      sensor_iterator sensors_end
+      SensorIterator sensors_begin,
+      SensorIterator sensors_end
     ) :
-      interface_type(skin_helpers::distance(sensors_begin, sensors_end)),
-      sensors_begin_(sensors_begin),
-      sensors_end_(sensors_end)
+      interface_type(skin_helpers::distance(sensors_begin, sensors_end))
     {
       double min_x = std::numeric_limits<double>::max();
       double min_y = std::numeric_limits<double>::max();
       double max_x = std::numeric_limits<double>::min();
       double max_y = std::numeric_limits<double>::min();
       size_t n = 0;
-      for (sensor_iterator it = sensors_begin_; it != sensors_end_; ++it) {
+      for (SensorIterator it = sensors_begin; it != sensors_end; ++it) {
         const double x = (*it).relative_position[0];
         const double y = (*it).relative_position[1];
         this->node(n).x = x;
@@ -66,29 +79,17 @@ class MeshNatural : public MeshInterface<MeshNatural<TNode, SkinConnector> >
     double maxX() const { return max_x_; }
     double maxY() const { return max_y_; }
 
+  protected:
+    const double impl_node_area(size_t i) const
+    {
+      throw std::runtime_error("Node areas for Natural Mesh are not yet implemented. "
+        "Do it if you have the time! :D");
+    }
+
+
   private:
     double min_x_;    double min_y_;
     double max_x_;    double max_y_;
-};
-
-/**
- * \brief type traits for Natural mesh.
- *
- * \note Sorry for the weird TNode/node_type naming, but 14.6.1/7:
- * > A template-parameter shall not be redeclared within its scope
- * > (including nested scopes). A template-parameter shall not have
- * > the same name as the template name.
- */
-template <class TNode, class SkinConnector>
-struct MeshImpl_traits<MeshNatural<TNode, SkinConnector> > {
-  typedef TNode                                  node_type;
-  typedef node_type      &                       reference;
-  typedef node_type const&                 const_reference;
-  typedef typename std::vector<node_type>            container_type;
-  typedef container_type      &        container_reference;
-  typedef container_type const&  container_const_reference;
-  typedef typename container_type::iterator                iterator;
-  typedef typename container_type::const_iterator    const_iterator;
 };
 
 

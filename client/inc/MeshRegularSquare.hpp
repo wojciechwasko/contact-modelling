@@ -8,6 +8,17 @@
 #include "MeshNatural.hpp"
 #include "MeshInterface.hpp"
 
+template <size_t dim>
+class MeshRegularSquare;
+
+/**
+ * \brief type traits for Regular Square mesh.
+ */
+template <size_t dim>
+struct MeshImpl_traits<MeshRegularSquare<dim> > {
+
+};
+
 /**
  * \brief   Regular mesh with square base element.
  *
@@ -16,14 +27,14 @@
  * of having to populate some internal std::vector. After all,
  * (x,y) positions are very easy to calculate on-the-fly.
  */
-template <class TNode>
-class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
+template <size_t dim>
+class MeshRegularSquare : public MeshInterface<MeshRegularSquare<dim>,dim>
 {
-  friend class MeshInterface<MeshRegularSquare<TNode> >;
-  typedef MeshInterface<MeshRegularSquare<TNode> > interface_type;
+  friend class MeshInterface<MeshRegularSquare<dim>,dim>;
+  typedef MeshInterface<MeshRegularSquare<dim>,dim> interface_type;
   
   public:
-    INJECT_MESH_INTERFACE_TYPES(MeshRegularSquare<TNode>)
+    INJECT_MESH_INTERFACE_TYPES(MeshRegularSquare<dim> COMMA dim)
 
     /**
      * \brief   Constructor for a regular square mesh spanning a mesh of sensors -- from a "Natural
@@ -59,7 +70,7 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
      * extend the same distance "before" x0/y0 and "after" x1/y1.
      */
     MeshRegularSquare(double x0, double y0, double x1, double y1, double d)
-      : interface_type(calculate_no_nodes(x0, y0, x1, y1, d))
+      : interface_type(calculate_no_nodes(x0, y0, x1, y1, d)), d_(d)
     {
       const size_t nx       = calculate_no_nodes_1D(x0, x1, d);
       const double diff_x   = nx * d - (x1 - x0);
@@ -83,7 +94,18 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
       }
     }
 
+  protected:
+    const double impl_node_area(size_t i) const
+    {
+      return d_*d_;
+    }
+
   private:
+    /**
+     * \brief   "delta", distance between two neighbouring nodes in x or y direction (square base)
+     */
+    double d_;
+
     /**
      * \brief   How many nodes in total. The mesh is supposed to contain the x0,x1,y0,y1 points
      */
@@ -102,25 +124,4 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<TNode> >
       return std::ceil((t1-t0)/d);
     };
 };
-
-/**
- * \brief type traits for Regular Square mesh.
- *
- * \note Sorry for the weird naming, but 14.6.1/7:
- * > A template-parameter shall not be redeclared within its scope
- * > (including nested scopes). A template-parameter shall not have
- * > the same name as the template name.
- */
-template <class TNode>
-struct MeshImpl_traits<MeshRegularSquare<TNode> > {
-  typedef TNode                                  node_type;
-  typedef node_type      &                       reference;
-  typedef node_type const&                 const_reference;
-  typedef typename std::vector<node_type>            container_type;
-  typedef container_type      &        container_reference;
-  typedef container_type const&  container_const_reference;
-  typedef typename container_type::iterator                iterator;
-  typedef typename container_type::const_iterator    const_iterator;
-};
-
 #endif /* MESHREGULARSQUARE_HPP */
