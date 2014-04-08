@@ -8,7 +8,6 @@
 #include "main.hpp"
 #include "SkinConnector.hpp"
 #include "SensorValuesConverter.hpp"
-#include "Forces.hpp"
 #include "MeshNode.hpp"
 #include "MeshNatural.hpp"
 #include "MeshRegularSquare.hpp"

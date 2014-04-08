@@ -2,9 +2,7 @@
 #define MESHINTERFACE_HPP
 
 #include <array>
-#include <memory>
 #include <cstddef>
-#include <algorithm>
 
 #include <boost/any.hpp>
 
@@ -32,7 +30,6 @@
   using typename MeshInterface< name >::values_container; \
   using typename MeshInterface< name >::metadata_type; \
   using typename MeshInterface< name >::metadata_container;
-
 
 template <class derived_t>
 struct MeshImpl_traits;
@@ -198,6 +195,7 @@ class MeshInterface {
       erase_by_indices(nodes_,      indices);
       erase_by_indices(metadata_,   indices);
       erase_by_indices(values_,     indices, D);
+      static_cast<Derived*>(this)->hook_post_erase(indices);
     }
 
   protected:
@@ -218,6 +216,20 @@ class MeshInterface {
         nodes_(no_nodes),
         metadata_(no_nodes)
     {}
+
+    MeshInterface& operator=(const MeshInterface&) = default;
+    MeshInterface(const MeshInterface&)            = default;
+    MeshInterface& operator=(MeshInterface&&)      = default;
+    MeshInterface(MeshInterface&&)                 = default;
+    ~MeshInterface()                               = default;
+
+    /**
+     * \brief   Default, empty hook called after erasing nodes from the mesh.
+     * \param   indices   IDs of nodes which were erased
+     *
+     * If a child class will not override this method, this implementation will be called.
+     */
+    void hook_post_erase(const std::vector<size_t>& indices) { }
 
   private:
     /**
