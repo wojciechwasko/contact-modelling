@@ -123,6 +123,12 @@ class Delaunay
       }
     }
 
+    Delaunay& operator=(const Delaunay&) = default;
+    Delaunay(const Delaunay&)            = default;
+    Delaunay& operator=(Delaunay&&)      = default;
+    Delaunay(Delaunay&&)                 = default;
+    ~Delaunay()                          = default;
+
     size_t getNoTriangles() const { return triangles_.size(); }
 
     /// for meaning of fields, refer to PointInTriangleMetaIndex
@@ -159,7 +165,8 @@ class Delaunay
      * Complexity: Worst-case O(n) where n is the number of triangles. We'll traverse the triangles
      * one-by-one, with no shortcuts. There are sneaky ways to speed things up, but they rely on the
      * triangulation to be convex and such. I figured since this is not an online step, there's not
-     * much point in spending too much time optimising this method.
+     * much point in spending too much time optimising this method. Obviously, it'd be more than
+     * welcome, but there are priorities.
      */
     template <class MeshPoint>
     PointInTriangleMeta getTriangleInfoForPoint(const MeshPoint& p)
@@ -205,8 +212,6 @@ class Delaunay
 
       return ret;
     }
-  private:
-
 };
 
 #endif /* DELAUNAY_HPP */

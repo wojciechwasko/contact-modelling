@@ -12,11 +12,13 @@
 
 #include "skin_sensor.h"
 
-#include "skin_helpers.hpp"
+#include "helpers/skin.hpp"
 #include "traits_helpers.hpp"
 
 /**
  * \brief   Interface abstracting SkinWare.
+ *
+ * Here be dragons. To be cleaned up and covered by unit tests, up to the possible extent.
  */
 template <class SensorsSource>
 class SkinConnector {
@@ -125,7 +127,7 @@ class SkinConnector {
 
       s_begin_    = sensors_source_->sensors_iter_begin();
       s_end_      = sensors_source_->sensors_iter_end();
-      no_sensors_ = skin_helpers::distance(s_begin_, s_end_);
+      no_sensors_ = helpers::skin::distance(s_begin_, s_end_);
     }
     /**
      * First - fail (true/false), second - failure text.

@@ -61,8 +61,13 @@ class InterpolatorInterface {
   protected:
     InterpolatorInterface(const source_mesh_type* source_mesh, target_mesh_type* target_mesh)
       : source_mesh_(source_mesh), target_mesh_(target_mesh)
-    {
-    }
+    {}
+
+    InterpolatorInterface& operator=(const InterpolatorInterface&) = default;
+    InterpolatorInterface(const InterpolatorInterface&)            = default;
+    InterpolatorInterface& operator=(InterpolatorInterface&&)      = default;
+    InterpolatorInterface(InterpolatorInterface&&)                 = default;
+    ~InterpolatorInterface()                                       = default;
 
     /**
      * \brief   Internal use. Called by child classes after metadata has been gathered, to apply
@@ -116,6 +121,10 @@ class InterpolatorInterface {
      *
      * \note  This method does *NOT* modify the targetMesh in any way; if you want to save the returned
      *        value to the mesh, do it manually. 
+     *
+     * TODO possible optimisation path -- use std::enable_if based on the policy value to ensure
+     * compile-time branch elimination? My fair guess is that gcc is smart enough to do it with the
+     * "runtime" ifs (since policy_ is a constexpr), but who knows. It's just a guess.
      */
     double interpolateSingle(size_t n)
     {

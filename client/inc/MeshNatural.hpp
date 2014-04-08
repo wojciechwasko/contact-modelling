@@ -8,7 +8,7 @@
 #include <iterator>
 #include <algorithm>
 
-#include "skin_helpers.hpp"
+#include "helpers/skin.hpp"
 #include "MeshInterface.hpp"
 
 template <size_t dim>
@@ -47,7 +47,7 @@ class MeshNatural : public MeshInterface<MeshNatural<dim>,dim>
       SensorIterator sensors_begin,
       SensorIterator sensors_end
     ) :
-      interface_type(skin_helpers::distance(sensors_begin, sensors_end))
+      interface_type(helpers::skin::distance(sensors_begin, sensors_end))
     {
       double min_x = std::numeric_limits<double>::max();
       double min_y = std::numeric_limits<double>::max();
@@ -74,6 +74,12 @@ class MeshNatural : public MeshInterface<MeshNatural<dim>,dim>
       max_y_ = max_y;
     }
 
+    MeshNatural& operator=(const MeshNatural&) = default;
+    MeshNatural(const MeshNatural&)            = default;
+    MeshNatural& operator=(MeshNatural&&)      = default;
+    MeshNatural(MeshNatural&&)                 = default;
+    ~MeshNatural()                             = default;
+
     double minX() const { return min_x_; }
     double minY() const { return min_y_; }
     double maxX() const { return max_x_; }
@@ -84,6 +90,29 @@ class MeshNatural : public MeshInterface<MeshNatural<dim>,dim>
     {
       throw std::runtime_error("Node areas for Natural Mesh are not yet implemented. "
         "Do it if you have the time! :D");
+    }
+
+    void hook_post_erase(const std::vector<size_t>& indices)
+    {
+      if (0 == indices.size())
+        return;
+      // else, regenerate the min/max_x/y_ values
+      double min_x = std::numeric_limits<double>::max();
+      double min_y = std::numeric_limits<double>::max();
+      double max_x = std::numeric_limits<double>::min();
+      double max_y = std::numeric_limits<double>::min();
+
+      std::for_each(this->nodes_cbegin(), this->nodes_cend(), [&](const node_type& n) {
+        if (n.x < min_x) min_x = n.x;
+        if (n.x > max_x) max_x = n.x;
+        if (n.y < min_y) min_y = n.y;
+        if (n.y > max_y) max_y = n.y;
+      });
+      // save min/max to member variables
+      min_x_ = min_x;
+      min_y_ = min_y;
+      max_x_ = max_x;
+      max_y_ = max_y;
     }
 
 

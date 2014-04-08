@@ -63,7 +63,13 @@ class AlgInterface {
 
     typedef output_type&       output_ref;
   protected:
-    AlgInterface() {};
+    AlgInterface()                               = delete;
+    AlgInterface& operator=(const AlgInterface&) = delete;
+    AlgInterface(const AlgInterface&)            = delete;
+    AlgInterface& operator=(AlgInterface&&)      = delete;
+    AlgInterface(AlgInterface&&)                 = delete;
+    ~AlgInterface()                              = delete;
+
     /**
      * \brief   To be overriden by implementation (Derived class).
      */

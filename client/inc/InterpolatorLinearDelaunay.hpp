@@ -11,6 +11,16 @@
 #include "InterpolatorInterface.hpp"
 #include "Delaunay.hpp"
 
+template <class sourceMeshType, class targetMeshType, NIPP::NIPP policy>
+class InterpolatorLinearDelaunay;
+
+template <class sourceMeshType, class targetMeshType, NIPP::NIPP policy_val>
+struct InterpolatorImpl_traits<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, policy_val> > {
+  typedef sourceMeshType source_mesh_type;
+  typedef targetMeshType target_mesh_type;
+  constexpr static NIPP::NIPP policy = policy_val;
+};
+
 /**
  * \brief   Implementation of a linear Delaunay triangulation-based interpolation
  * \tparam  sourceMeshType  type of the "input", "real" mesh. Almost always MeshNatural. But still...
@@ -37,16 +47,10 @@ template <
 class InterpolatorLinearDelaunay
   : public InterpolatorInterface<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, policy>>
 {
-
-  // FRIEND DECLARATIONS
-  friend class InterpolatorInterface<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, policy>>;
-  // FRIEND DECLARATIONS -- end
+friend class InterpolatorInterface<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, policy>>;
   
-    // PRIVATE TYPEDEFS
     typedef InterpolatorInterface<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, policy>> interface_type;
     typedef Delaunay<sourceMeshType> DelaunayImpl;
-
-    // PRIVATE MEMBERS DECLARATIONS
 
   public:
     INJECT_INTERPOLATOR_TRAITS_TYPEDEFS(InterpolatorLinearDelaunay<sourceMeshType COMMA targetMeshType COMMA policy>)
@@ -70,6 +74,12 @@ class InterpolatorLinearDelaunay
       this->applyNIPP(nonInterpolableNodes);
     }
 
+    InterpolatorLinearDelaunay& operator=(const InterpolatorLinearDelaunay&) = default;
+    InterpolatorLinearDelaunay(const InterpolatorLinearDelaunay&)            = default;
+    InterpolatorLinearDelaunay& operator=(InterpolatorLinearDelaunay&&)      = default;
+    InterpolatorLinearDelaunay(InterpolatorLinearDelaunay&&)                 = default;
+    ~InterpolatorLinearDelaunay()                                            = default;
+
   protected:
     /**
      * \brief Actual implementation of online phase of Linear Delaunay interpolation
@@ -77,13 +87,13 @@ class InterpolatorLinearDelaunay
     double impl_interpolate(size_t n)
     {
       // this line might throw a boost::bad_any_cast in case of failure
-      // TODO recover from failure and do something meaningful
+      // TODO recover from failure and do something meaningful?
       const typename DelaunayImpl::PointInTriangleMeta& meta =
           boost::any_cast<const typename DelaunayImpl::PointInTriangleMeta&>(this->getTargetMesh()->getMetadata(n));
 
       if (std::get<DelaunayImpl::FAIL>(meta)) {
-        throw std::runtime_error("This is not supposed to happen! Interpolator implementation cannot be asked"
-          " to interpolate a non-interpolable point. Contact the authors.");
+        throw std::runtime_error("This is not supposed to happen! Interpolator implementation "
+          "cannot be asked to interpolate a non-interpolable point. Contact the authors.");
       }
 
       const size_t n0  = std::get<DelaunayImpl::N0>(meta);
@@ -100,14 +110,5 @@ class InterpolatorLinearDelaunay
       const double ret = ksi0 * val0 + ksi1 * val1 + ksi2 * val2;
       return ret;
     }
-
-  private:
-};
-
-template <class sourceMeshType, class targetMeshType, NIPP::NIPP policy_val>
-struct InterpolatorImpl_traits<InterpolatorLinearDelaunay<sourceMeshType, targetMeshType, policy_val> > {
-  typedef sourceMeshType source_mesh_type;
-  typedef targetMeshType target_mesh_type;
-  constexpr static NIPP::NIPP policy = policy_val;
 };
 #endif /* INTERPOLATORLINEARDELAUNAY_HPP */

@@ -39,8 +39,8 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<dim>,dim>
     /**
      * \brief   Constructor for a regular square mesh spanning a mesh of sensors -- from a "Natural
      *          Mesh" instance.
-     * \param   natural_mesh
-     * \param   d               delta, distance in x/y direction between two neighbouring nodes
+     * \param   base_mesh Any mesh supporting .min/maxX/Y(), but that's only natural meshes so far
+     * \param   d         Delta, distance in x/y direction between two neighbouring nodes
      *
      * This is merely a delegating constructor.
      */
@@ -93,6 +93,12 @@ class MeshRegularSquare : public MeshInterface<MeshRegularSquare<dim>,dim>
         x += d;
       }
     }
+    
+    MeshRegularSquare& operator=(const MeshRegularSquare&) = default;
+    MeshRegularSquare(const MeshRegularSquare&)            = default;
+    MeshRegularSquare& operator=(MeshRegularSquare&&)      = default;
+    MeshRegularSquare(MeshRegularSquare&&)                 = default;
+    ~MeshRegularSquare()                                   = default;
 
   protected:
     const double impl_node_area(size_t i) const
