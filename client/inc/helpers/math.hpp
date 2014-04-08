@@ -9,7 +9,7 @@ namespace helpers {
      * \brief   Returns |v1-v2| < eps
      */
     bool eq_almost(double v1, double v2, double eps) {
-      return std::abs(v1-v2) < eps;
+      return std::abs(v1-v2) < std::abs(eps);
     }
   }
 }

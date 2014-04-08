@@ -19,10 +19,15 @@ ADD_EXECUTABLE(test_elastic_model test_elastic_model.cpp)
 TARGET_LINK_LIBRARIES(test_elastic_model ${Boost_LIBRARIES})
 ADD_TEST(test_elastic_model test_elastic_model)
 
+ADD_EXECUTABLE(test_eq_almost test_eq_almost.cpp)
+TARGET_LINK_LIBRARIES(test_eq_almost ${Boost_LIBRARIES})
+ADD_TEST(test_eq_almost test_eq_almost)
+
 
 ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPENDS
   test_geometry
   test_erase_by_indices
   test_alg_interface
   test_elastic_model
+  test_eq_almost
 )

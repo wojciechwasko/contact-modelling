@@ -58,7 +58,7 @@ int main(int argc, char** argv)
   natural_mesh_type natural_mesh_2(skin_conn->sensors_begin(), skin_conn->sensors_end());
   std::cout << "Natural mesh: no_nodes == " << natural_mesh_2.no_nodes() << std::endl;
   
-  interpolated_mesh_type interpolated_mesh(natural_mesh_2, 0.006);
+  interpolated_mesh_type interpolated_mesh(natural_mesh_2, 0.0005);
   std::cout << "Interpolated mesh: no_nodes == " << interpolated_mesh.no_nodes() << std::endl;
 
   interpolator_type interpolator(&natural_mesh_2, &interpolated_mesh);
@@ -79,17 +79,17 @@ int main(int argc, char** argv)
   params_disps_to_forces.skin_props.elasticModulus = 300000;
   params_disps_to_forces.skin_props.skinThickness  = 0.002;
 
-  boost::any cache_disps_to_forces = alg_interpolated_disps_to_forces_type::offline( 
-    interpolated_mesh,
-    forces,
-    params_disps_to_forces
-  );
+  // boost::any cache_disps_to_forces = alg_interpolated_disps_to_forces_type::offline( 
+  //   interpolated_mesh,
+  //   forces,
+  //   params_disps_to_forces
+  // );
 
-  boost::any cache_forces_to_disps = alg_forces_to_disps::offline( 
-    forces,
-    resulting_disps,
-    params_forces_to_disps
-  );
+  // boost::any cache_forces_to_disps = alg_forces_to_disps::offline( 
+  //   forces,
+  //   resulting_disps,
+  //   params_forces_to_disps
+  // );
 
   std::cout << "Requesting new data.\n";
   skin_conn->update(natural_mesh_1.getRawValues());
