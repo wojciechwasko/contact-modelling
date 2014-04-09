@@ -20,6 +20,7 @@ FIND_PACKAGE(Armadillo 2.4.2 REQUIRED)
 
 include_directories(${ContactModelling_SOURCE_DIR}/client/inc)
 include_directories(${ContactModelling_SOURCE_DIR}/triangle/inc)
+include_directories(${ContactModelling_SOURCE_DIR}/yaml-cpp/include)
 include_directories(${ContactModelling_SOURCE_DIR}/gnuplot-iostream/inc)
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(${Armadillo_INCLUDE_DIR})
@@ -39,6 +40,7 @@ add_executable(client
 
 target_link_libraries(client
   triangle
+  yaml-cpp
   ${Boost_LIBRARIES}
   ${ARMADILLO_LIBRARIES}
 )

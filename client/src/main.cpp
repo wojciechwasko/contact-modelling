@@ -4,6 +4,7 @@
 
 #include <boost/any.hpp>
 
+#include "yaml-cpp/yaml.h"
 
 #include "main.hpp"
 #include "SkinConnector.hpp"
@@ -32,6 +33,8 @@ typedef MeshRegularSquare<3>
 
 typedef AlgDisplacementsToForces<interpolated_mesh_type, forces_type> alg_interpolated_disps_to_forces_type;
 typedef AlgForcesToDisplacements<forces_type, resulting_disps_type> alg_forces_to_disps;
+
+void test_YAML();
 
 int main(int argc, char** argv)
 {
@@ -100,6 +103,19 @@ int main(int argc, char** argv)
   plotMesh(natural_mesh_2, "natural");
   plotMesh(interpolated_mesh, "interpolated", true);
 
+  std::cout << "Testing YAML:\n";
+  test_YAML();
+
   std::cout << "Finishing!\n";
   return 0;
+}
+
+void test_YAML()
+{
+  YAML::Node node = YAML::Load("{name: Brewers, city: Milwaukee}");
+  if(node["name"])
+     std::cout << node["name"].as<std::string>() << "\n";
+  if(node["mascot"])
+     std::cout << node["mascot"].as<std::string>() << "\n";
+  assert(node.size() == 2); // the previous call didn't create a node
 }

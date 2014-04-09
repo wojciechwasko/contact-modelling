@@ -7,6 +7,7 @@ endif("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 
 ENABLE_TESTING()
 add_subdirectory (triangle)
+add_subdirectory (yaml-cpp)
 add_subdirectory (data)
 add_subdirectory (client) 
 add_subdirectory (driver)
