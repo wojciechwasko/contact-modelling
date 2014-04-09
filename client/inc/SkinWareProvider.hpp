@@ -1,5 +1,5 @@
-#ifndef SKINCONNECTOR_HPP
-#define SKINCONNECTOR_HPP
+#ifndef SKINWAREPROVIDER_HPP
+#define SKINWAREPROVIDER_HPP
 
 #include <cstdint>
 #include <cstddef>
@@ -10,10 +10,21 @@
 #include <vector>
 #include <algorithm>
 
+#include "SkinProviderInterface.hpp"
+
 #include "skin_sensor.h"
 
 #include "helpers/skin.hpp"
 #include "traits_helpers.hpp"
+
+template <class SensorsSource>
+class SkinWareProvider;
+
+template <class SensorsSource>
+struct SkinProvider_traits<SkinWareProvider<SensorsSource>>
+{
+  typedef typename SensorsSource::skin_sensor_iterator sensor_iterator;
+};
 
 /**
  * \brief   Interface abstracting SkinWare.
@@ -21,9 +32,11 @@
  * Here be dragons. To be cleaned up and covered by unit tests, up to the possible extent.
  */
 template <class SensorsSource>
-class SkinConnector {
+class SkinWareProvider : public SkinProviderInterface<SkinWareProvider<SensorsSource>>
+{
+friend class SkinProviderInterface<SkinWareProvider<SensorsSource>>;
   public:
-    typedef typename SensorsSource::skin_sensor_iterator sensor_iterator;
+    typedef typename SkinProvider_traits<SkinWareProvider<SensorsSource>>::sensor_iterator sensor_iterator;
 
   private:
     typedef double (*converter_type)(uint16_t);
@@ -51,7 +64,7 @@ class SkinConnector {
      * (what a PITA).
      */
     template <class SS=SensorsSource, traits_helpers::EnableIf<std::is_same<SS, skin_object>>...>
-    SkinConnector(converter_type conv)
+    SkinWareProvider(converter_type conv)
       :
         conv_(conv),
         sensor_layer_(SKIN_ALL_SENSOR_TYPES),
@@ -73,7 +86,7 @@ class SkinConnector {
      * (what a PITA).
      */
     template <class SS=SensorsSource, traits_helpers::DisableIf<std::is_same<SS, skin_object>>...>
-    SkinConnector(SensorsSource& sensors_source, converter_type conv)
+    SkinWareProvider(SensorsSource& sensors_source, converter_type conv)
       :
         conv_(conv),
         sensor_layer_(SKIN_ALL_SENSOR_TYPES),
@@ -84,10 +97,24 @@ class SkinConnector {
       init();
     }
 
-    sensor_iterator sensors_begin() { return s_begin_; }
-    sensor_iterator sensors_end()   { return s_end_;   } 
+  protected:
 
-    void update(std::vector<double>& target_vec)
+    sensor_iterator impl_sensors_begin() { return s_begin_; }
+    sensor_iterator impl_sensors_end()   { return s_end_;   } 
+
+    //! TODO  try to find some compile-time check. (using static_assert will generate an error at
+    //        compilation regardless of whether the method is actually used or not).
+    sensor_iterator impl_sensors_cbegin() { 
+      throw std::runtime_error("Unfortunately SkinWare does not expose const_iterators. Sorry.");
+    }
+
+    //! TODO  try to find some compile-time check. (using static_assert will generate an error at
+    //        compilation regardless of whether the method is actually used or not).
+    sensor_iterator impl_sensors_cend()   { 
+      throw std::runtime_error("Unfortunately SkinWare does not expose const_iterators. Sorry.");
+    } 
+
+    void impl_update(std::vector<double>& target_vec)
     {
       const int req_res = s_reader_->request(sensor_layer_);
       switch (req_res) {
@@ -106,10 +133,10 @@ class SkinConnector {
       });
     }
 
-    std::vector<double> update()
+    std::vector<double> impl_update()
     {
       std::vector<double> ret(no_sensors_);
-      update(ret);
+      this->update(ret);
       return ret;
     }
 
@@ -119,11 +146,11 @@ class SkinConnector {
     {
       fail_error ret_load = loadSkin();
       if (ret_load.first)
-        throw std::runtime_error("SkinConnector construction failed : " + ret_load.second);
+        throw std::runtime_error("SkinWareProvider construction failed : " + ret_load.second);
 
       fail_error ret_read = startReader();
       if (ret_read.first)
-        throw std::runtime_error("SkinConnector construction failed : " + ret_load.second);
+        throw std::runtime_error("SkinWareProvider construction failed : " + ret_load.second);
 
       s_begin_    = sensors_source_->sensors_iter_begin();
       s_end_      = sensors_source_->sensors_iter_end();
@@ -165,4 +192,4 @@ class SkinConnector {
     }
 };
 
-#endif /* SKINCONNECTOR_HPP */
+#endif /* SKINWAREPROVIDER_HPP */
