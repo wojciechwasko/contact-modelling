@@ -1,6 +1,8 @@
 #ifndef SKINPROVIDERINTERFACE_HPP
 #define SKINPROVIDERINTERFACE_HPP
 
+#include <functional>
+
 /**
  * \def COMMA
  * A nifty hack to enable processing of multiple templated classes in macros.
@@ -28,16 +30,6 @@ class SkinProviderInterface {
       return static_cast<Derived*>(this)->impl_sensors_end(); 
     }
 
-    const sensor_iterator sensors_cbegin() const
-    {
-      return static_cast<Derived*>(this)->impl_sensors_cbegin(); 
-    }
-
-    const sensor_iterator sensors_cend() const 
-    {
-      return static_cast<Derived*>(this)->impl_sensors_cend(); 
-    }
-
     std::vector<double> update()
     {
       return static_cast<Derived*>(this)->impl_update();
@@ -49,7 +41,16 @@ class SkinProviderInterface {
     }
 
   protected:
-    SkinProviderInterface()                                         = default;
+    typedef typename SkinProvider_traits<Derived>::convT convT;
+    typedef typename SkinProvider_traits<Derived>::rawT  rawT;
+
+    typedef std::function<convT(rawT)> converter_type;
+    converter_type converter_;
+
+    SkinProviderInterface(converter_type conv)
+      : converter_(conv)
+    {}
+
     SkinProviderInterface& operator=(const SkinProviderInterface&)  = default;
     SkinProviderInterface(const SkinProviderInterface&)             = default;
     SkinProviderInterface& operator=(SkinProviderInterface&&)       = default;
