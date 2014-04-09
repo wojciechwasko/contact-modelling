@@ -23,6 +23,10 @@ ADD_EXECUTABLE(test_eq_almost test_eq_almost.cpp)
 TARGET_LINK_LIBRARIES(test_eq_almost ${Boost_LIBRARIES})
 ADD_TEST(test_eq_almost test_eq_almost)
 
+ADD_EXECUTABLE(test_skin_yaml_provider test_skin_yaml_provider.cpp)
+TARGET_LINK_LIBRARIES(test_skin_yaml_provider ${Boost_LIBRARIES} yaml-cpp)
+ADD_TEST(test_skin_yaml_provider test_skin_yaml_provider)
+
 
 ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPENDS
   test_geometry
@@ -30,4 +34,5 @@ ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPEN
   test_alg_interface
   test_elastic_model
   test_eq_almost
+  test_skin_yaml_provider
 )

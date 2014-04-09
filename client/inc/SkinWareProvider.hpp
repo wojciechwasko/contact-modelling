@@ -17,35 +17,43 @@
 #include "helpers/skin.hpp"
 #include "traits_helpers.hpp"
 
-template <class SensorsSource>
+template <class source, class raw, class conv>
 class SkinWareProvider;
 
-template <class SensorsSource>
-struct SkinProvider_traits<SkinWareProvider<SensorsSource>>
+template <class source, class raw, class conv>
+struct SkinProvider_traits<SkinWareProvider<source, raw, conv>>
 {
-  typedef typename SensorsSource::skin_sensor_iterator sensor_iterator;
+  typedef typename source::skin_sensor_iterator sensor_iterator;
+  typedef raw rawT;
+  typedef conv convT;
 };
 
 /**
  * \brief   Interface abstracting SkinWare.
+ * \tparam  source  where are the sensors coming from? Unfortunately SkinWare's skin/layer/module
+ *                  sensor iterators are not inter-operable.
+ * \tparam  raw     typw in which the raw readings are given, uint16_t by default
+ * \tparam  conv    to which type to convert? double by default
  *
  * Here be dragons. To be cleaned up and covered by unit tests, up to the possible extent.
  */
-template <class SensorsSource>
-class SkinWareProvider : public SkinProviderInterface<SkinWareProvider<SensorsSource>>
+template <class source, class raw = uint16_t, class conv = double>
+class SkinWareProvider : public SkinProviderInterface<SkinWareProvider<source, raw, conv>>
 {
-friend class SkinProviderInterface<SkinWareProvider<SensorsSource>>;
+friend class SkinProviderInterface<SkinWareProvider<source, raw, conv>>;
   public:
-    typedef typename SkinProvider_traits<SkinWareProvider<SensorsSource>>::sensor_iterator sensor_iterator;
+
+    using typename SkinProviderInterface<SkinWareProvider<source, raw, conv>>::sensor_iterator;
+    using typename SkinProviderInterface<SkinWareProvider<source, raw, conv>>::convT;
+    using typename SkinProviderInterface<SkinWareProvider<source, raw, conv>>::rawT;
+    using typename SkinProviderInterface<SkinWareProvider<source, raw, conv>>::converter_type;
 
   private:
-    typedef double (*converter_type)(uint16_t);
 
-    converter_type conv_;
     const skin_sensor_type_id sensor_layer_;
     skin_object     s_object_;
     skin_reader*    s_reader_;
-    SensorsSource*  sensors_source_;
+    source*  sensors_source_;
     // it's not const since we have to do it after the skin initialisation and without extra magic
     // it'd be too hard/tricky to make it const
     std::size_t     no_sensors_; 
@@ -63,10 +71,10 @@ friend class SkinProviderInterface<SkinWareProvider<SensorsSource>>;
      * Though we'd probably have to make this class templated and expose the correct iterator type
      * (what a PITA).
      */
-    template <class SS=SensorsSource, traits_helpers::EnableIf<std::is_same<SS, skin_object>>...>
-    SkinWareProvider(converter_type conv)
+    template <class SS=source, traits_helpers::EnableIf<std::is_same<SS, skin_object>>...>
+    SkinWareProvider(converter_type converter)
       :
-        conv_(conv),
+        SkinProviderInterface<SkinWareProvider<source,raw,conv>>(converter),
         sensor_layer_(SKIN_ALL_SENSOR_TYPES),
         s_object_(),
         s_reader_(s_object_.reader()),
@@ -76,7 +84,7 @@ friend class SkinProviderInterface<SkinWareProvider<SensorsSource>>;
     }
 
     /**
-     * \brief Takes a part of the skin (SensorsSource) as the source of sensors.
+     * \brief Takes a part of the skin (source) as the source of sensors.
      * \param conv  Fuction pointer; function shall take a uint16_t and return a double in [m].
      *
      * I know function pointers are ugly. But they work for now.
@@ -85,10 +93,10 @@ friend class SkinProviderInterface<SkinWareProvider<SensorsSource>>;
      * Though we'd probably have to make this class templated and expose the correct iterator type
      * (what a PITA).
      */
-    template <class SS=SensorsSource, traits_helpers::DisableIf<std::is_same<SS, skin_object>>...>
-    SkinWareProvider(SensorsSource& sensors_source, converter_type conv)
+    template <class SS=source, traits_helpers::DisableIf<std::is_same<SS, skin_object>>...>
+    SkinWareProvider(converter_type converter, source& sensors_source)
       :
-        conv_(conv),
+        SkinProviderInterface<SkinWareProvider<source,raw,conv>>(converter),
         sensor_layer_(SKIN_ALL_SENSOR_TYPES),
         s_object_(),
         s_reader_(s_object_.reader()),
@@ -102,19 +110,7 @@ friend class SkinProviderInterface<SkinWareProvider<SensorsSource>>;
     sensor_iterator impl_sensors_begin() { return s_begin_; }
     sensor_iterator impl_sensors_end()   { return s_end_;   } 
 
-    //! TODO  try to find some compile-time check. (using static_assert will generate an error at
-    //        compilation regardless of whether the method is actually used or not).
-    sensor_iterator impl_sensors_cbegin() { 
-      throw std::runtime_error("Unfortunately SkinWare does not expose const_iterators. Sorry.");
-    }
-
-    //! TODO  try to find some compile-time check. (using static_assert will generate an error at
-    //        compilation regardless of whether the method is actually used or not).
-    sensor_iterator impl_sensors_cend()   { 
-      throw std::runtime_error("Unfortunately SkinWare does not expose const_iterators. Sorry.");
-    } 
-
-    void impl_update(std::vector<double>& target_vec)
+    void impl_update(std::vector<convT>& target_vec)
     {
       const int req_res = s_reader_->request(sensor_layer_);
       switch (req_res) {
@@ -128,14 +124,14 @@ friend class SkinProviderInterface<SkinWareProvider<SensorsSource>>;
 
       std::size_t i = 0;
       std::for_each(s_begin_, s_end_, [&](skin_sensor & s) {
-        target_vec[i] = this->conv_(s.get_response());
+        target_vec[i] = this->converter_(s.get_response());
         ++i;
       });
     }
 
-    std::vector<double> impl_update()
+    std::vector<convT> impl_update()
     {
-      std::vector<double> ret(no_sensors_);
+      std::vector<convT> ret(no_sensors_);
       this->update(ret);
       return ret;
     }
