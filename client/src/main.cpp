@@ -7,7 +7,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include "main.hpp"
-#include "SkinConnector.hpp"
+#include "SkinWareProvider.hpp"
 #include "SensorValuesConverter.hpp"
 #include "MeshNode.hpp"
 #include "MeshNatural.hpp"
@@ -18,7 +18,7 @@
 
 #include "helpers/plot.hpp"
 
-typedef SkinConnector<skin_object>
+typedef SkinWareProvider<skin_object>
   skin_connector_type;
 typedef MeshNatural<1>
   natural_mesh_type;
