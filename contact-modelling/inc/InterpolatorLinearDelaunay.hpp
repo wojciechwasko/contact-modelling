@@ -30,29 +30,28 @@
  */
 class InterpolatorLinearDelaunay : public InterpolatorInterface
 {
-  public:
-    InterpolatorLinearDelaunay(NIPP::NIPP policy);
+public:
+  InterpolatorLinearDelaunay(NIPP::NIPP policy);
 
-    InterpolatorLinearDelaunay& operator=(const InterpolatorLinearDelaunay&) = default;
-    InterpolatorLinearDelaunay(const InterpolatorLinearDelaunay&)            = default;
-    InterpolatorLinearDelaunay& operator=(InterpolatorLinearDelaunay&&)      = default;
-    InterpolatorLinearDelaunay(InterpolatorLinearDelaunay&&)                 = default;
-    ~InterpolatorLinearDelaunay()                                            = default;
+  InterpolatorLinearDelaunay& operator=(const InterpolatorLinearDelaunay&) = default;
+  InterpolatorLinearDelaunay(const InterpolatorLinearDelaunay&)            = default;
+  InterpolatorLinearDelaunay& operator=(InterpolatorLinearDelaunay&&)      = default;
+  InterpolatorLinearDelaunay(InterpolatorLinearDelaunay&&)                 = default;
+  ~InterpolatorLinearDelaunay()                                            = default;
 
-  private:
-    /**
-     * \brief Actual implementation of offline phase of Linear Delaunay interpolation
-     */
-    std::vector<size_t> impl_offline(const MeshInterface& from, MeshInterface& to);
+private:
+  /**
+   * \brief Actual implementation of offline phase of Linear Delaunay interpolation
+   */
+  std::vector<size_t> impl_offline(const MeshInterface& from, MeshInterface& to);
 
-    /**
-     * \brief Actual implementation of online phase of Linear Delaunay interpolation
-     */
-    void impl_interpolate(
-      const MeshInterface& from,
-      MeshInterface& to,
-      const size_t n
-    );
-
+  /**
+   * \brief Actual implementation of online phase of Linear Delaunay interpolation
+   */
+  void impl_interpolate(
+    const MeshInterface& from,
+    MeshInterface& to,
+    const size_t n
+  );
 };
 #endif /* INTERPOLATORLINEARDELAUNAY_HPP */

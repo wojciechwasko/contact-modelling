@@ -7,8 +7,8 @@ AlgInterface::offline(
   const boost::any& params
 )
 {
-    // automatic wrapping in boost::any
-    return impl_offline(input, output, params);
+  // automatic wrapping in boost::any
+  return impl_offline(input, output, params);
 }
 
 void

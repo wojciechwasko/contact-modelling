@@ -1,6 +1,11 @@
 #include "MeshRegularSquare.hpp"
 
+#include <stdexcept>
 #include <cmath>
+
+#include "helpers/string.hpp"
+
+using helpers::string::sb;
 
 MeshRegularSquare::MeshRegularSquare(const MeshInterface& base_mesh, const double d)
   : MeshRegularSquare(
@@ -56,15 +61,36 @@ MeshRegularSquare::impl_node_area(size_t i) const
 size_t 
 MeshRegularSquare::calculate_no_nodes(double x0, double y0, double x1, double y1, double d)
 {
-  if (!(x1 > x0)) throw std::runtime_error("Error constructing regular square mesh, !(x1 > x0)");
-  if (!(y1 > y0)) throw std::runtime_error("Error constructing regular square mesh, !(y1 > y0)");
+  if (!(x1 > x0)) {
+    throw std::runtime_error(
+      sb()  << "Error constructing regular square mesh, !(x1 > x0); "
+            << "x1 == " << x1 << "x0 == " << x0
+    );
+  }
+  if (!(y1 > y0)) {
+    throw std::runtime_error(
+      sb()  << "Error constructing regular square mesh, !(y1 > y0); "
+            << "y1 == " << y1 << "y0 == " << y0
+    );
+  }
+
   return calculate_no_nodes_1D(x0, x1, d) * calculate_no_nodes_1D(y0, y1, d);
 }
 
 size_t 
 MeshRegularSquare::calculate_no_nodes_1D(double t0, double t1, double d)
 {
-  if (!(t1 > t0)) throw std::runtime_error("Error constructing regular square mesh, !(t1 > t0)");
-  if (!(d > 0)) throw std::runtime_error("Error constructing regular square mesh, !(d > 0)");
+  if (!(t1 > t0)) {
+    throw std::runtime_error(
+      sb()  << "Error constructing regular square mesh, !(t1 > t0); "
+            << "t1 == " << t1 << "t0 == " << t0
+    );
+  }
+  if (!(d > 0)) {
+    throw std::runtime_error(
+      sb()  << "Error constructing regular square mesh, !(d > 0); "
+            << "d == " << d
+    );
+  }
   return std::ceil((t1-t0)/d);
 }

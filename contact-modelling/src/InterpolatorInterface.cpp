@@ -4,6 +4,9 @@
 #include <algorithm>
 
 #include "MeshInterface.hpp"
+#include "helpers/string.hpp"
+
+using helpers::string::sb;
 
 InterpolatorInterface::InterpolatorInterface(
   NIPP::NIPP policy
@@ -15,6 +18,13 @@ InterpolatorInterface::InterpolatorInterface(
 void
 InterpolatorInterface::offline(const MeshInterface& from, MeshInterface& to)
 {
+  if (from.D !=  to.D) {
+    throw std::runtime_error(
+      sb()  << "Incompatible dimensionality of from and to mesh: "
+            << from.D << " vs. " << to.D
+    );
+  }
+
   std::vector<size_t> bad_points = impl_offline(from, to);
   applyNippOffline(to, bad_points);
   to.setBadNodes(bad_points);
@@ -37,7 +47,10 @@ InterpolatorInterface::applyNippOffline(
   } else if (bad_node_policy == NIPP::InterpolateToZero) {
     // do nothing, essentially. This will be applied online 
   } else {
-    throw std::runtime_error("Unrecognized Non-interpolable Point Policy.");
+    throw std::runtime_error(
+      sb()  << "Unrecognized Non-interpolable Point Policy: "
+            << bad_node_policy
+    );
   }
 }
 
@@ -47,6 +60,13 @@ InterpolatorInterface::interpolate(
         MeshInterface& to
 )
 {
+  if (from.D !=  to.D) {
+    throw std::runtime_error(
+      sb()  << "Incompatible dimensionality of from and to mesh: "
+            << from.D << " vs. " << to.D
+    );
+  }
+
   const std::vector<size_t>& bad_nodes = to.getBadNodes();
   for (size_t n = 0; n < to.no_nodes(); ++n) {
     if (applyNippOnline(to, bad_nodes, n))

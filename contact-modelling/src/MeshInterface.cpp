@@ -82,7 +82,7 @@ std::vector<MeshInterface::value_type>
 MeshInterface::getValues(size_t i) const
 {
   std::vector<value_type> ret;
-  ret.reserve(D);
+  ret.resize(D);
   for (size_t it = 0; it < D; ++it)
     ret[it] = values_[i*D + it];
   return ret;
