@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <memory>
+#include <stdexcept>
 
 #include "MeshInterface.hpp"
 #include "MeshNatural.hpp"
@@ -120,3 +121,35 @@ BOOST_AUTO_TEST_CASE(simple_test_1D_outside_NIPP_remove)
     0
   );
 };
+
+BOOST_AUTO_TEST_CASE(throw_1D_to_3D)
+{
+  std::unique_ptr<MeshInterface> m_source(createMockSourceMesh(1));  
+  std::unique_ptr<MeshInterface> m_target(createMockTargetMeshInside(3));  
+  InterpolatorLinearDelaunay interpolator(NIPP::RemoveFromMesh);
+  BOOST_CHECK_THROW(
+    interpolator.offline(*m_source, *m_target),
+    std::runtime_error
+  );
+
+  BOOST_CHECK_THROW(
+    interpolator.interpolate(*m_source, *m_target),
+    std::runtime_error
+  );
+}
+
+BOOST_AUTO_TEST_CASE(throw_3D_to_1D)
+{
+  std::unique_ptr<MeshInterface> m_source(createMockSourceMesh(3));  
+  std::unique_ptr<MeshInterface> m_target(createMockTargetMeshInside(1));  
+  InterpolatorLinearDelaunay interpolator(NIPP::RemoveFromMesh);
+  BOOST_CHECK_THROW(
+    interpolator.offline(*m_source, *m_target),
+    std::runtime_error
+  );
+
+  BOOST_CHECK_THROW(
+    interpolator.interpolate(*m_source, *m_target),
+    std::runtime_error
+  );
+}
