@@ -52,6 +52,9 @@ BOOST_AUTO_TEST_CASE(read_yaml_file)
   meshnode_2["value"] = 321;
   rootnode["nodes"].push_back(meshnode_1);
   rootnode["nodes"].push_back(meshnode_2);
+  rootnode["attributes"] = YAML::Node();
+  rootnode["attributes"]["h"] = 0.002;
+  rootnode["attributes"]["E"] = 3e6;
   std::ofstream out(tempstr);
   out << rootnode;
   out.close(); // close the file or YAML reader won't be able to open it.
@@ -75,4 +78,6 @@ BOOST_AUTO_TEST_CASE(read_yaml_file)
 
   CHECK_CLOSE_COLLECTION(expected_nodes_coordinates, mesh_nodes_coordinates, 1e-4);
   CHECK_CLOSE_COLLECTION(expected_update_values, update_values, 1e-4);
+  BOOST_CHECK_EQUAL(provider.getAttributes().h, 0.002);
+  BOOST_CHECK_EQUAL(provider.getAttributes().E, 3e6);
 }

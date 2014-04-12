@@ -21,9 +21,13 @@ int main(int argc, char** argv)
 {
   std::cout << "Starting!\n";
 
+  SkinAttributes attr;
+  attr.h = 0.002;
+  attr.E = 3e6;
+
   std::unique_ptr<skin_connector> skin_conn;
   try {
-    skin_conn.reset(new skin_connector(SensorValuesConverter));
+    skin_conn.reset(new skin_connector(SensorValuesConverter, attr));
   } catch (const std::exception& e) {
     std::cerr << "Something went wrong with the inialisation:\n"
       << e.what() << "\nExiting...\n";
@@ -56,12 +60,10 @@ int main(int argc, char** argv)
   std::cout << "Resulting displacements mesh: no_nodes == " << resulting_disps.no_nodes() << std::endl;
 
   AlgForcesToDisplacements::params_type params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props = skin_conn->getAttributes();
 
   AlgDisplacementsToForces::params_type params_disps_to_forces;
-  params_disps_to_forces.skin_props.elasticModulus = 300000;
-  params_disps_to_forces.skin_props.skinThickness  = 0.002;
+  params_disps_to_forces.skin_props = skin_conn->getAttributes();
 
   // boost::any cache_disps_to_forces = alg_interpolated_disps_to_forces_type::offline( 
   //   interpolated_mesh,
@@ -86,6 +88,18 @@ int main(int argc, char** argv)
   using helpers::plot::plotMesh;
   plotMesh(*natural_mesh_2, "natural");
   plotMesh(interpolated_mesh, "interpolated", true);
+
+  std::cout << "nodes:\n";
+  for (size_t n = 0; n < natural_mesh_1->no_nodes(); ++n) {
+    std::cout   << "  - relative_position:\n"
+                << "      - " << natural_mesh_1->node(n).x << std::endl
+                << "      - " << natural_mesh_1->node(n).y << std::endl
+                << "    value: " << natural_mesh_1->getValue(n, 0) << std::endl;
+  }
+  std::cout << "attributes:\n"
+            << "  h: 0.0002\n"
+            << "  E: 3000000\n";
+
 
   std::cout << "Finishing!\n";
   return 0;

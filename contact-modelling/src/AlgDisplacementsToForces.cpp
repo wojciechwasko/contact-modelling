@@ -18,13 +18,13 @@ AlgDisplacementsToForces::impl_offline(
 {
   if (disps.D != 1 && disps.D != 3)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the displacements matrix: "
+      sb()  << "Wrong dimensionality of the displacements mesh: "
             << disps.D << "; supported dimensionalities: (1,3)"
     );
 
   if (forces.D != 1 && forces.D != 3)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the forces matrix: "
+      sb()  << "Wrong dimensionality of the forces mesh: "
             << disps.D << "; supported dimensionalities: (1,3)"
     );
 
@@ -43,19 +43,17 @@ AlgDisplacementsToForces::impl_run(
 {
   if (disps.D != 1 && disps.D != 3)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the displacements matrix: "
+      sb()  << "Wrong dimensionality of the displacements mesh: "
             << disps.D << "; supported dimensionalities: (1,3)"
     );
 
   if (forces.D != 1 && forces.D != 3)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the forces matrix: "
+      sb()  << "Wrong dimensionality of the forces mesh: "
             << disps.D << "; supported dimensionalities: (1,3)"
     );
 
-  // const precomputed_type& pre = boost::any_cast<precomputed_type>(precomputed);
-  // const params_type& p = boost::any_cast<const params_type&>(params);
-  //
-  // perform update, possibly using non-const output.getRawValues() and Armadillo's
-  // conv_to<std::vector<double>>
+  const precomputed_type& pre = boost::any_cast<precomputed_type>(precomputed);
+  arma::colvec temp = pre * arma::conv_to<arma::colvec>::from(disps.getRawValues());
+  forces.getRawValues().assign(temp.begin(), temp.end());
 }

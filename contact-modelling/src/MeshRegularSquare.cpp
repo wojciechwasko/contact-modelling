@@ -19,6 +19,18 @@ MeshRegularSquare::MeshRegularSquare(const MeshInterface& base_mesh, const doubl
 {
 }
 
+MeshRegularSquare::MeshRegularSquare(const MeshInterface& base_mesh, const double d, const size_t dim)
+  : MeshRegularSquare(
+      dim,
+      base_mesh.minX(), 
+      base_mesh.minY(),
+      base_mesh.maxX(),
+      base_mesh.maxY(),
+      d
+    )
+{
+}
+
 MeshRegularSquare::MeshRegularSquare(
   const size_t dim,
   const double x0,

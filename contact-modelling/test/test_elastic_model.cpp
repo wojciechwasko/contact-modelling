@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(em_other_nodes_1_1_dim_3_3)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     0.000284267757585335,
@@ -80,8 +80,8 @@ BOOST_AUTO_TEST_CASE(em_other_nodes_1_1_dim_1_3)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     -1.2641650958631e-05,
@@ -102,8 +102,8 @@ BOOST_AUTO_TEST_CASE(em_other_nodes_1_1_dim_3_1)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     -1.81650558119599e-05,
@@ -124,8 +124,8 @@ BOOST_AUTO_TEST_CASE(em_other_nodes_1_1_dim_1_1)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     0.000388846272447214
@@ -149,8 +149,8 @@ BOOST_AUTO_TEST_CASE(em_same_nodes_1_1_dim_3_3)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     1.93137101011595e-05,
@@ -178,8 +178,8 @@ BOOST_AUTO_TEST_CASE(em_same_nodes_1_1_dim_1_3)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
                       0,
@@ -200,8 +200,8 @@ BOOST_AUTO_TEST_CASE(em_same_nodes_1_1_dim_3_1)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
                       0,
@@ -222,8 +222,8 @@ BOOST_AUTO_TEST_CASE(em_same_nodes_1_1_dim_1_1)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     3.8627420202319e-05
@@ -246,8 +246,8 @@ BOOST_AUTO_TEST_CASE(em_onedirx_nodes_1_1_dim_3_3)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     0.000253757610931623,
@@ -274,8 +274,8 @@ BOOST_AUTO_TEST_CASE(em_onediry_nodes_1_1_dim_3_3)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     0.000924790809052427,
@@ -302,8 +302,8 @@ BOOST_AUTO_TEST_CASE(em_onedirx_nodes_1_1_dim_1_3)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     -6.4137755190822e-08,
@@ -324,8 +324,8 @@ BOOST_AUTO_TEST_CASE(em_onediry_nodes_1_1_dim_1_3)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     -1.30664215002714e-05,
@@ -346,8 +346,8 @@ BOOST_AUTO_TEST_CASE(em_onedirx_nodes_1_1_dim_3_1)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     -6.25257233026628e-08,
@@ -368,8 +368,8 @@ BOOST_AUTO_TEST_CASE(em_onediry_nodes_1_1_dim_3_1)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     -1.92413265572466e-05,
@@ -390,8 +390,8 @@ BOOST_AUTO_TEST_CASE(em_onedirx_nodes_1_1_dim_1_1)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     0.000408038541558231
@@ -410,8 +410,8 @@ BOOST_AUTO_TEST_CASE(em_onediry_nodes_1_1_dim_1_1)
 
   typedef AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props.E = 300000;
+  params_forces_to_disps.skin_props.h  = 0.002;
   arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(forces_mesh, disps_mesh, params_forces_to_disps));
   std::vector<double> expected = {
     0.00106363950928189

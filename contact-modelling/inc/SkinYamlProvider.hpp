@@ -40,11 +40,13 @@ private:
     std::array<double, 2> relative_position;
   };
 
-  std::vector<HelperMeshNode>      nodes_;
-  std::vector<uint16_t>         raw_values_;
+  std::vector<HelperMeshNode>             nodes_;
+  std::vector<uint16_t>              raw_values_;
+  SkinAttributes                skin_attributes_;
 
-  void impl_update(target_values_type& target_vec);
-  MeshNatural* impl_createMesh();
+  void impl_update(target_values_type& target_vec) const;
+  MeshNatural* impl_createMesh() const;
+  SkinAttributes impl_getAttributes() const;
 };
 
 #endif /* SKINYAMLPROVIDER_HPP */

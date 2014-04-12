@@ -1,6 +1,7 @@
 #ifndef ALGDISPLACEMENTSTOFORCES_HPP
 #define ALGDISPLACEMENTSTOFORCES_HPP
 
+#include "SkinAttributes.hpp"
 #include "AlgInterface.hpp"
 #include "helpers/elastic_linear_model.hpp"
 
@@ -8,7 +9,7 @@ class AlgDisplacementsToForces : public AlgInterface
 {
 public:
   typedef struct params_type {
-    helpers::elastic_linear_model::skin_properties skin_props;
+    SkinAttributes skin_props;
   } params_type;
 
 private:

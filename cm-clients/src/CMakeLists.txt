@@ -13,9 +13,10 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-FIND_PACKAGE(Boost 1.54 COMPONENTS iostreams system filesystem REQUIRED)
+FIND_PACKAGE(Boost 1.54 COMPONENTS iostreams system filesystem program_options REQUIRED)
 FIND_PACKAGE(Armadillo 2.4.2 REQUIRED)
 
+include_directories(${ContactModellingClients_SOURCE_DIR}/inc)
 include_directories(${ContactModellingSuite_SOURCE_DIR}/triangle/inc)
 include_directories(${ContactModellingSuite_SOURCE_DIR}/yaml-cpp/include)
 include_directories(${ContactModellingSuite_SOURCE_DIR}/gnuplot-iostream/inc)
@@ -41,4 +42,13 @@ add_executable(client
 
 target_link_libraries(client
   ContactModelling
+)
+
+add_executable(reconstruction
+  reconstruction.cpp
+)
+
+target_link_libraries(reconstruction
+  ContactModelling
+  ${Boost_LIBRARIES}
 )

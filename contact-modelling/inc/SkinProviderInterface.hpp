@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <functional>
 
+#include "SkinAttributes.hpp"
+
 class MeshNatural;
 
 /**
@@ -31,9 +33,11 @@ public:
    *
    * \note  This newly created mesh does *not* have values initialised.
    */
-  MeshNatural* createMesh();
+  MeshNatural* createMesh() const;
 
-  void update(target_values_type& target_vec);
+  void update(target_values_type& target_vec) const;
+
+  SkinAttributes getAttributes() const;
 
 protected:
   // TODO ? probably make this private and expose access through member methods
@@ -50,8 +54,9 @@ public:
   virtual ~SkinProviderInterface()                                = default;
 
 private:
-  virtual MeshNatural* impl_createMesh() = 0;
-  virtual void impl_update(target_values_type& target_vec) = 0;
+  virtual MeshNatural* impl_createMesh() const = 0;
+  virtual void impl_update(target_values_type& target_vec) const = 0;
+  virtual SkinAttributes impl_getAttributes() const = 0;
 };
 
 

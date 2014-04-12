@@ -30,6 +30,11 @@ public:
    * \endcond
    */
   MeshRegularSquare(const MeshInterface& base_mesh, const double d);
+
+  /**
+   * \brief   Similar to above, but changes the dimensionality of values to dim
+   */
+  MeshRegularSquare(const MeshInterface& base_mesh, const double d, const size_t dim);
   
   /**
    * \brief   Constructor for a regular square mesh going from x0 to x1 and from y0 to y1
