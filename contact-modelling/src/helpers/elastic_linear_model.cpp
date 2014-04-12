@@ -3,6 +3,7 @@
 #include <cmath>
 #include <stdexcept>
 
+#include "SkinAttributes.hpp"
 #include "MeshInterface.hpp"
 #include "helpers/math.hpp"
 #include "helpers/string.hpp"
@@ -41,7 +42,7 @@ arma::mat
 helpers::elastic_linear_model::forces_to_displacements_matrix(
   const MeshInterface& f,
   const MeshInterface& d,
-  const skin_properties& skin_attr
+  const SkinAttributes& skin_attr
 )
 {
   using helpers::math::eq_almost;
@@ -55,8 +56,8 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
   // helper variables, not to be computed at each iteration
   const double eps_samepoint      = 1e-4;
   const double pi = M_PI;
-  const double E = skin_attr.elasticModulus;
-  const double h = skin_attr.skinThickness;
+  const double E = skin_attr.E;
+  const double h = skin_attr.h;
   const double h2 = h*h;
   const double coeff_samepoint_xy = 9.0/(4 * pi * E);
   const double coeff_samepoint_z  = 9.0/(2 * pi * E);
@@ -239,7 +240,7 @@ arma::mat
 helpers::elastic_linear_model::displacements_to_forces_matrix(
   const MeshInterface& d,
   const MeshInterface& f,
-  const skin_properties& skin_attr
+  const SkinAttributes& skin_attr
 )
 {
   return arma::pinv(forces_to_displacements_matrix(f,d,skin_attr));

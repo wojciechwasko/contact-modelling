@@ -21,9 +21,13 @@ int main(int argc, char** argv)
 {
   std::cout << "Starting!\n";
 
+  SkinAttributes attr;
+  attr.h = 0.002;
+  attr.E = 3e6;
+
   std::unique_ptr<skin_connector> skin_conn;
   try {
-    skin_conn.reset(new skin_connector(SensorValuesConverter));
+    skin_conn.reset(new skin_connector(SensorValuesConverter, attr));
   } catch (const std::exception& e) {
     std::cerr << "Something went wrong with the inialisation:\n"
       << e.what() << "\nExiting...\n";
@@ -56,12 +60,10 @@ int main(int argc, char** argv)
   std::cout << "Resulting displacements mesh: no_nodes == " << resulting_disps.no_nodes() << std::endl;
 
   AlgForcesToDisplacements::params_type params_forces_to_disps;
-  params_forces_to_disps.skin_props.elasticModulus = 300000;
-  params_forces_to_disps.skin_props.skinThickness  = 0.002;
+  params_forces_to_disps.skin_props = skin_conn->getAttributes();
 
   AlgDisplacementsToForces::params_type params_disps_to_forces;
-  params_disps_to_forces.skin_props.elasticModulus = 300000;
-  params_disps_to_forces.skin_props.skinThickness  = 0.002;
+  params_disps_to_forces.skin_props = skin_conn->getAttributes();
 
   // boost::any cache_disps_to_forces = alg_interpolated_disps_to_forces_type::offline( 
   //   interpolated_mesh,

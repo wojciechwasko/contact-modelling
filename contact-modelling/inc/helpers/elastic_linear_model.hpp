@@ -4,23 +4,10 @@
 #include "external/armadillo.hpp"
 
 class MeshInterface;
+class SkinAttributes;
 
 namespace helpers {
   namespace elastic_linear_model {
-    /**
-     * \brief   Parameters of skin required for the linear model
-     */
-    typedef struct skin_properties {
-      /**
-       * \brief   The Young modulus of the elastomer
-       */
-      double elasticModulus;
-      /**
-       * \brief   Thickness of the layer of elastomer
-       */
-      double skinThickness;
-    } skin_properties;
-
     namespace impl {
       /**
        * \brief   Runtime checks for creating the forces to displacements matrix.
@@ -52,7 +39,7 @@ namespace helpers {
     arma::mat forces_to_displacements_matrix(
       const MeshInterface& f,
       const MeshInterface& d,
-      const skin_properties& skin_attr
+      const SkinAttributes& skin_attr
     );
 
     /**
@@ -70,7 +57,7 @@ namespace helpers {
     arma::mat displacements_to_forces_matrix(
       const MeshInterface& d,
       const MeshInterface& f,
-      const skin_properties& skin_attr
+      const SkinAttributes& skin_attr
     );
   }
 }

@@ -10,6 +10,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "SkinAttributes.hpp"
 #include "SkinProviderInterface.hpp"
 #include "MeshNatural.hpp"
 
@@ -52,13 +53,14 @@ public:
    * (what a PITA).
    */
   template <class SS=source, helpers::traits::EnableIf<std::is_same<SS, skin_object>>...>
-  SkinWareProvider(converter_type converter)
+  SkinWareProvider(converter_type converter, SkinAttributes attr)
     :
       SkinProviderInterface(1, converter), // hard-coded to 1D only
       sensor_layer_(SKIN_ALL_SENSOR_TYPES),
       s_object_(),
       s_reader_(s_object_.reader()),
-      sensors_source_(&s_object_)
+      sensors_source_(&s_object_),
+      skin_attributes_(attr)
   {
     init();
   }
@@ -75,13 +77,14 @@ public:
    */
 //  template <class SS=source, traits_helpers::DisableIf<std::is_same<SS, skin_object>>...>
   template <class SS=source, helpers::traits::DisableIf<std::is_same<SS, skin_object>>...>
-  SkinWareProvider(converter_type converter, source& sensors_source)
+  SkinWareProvider(converter_type converter, source& sensors_source, SkinAttributes attr)
     :
       SkinProviderInterface(1, converter), // hard-coded to 1D only
       sensor_layer_(SKIN_ALL_SENSOR_TYPES),
       s_object_(),
       s_reader_(s_object_.reader()),
-      sensors_source_(&sensors_source)
+      sensors_source_(&sensors_source),
+      skin_attributes_(attr)
   {
     init();
   }
@@ -103,6 +106,7 @@ private:
   std::size_t     no_sensors_; 
   sensor_iterator s_begin_;
   sensor_iterator s_end_;
+  SkinAttributes  skin_attributes_;
 
   void init()
   {
@@ -119,12 +123,12 @@ private:
     no_sensors_ = helpers::skin::distance(s_begin_, s_end_);
   }
 
-  MeshNatural* impl_createMesh()
+  MeshNatural* impl_createMesh() const
   {
     return new MeshNatural(D, s_begin_, s_end_);
   }
 
-  void impl_update(target_values_type& target_vec)
+  void impl_update(target_values_type& target_vec) const
   {
     target_vec.resize(no_sensors_ * D);
   
@@ -145,6 +149,11 @@ private:
       target_vec[i] = this->converter_(s.get_response());
       ++i;
     });
+  }
+
+  SkinAttributes impl_getAttributes() const
+  {
+    return skin_attributes_;
   }
 
   fail_error loadSkin(skin_object* so)
