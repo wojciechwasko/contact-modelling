@@ -243,5 +243,6 @@ helpers::elastic_linear_model::displacements_to_forces_matrix(
   const SkinAttributes& skin_attr
 )
 {
+//  forces_to_displacements_matrix(f,d,skin_attr).print();
   return arma::pinv(forces_to_displacements_matrix(f,d,skin_attr));
 }

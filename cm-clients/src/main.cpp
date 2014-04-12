@@ -89,6 +89,18 @@ int main(int argc, char** argv)
   plotMesh(*natural_mesh_2, "natural");
   plotMesh(interpolated_mesh, "interpolated", true);
 
+  std::cout << "nodes:\n";
+  for (size_t n = 0; n < natural_mesh_1->no_nodes(); ++n) {
+    std::cout   << "  - relative_position:\n"
+                << "      - " << natural_mesh_1->node(n).x << std::endl
+                << "      - " << natural_mesh_1->node(n).y << std::endl
+                << "    value: " << natural_mesh_1->getValue(n, 0) << std::endl;
+  }
+  std::cout << "attributes:\n"
+            << "  h: 0.0002\n"
+            << "  E: 3000000\n";
+
+
   std::cout << "Finishing!\n";
   return 0;
 }
