@@ -38,7 +38,7 @@ template <class source=skin_object>
 class SkinWareProvider : public SkinProviderInterface
 {
 public:
-  using typename SkinProviderInterface::converter_type;
+  typedef std::function<double(uint16_t)> converter_type;
   using typename SkinProviderInterface::target_values_type;
 
 public:
@@ -55,7 +55,8 @@ public:
   template <class SS=source, helpers::traits::EnableIf<std::is_same<SS, skin_object>>...>
   SkinWareProvider(converter_type converter, SkinAttributes attr)
     :
-      SkinProviderInterface(1, converter), // hard-coded to 1D only
+      SkinProviderInterface(1), // hard-coded to 1D only
+      converter_(converter),
       sensor_layer_(SKIN_ALL_SENSOR_TYPES),
       s_object_(),
       s_reader_(s_object_.reader()),
@@ -79,7 +80,8 @@ public:
   template <class SS=source, helpers::traits::DisableIf<std::is_same<SS, skin_object>>...>
   SkinWareProvider(converter_type converter, source& sensors_source, SkinAttributes attr)
     :
-      SkinProviderInterface(1, converter), // hard-coded to 1D only
+      SkinProviderInterface(1), // hard-coded to 1D only
+      converter_(converter),
       sensor_layer_(SKIN_ALL_SENSOR_TYPES),
       s_object_(),
       s_reader_(s_object_.reader()),
@@ -90,6 +92,7 @@ public:
   }
 
 private:
+  converter_type converter_;
   typedef typename source::skin_sensor_iterator sensor_iterator;
   /**
    * First - fail (true/false), second - failure text.

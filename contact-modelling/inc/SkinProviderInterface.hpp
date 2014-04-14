@@ -18,7 +18,6 @@ class MeshNatural;
  */
 class SkinProviderInterface {
 public:
-  typedef std::function<double(uint16_t)> converter_type;
   typedef std::vector<double> target_values_type;
 
   /**
@@ -40,10 +39,8 @@ public:
   SkinAttributes getAttributes() const;
 
 protected:
-  // TODO ? probably make this private and expose access through member methods
-  converter_type converter_;
 
-  SkinProviderInterface(const size_t dim, converter_type conv);
+  SkinProviderInterface(const size_t dim);
 
   SkinProviderInterface& operator=(const SkinProviderInterface&)  = default;
   SkinProviderInterface(const SkinProviderInterface&)             = default;

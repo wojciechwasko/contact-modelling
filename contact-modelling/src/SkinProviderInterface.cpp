@@ -2,12 +2,10 @@
 
 
 SkinProviderInterface::SkinProviderInterface(
-  const size_t dim,
-  SkinProviderInterface::converter_type conv
+  const size_t dim
 )
   :
-    D(dim),
-    converter_(conv)
+    D(dim)
 {}
 
 MeshNatural*

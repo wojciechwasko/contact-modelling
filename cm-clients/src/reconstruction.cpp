@@ -14,7 +14,6 @@
 #include "MeshNatural.hpp"
 #include "MeshRegularSquare.hpp"
 #include "InterpolatorLinearDelaunay.hpp"
-#include "SensorValuesConverter.hpp"
 #include "SkinYamlProvider.hpp"
 #include "AlgDisplacementsToForces.hpp"
 #include "AlgForcesToDisplacements.hpp"
@@ -29,7 +28,7 @@ int main(int argc, char** argv)
   if (process_options(argc, argv, options))
     return 0;
 
-  SkinYamlProvider skin_provider(SensorValuesConverter, options.input_filename);
+  SkinYamlProvider skin_provider(options.input_filename);
   std::unique_ptr<MeshInterface> natural_mesh((MeshInterface*) skin_provider.createMesh());
   std::unique_ptr<MeshInterface> interp_mesh;
   std::unique_ptr<InterpolatorInterface> interpolator;
