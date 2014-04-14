@@ -36,13 +36,15 @@ include_directories(${ContactModellingLib_SOURCE_DIR}/inc)
 #   (We do not recommend using GLOB to collect a list of source files from your
 #   source tree. If no CMakeLists.txt file changes when a source is added or
 #   regenerate.)
-add_executable(client 
-  main.cpp
-)
 
-target_link_libraries(client
-  ContactModelling
-)
+# Disabling "client" since there's not much use for it anymore
+# add_executable(client 
+#   main.cpp
+# )
+# 
+# target_link_libraries(client
+#   ContactModelling
+# )
 
 add_executable(reconstruction
   reconstruction.cpp
