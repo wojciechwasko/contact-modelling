@@ -30,10 +30,9 @@
 class SkinYamlProvider : public SkinProviderInterface
 {
 public:
-  using typename SkinProviderInterface::converter_type;
   using typename SkinProviderInterface::target_values_type;
 
-  SkinYamlProvider(converter_type converter, const std::string& filename);
+  SkinYamlProvider(const std::string& filename);
 
 private:
   struct HelperMeshNode {
@@ -41,7 +40,7 @@ private:
   };
 
   std::vector<HelperMeshNode>             nodes_;
-  std::vector<uint16_t>              raw_values_;
+  std::vector<double>                    values_;
   SkinAttributes                skin_attributes_;
 
   void impl_update(target_values_type& target_vec) const;

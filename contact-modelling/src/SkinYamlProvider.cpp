@@ -8,10 +8,9 @@
 #include "MeshNatural.hpp"
 
 SkinYamlProvider::SkinYamlProvider(
-  SkinYamlProvider::converter_type converter,
   const std::string& filename
 )
-  : SkinProviderInterface(1, converter) // hard-coded to 1D sensors only
+  : SkinProviderInterface(1) // hard-coded to 1D sensors only
 {
   YAML::Node input = YAML::LoadFile(filename);
   if (!input["nodes"]) {
@@ -58,15 +57,14 @@ SkinYamlProvider::SkinYamlProvider(
     std::get<0>(n.relative_position) = node["relative_position"][0].as<double>();
     std::get<1>(n.relative_position) = node["relative_position"][1].as<double>();
     nodes_.push_back(n);
-    raw_values_.push_back(node["value"].as<double>());
+    values_.push_back(node["value"].as<double>());
   }
 }
 
 void
 SkinYamlProvider::impl_update(SkinYamlProvider::target_values_type& target_vec) const
 {
-  target_vec.resize(raw_values_.size());
-  std::transform(raw_values_.cbegin(), raw_values_.cend(), target_vec.begin(), this->converter_);
+  target_vec.assign(values_.cbegin(), values_.cend());
 }
 
 MeshNatural*

@@ -65,9 +65,7 @@ BOOST_AUTO_TEST_CASE(read_yaml_file)
   std::vector<double> nodes_coordinates;
   std::vector<double> update_values;
 
-  // dummy converter which does nothing
-  auto converter = [] (uint16_t v) -> double { return (double)v; };
-  SkinYamlProvider provider(converter, tempstr);
+  SkinYamlProvider provider(tempstr);
   std::unique_ptr<MeshInterface> m ((MeshInterface*) provider.createMesh());
   provider.update(update_values);
   std::vector<double> mesh_nodes_coordinates;

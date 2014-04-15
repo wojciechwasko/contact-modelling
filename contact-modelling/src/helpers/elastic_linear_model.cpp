@@ -61,7 +61,7 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
   const double h2 = h*h;
   const double coeff_samepoint_xy = 9.0/(4 * pi * E);
   const double coeff_samepoint_z  = 9.0/(2 * pi * E);
-  const double coeff_other        = 1.0/(4 * pi * E);
+  const double coeff_other        = 3.0/(4 * pi * E);
   const double psi                = 0.25; // Note this should be a function of h/zoh
 
   arma::mat ret(nrows, ncols);
@@ -100,8 +100,8 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       coeff_samepoint_xy * psi / z0h
     : 
       coeff_other * (
-        coeff_inv_dxdy_pow3 *    (2*dx2 + dy2)
-        - coeff_inv_dxdyh_pow3 * (2*dx2 + dy2 + h2)
+        - coeff_inv_dxdy_pow3 *    (2*dx2 + dy2)
+        + coeff_inv_dxdyh_pow3 * (2*dx2 + dy2 + h2)
       )
     ;
   };
@@ -111,8 +111,8 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       0
     : 
       coeff_other * (
-        coeff_inv_dxdy_pow3 *    (dx * dy)
-        - coeff_inv_dxdyh_pow3 * (dx * dy)
+        - coeff_inv_dxdy_pow3 *    (dx * dy)
+        + coeff_inv_dxdyh_pow3 * (dx * dy)
       )
     ;
   }; 
@@ -121,7 +121,7 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
     ret(row,col) = (is_same) ? 
       0
     : 
-      - coeff_other * (
+      coeff_other * (
         coeff_inv_dxdyh_pow3 *    (dx * h)
       )
     ;
@@ -132,8 +132,8 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       0
     : 
       coeff_other * (
-        coeff_inv_dxdy_pow3 *    (dx * dy)
-        - coeff_inv_dxdyh_pow3 * (dx * dy)
+        - coeff_inv_dxdy_pow3 *    (dx * dy)
+        + coeff_inv_dxdyh_pow3 * (dx * dy)
       )
     ;
   };
@@ -143,8 +143,8 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       coeff_samepoint_xy * psi / z0h
     : 
       coeff_other * (
-        coeff_inv_dxdy_pow3 *    (dx2 + 2*dy2)
-        - coeff_inv_dxdyh_pow3 * (dx2 + 2*dy2 + h2)
+        - coeff_inv_dxdy_pow3 *    (dx2 + 2*dy2)
+        + coeff_inv_dxdyh_pow3 * (dx2 + 2*dy2 + h2)
       )
     ;
   };
@@ -153,7 +153,7 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
     ret(row,col) = (is_same) ? 
       0
     : 
-      - coeff_other * (
+      coeff_other * (
         coeff_inv_dxdyh_pow3 *    (dy * h)
       )
     ;
@@ -163,7 +163,7 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
     ret(row,col) = (is_same) ? 
       0
     : 
-      - coeff_other * (
+      coeff_other * (
         coeff_inv_dxdyh_pow3 *    (dx *  h)
       )
     ;
@@ -173,7 +173,7 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
     ret(row,col) = (is_same) ? 
       0
     : 
-      - coeff_other * (
+      coeff_other * (
         coeff_inv_dxdyh_pow3 *    (dy *  h)
       )
     ;
@@ -184,8 +184,8 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       coeff_samepoint_z * psi / z0h 
     : 
       coeff_other * (
-        coeff_inv_dxdy
-        - coeff_inv_dxdyh_pow3 *    (dx2 + dy2 + 2*h2)
+        - coeff_inv_dxdy
+        + coeff_inv_dxdyh_pow3 *    (dx2 + dy2 + 2*h2)
       )
     ;
   }; 
