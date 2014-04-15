@@ -56,7 +56,6 @@ public:
 
   /**
    * \brief   Get a reference to the node at position i, const version.
-   * \note    This is not bound-checked.
    */
   const node_type& node(size_t i) const;
 
@@ -69,7 +68,6 @@ public:
 
   /**
    * \brief   Get a reference to the node at position i, non-const version.
-   * \note    This is not bound-checked.
    */
   node_type& node(size_t i);
 
@@ -88,7 +86,6 @@ public:
   /**
    * \brief   Return a local copy of values for node i
    * \param   i   ID (number of the node)
-   * \note    This is not bound-checked
    * \note    This is not very efficient, since we're making a local copy and returning it.
    *
    * In future, if needed, it might be implement something resembling Eigen's ::block()
@@ -100,7 +97,6 @@ public:
    * \brief   Get vi-th value for i-th node.
    * \param   i   ID (number) of the node
    * \param   vi  which value from the node to get
-   * \note    This is not bound-checked.
    */
   value_type getValue(size_t i, size_t vi) const;
 
@@ -109,19 +105,16 @@ public:
    * \param   i   ID (number) of the node
    * \param   vi  which value from the node to get
    * \param   v   value to be set
-   * \note    This is not bound-checked.
    */
   void setValue(size_t i, size_t vi, value_type v);
 
   /**
    * \brief   Get a const reference to the metadata of a node at position i.
-   * \note    This is not bound-checked.
    */
   const metadata_type& getMetadata(const size_t i) const;
 
   /**
    * \brief   Set the metadata of a node at position i.
-   * \note    This is not bound-checked.
    */
   void setMetadata(const size_t i, const metadata_type& rhs);
 
