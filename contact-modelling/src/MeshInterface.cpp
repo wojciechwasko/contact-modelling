@@ -51,7 +51,7 @@ MeshInterface::nodes_cend() const
 const MeshInterface::node_type& 
 MeshInterface::node(size_t i) const
 {
-  return nodes_[i];
+  return nodes_.at(i);
 }
 
 double 
@@ -63,7 +63,7 @@ MeshInterface::node_area(size_t i) const
 MeshInterface::node_type& 
 MeshInterface::node(size_t i)
 {
-  return nodes_[i];
+  return nodes_.at(i);
 }
 
 const MeshInterface::values_container& 
@@ -84,32 +84,32 @@ MeshInterface::getValues(size_t i) const
   std::vector<value_type> ret;
   ret.resize(D);
   for (size_t it = 0; it < D; ++it)
-    ret[it] = values_[i*D + it];
+    ret.at(it) = values_.at(i*D + it);
   return ret;
 }
 
 MeshInterface::value_type 
 MeshInterface::getValue(size_t i, size_t vi) const
 {
-  return values_[i*D + vi];
+  return values_.at(i*D + vi);
 }
 
 void 
 MeshInterface::setValue(size_t i, size_t vi, value_type v)
 {
-  values_[i*D + vi] = v;
+  values_.at(i*D + vi) = v;
 }
 
 const MeshInterface::metadata_type&
 MeshInterface::getMetadata(const size_t i) const
 {
-  return metadata_[i];
+  return metadata_.at(i);
 }
 
 void 
 MeshInterface::setMetadata(const size_t i, const metadata_type& rhs)
 {
-  metadata_[i] = rhs;
+  metadata_.at(i) = rhs;
 }
 
 void 
