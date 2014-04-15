@@ -7,6 +7,7 @@
 #include "MeshInterface.hpp"
 #include "helpers/math.hpp"
 #include "helpers/string.hpp"
+#include "helpers/log.hpp"
 
 using helpers::string::sb;
 
@@ -54,7 +55,7 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
   const size_t ncols = f.no_nodes() * f_stride;        // number of cols: forces
 
   // helper variables, not to be computed at each iteration
-  const double eps_samepoint      = 1e-4;
+  const double eps_samepoint      = 1e-5;
   const double pi = M_PI;
   const double E = skin_attr.E;
   const double h = skin_attr.h;
@@ -100,8 +101,8 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       coeff_samepoint_xy * psi / z0h
     : 
       coeff_other * (
-        - coeff_inv_dxdy_pow3 *    (2*dx2 + dy2)
-        + coeff_inv_dxdyh_pow3 * (2*dx2 + dy2 + h2)
+          coeff_inv_dxdy_pow3 *    (2*dx2 + dy2)
+        - coeff_inv_dxdyh_pow3 * (2*dx2 + dy2 + h2)
       )
     ;
   };
@@ -111,8 +112,8 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       0
     : 
       coeff_other * (
-        - coeff_inv_dxdy_pow3 *    (dx * dy)
-        + coeff_inv_dxdyh_pow3 * (dx * dy)
+          coeff_inv_dxdy_pow3 *    (dx * dy)
+        - coeff_inv_dxdyh_pow3 * (dx * dy)
       )
     ;
   }; 
@@ -122,7 +123,7 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       0
     : 
       coeff_other * (
-        coeff_inv_dxdyh_pow3 *    (dx * h)
+        - coeff_inv_dxdyh_pow3 *    (dx * h)
       )
     ;
   };
@@ -132,8 +133,8 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       0
     : 
       coeff_other * (
-        - coeff_inv_dxdy_pow3 *    (dx * dy)
-        + coeff_inv_dxdyh_pow3 * (dx * dy)
+          coeff_inv_dxdy_pow3 *    (dx * dy)
+        - coeff_inv_dxdyh_pow3 * (dx * dy)
       )
     ;
   };
@@ -143,8 +144,8 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       coeff_samepoint_xy * psi / z0h
     : 
       coeff_other * (
-        - coeff_inv_dxdy_pow3 *    (dx2 + 2*dy2)
-        + coeff_inv_dxdyh_pow3 * (dx2 + 2*dy2 + h2)
+          coeff_inv_dxdy_pow3 *    (dx2 + 2*dy2)
+        - coeff_inv_dxdyh_pow3 * (dx2 + 2*dy2 + h2)
       )
     ;
   };
@@ -154,7 +155,7 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       0
     : 
       coeff_other * (
-        coeff_inv_dxdyh_pow3 *    (dy * h)
+        - coeff_inv_dxdyh_pow3 *    (dy * h)
       )
     ;
   };
@@ -164,7 +165,7 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       0
     : 
       coeff_other * (
-        coeff_inv_dxdyh_pow3 *    (dx *  h)
+        - coeff_inv_dxdyh_pow3 *    (dx *  h)
       )
     ;
   };
@@ -174,7 +175,7 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       0
     : 
       coeff_other * (
-        coeff_inv_dxdyh_pow3 *    (dy *  h)
+        - coeff_inv_dxdyh_pow3 *    (dy *  h)
       )
     ;
   }; 
@@ -184,16 +185,16 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       coeff_samepoint_z * psi / z0h 
     : 
       coeff_other * (
-        - coeff_inv_dxdy
-        + coeff_inv_dxdyh_pow3 *    (dx2 + dy2 + 2*h2)
+          coeff_inv_dxdy
+        - coeff_inv_dxdyh_pow3 *    (dx2 + dy2 + 2*h2)
       )
     ;
   }; 
 
   for (size_t nj = 0; nj < f.no_nodes(); ++nj) {
     for (size_t ni = 0; ni < d.no_nodes(); ++ni) {
-      dx = d.node(nj).x - f.node(ni).x;   dx2 = dx*dx;
-      dy = d.node(nj).y - f.node(ni).y;   dy2 = dy*dy;
+      dx = d.node(ni).x - f.node(nj).x;   dx2 = dx*dx;
+      dy = d.node(ni).y - f.node(nj).y;   dy2 = dy*dy;
       z0h = sqrt(f.node_area(nj) * 3.0 / (2*pi));
       is_same = eq_almost(dx, 0, eps_samepoint) && eq_almost(dy, 0, eps_samepoint);
       coeff_inv_dxdy       = 1.0 / sqrt(dx2 + dy2);
@@ -233,6 +234,13 @@ helpers::elastic_linear_model::forces_to_displacements_matrix(
       }
     }
   }
+  IFLOG(DEBUG2) {
+    static size_t sn = 0;
+    std::string fname = sb() << "f-d-" << sn << ".csv";
+    LOG(DEBUG2) << "Saving the forces-to-displacements matrix to '" << fname << "'.";
+    ret.save(fname, arma::csv_ascii);
+    ++sn;
+  }
   return ret;
 }
 
@@ -243,6 +251,17 @@ helpers::elastic_linear_model::displacements_to_forces_matrix(
   const SkinAttributes& skin_attr
 )
 {
-//  forces_to_displacements_matrix(f,d,skin_attr).print();
-  return arma::pinv(forces_to_displacements_matrix(f,d,skin_attr));
+  arma::mat orig = forces_to_displacements_matrix(f,d,skin_attr);
+  arma::mat ret = arma::pinv(orig);
+  IFLOG(DEBUG2) {
+    static size_t sn = 0;
+    std::string fname_orig = sb() << "orig-" << sn << ".csv";
+    LOG(DEBUG2) << "Saving the original (before pseudoinverse) matrix to '" << fname_orig << "'.";
+    orig.save(fname_orig, arma::csv_ascii);
+    std::string fname_pinv = sb() << "pinv-" << sn << ".csv";
+    LOG(DEBUG2) << "Saving the pseudoinverse matrix to '" << fname_pinv << "'.";
+    ret.save(fname_pinv, arma::csv_ascii);
+    ++sn;
+  }
+  return ret;
 }
