@@ -1,6 +1,8 @@
 #ifndef CUSTOM_TEST_MACROS_HPP
 #define CUSTOM_TEST_MACROS_HPP
 
+#include <string>
+
 // rip-off from http://stackoverflow.com/a/17503436/312650
 // Have to make it a macro so that it reports exact line numbers when checks fail.
 #define CHECK_CLOSE_COLLECTION(aa, bb, tolerance) { \
@@ -14,6 +16,9 @@
         BOOST_CHECK_CLOSE(*a, *b, tolerance); \
     } \
 }
+
+#define CHECK_EQUAL_STR( s, t ) \
+  BOOST_CHECK_EQUAL(std::string(s), std::string(t));
 
 
 #endif /* CUSTOM_TEST_MACROS_HPP */

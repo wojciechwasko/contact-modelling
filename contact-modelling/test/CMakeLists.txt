@@ -50,6 +50,18 @@ TARGET_LINK_LIBRARIES(test_interpolator_linear_delaunay
   ${Boost_LIBRARIES} yaml-cpp)
 ADD_TEST(test_interpolator_linear_delaunay test_interpolator_linear_delaunay)
 
+ADD_EXECUTABLE(test_log test_log.cpp)
+TARGET_LINK_LIBRARIES(test_log
+  ContactModelling
+  ${Boost_LIBRARIES} yaml-cpp)
+ADD_TEST(test_log test_log)
+
+ADD_EXECUTABLE(test_log_plateau_level test_log_plateau_level.cpp)
+TARGET_LINK_LIBRARIES(test_log_plateau_level
+  ContactModelling
+  ${Boost_LIBRARIES} yaml-cpp)
+ADD_TEST(test_log_plateau_level test_log_plateau_level)
+
 
 
 ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPENDS
@@ -60,4 +72,6 @@ ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPEN
   test_eq_almost
   test_skin_yaml_provider
   test_interpolator_linear_delaunay
+  test_log
+  test_log_plateau_level
 )
