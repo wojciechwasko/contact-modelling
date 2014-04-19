@@ -11,5 +11,3 @@ add_subdirectory (yaml-cpp)
 add_subdirectory (data)
 add_subdirectory (contact-modelling)
 add_subdirectory (cm-clients) 
-add_subdirectory (driver)
-
