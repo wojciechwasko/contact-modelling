@@ -24,6 +24,7 @@ tail_yaml = """
 attributes:
   h: 0.002
   E: 210000
+  taxelArea: 1.2566e-05
 """
 
 

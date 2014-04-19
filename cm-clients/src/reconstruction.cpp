@@ -24,7 +24,7 @@
 #include "external/armadillo.hpp"
 
 namespace po = boost::program_options;
-using helpers::plot::plotMesh;
+using helpers::plot::dumpForPlot;
 
 int main(int argc, char** argv)
 {
@@ -102,11 +102,11 @@ int main(int argc, char** argv)
   AlgFToD.run(*forces_mesh, *disps_mesh,  AlgFToD_params, AlgFToD_offline);
   LOG(DEBUG) << "Done with forces->disps online.";
 
-  plotMesh(*natural_mesh, "Natural mesh");
+  dumpForPlot(*natural_mesh, "natural");
   if (interpolator)
-    plotMesh(*interp_mesh, "Interpolated source mesh", true);
-  plotMesh(*forces_mesh, "Forces mesh", true);
-  plotMesh(*disps_mesh,  "Reconstructed displacements mesh", true);
+    dumpForPlot(*interp_mesh, "interpolated");
+  dumpForPlot(*forces_mesh, "forces");
+  dumpForPlot(*disps_mesh,  "reconstructed");
 
   return 0;
 }
