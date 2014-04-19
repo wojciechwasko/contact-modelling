@@ -1,4 +1,4 @@
-FIND_PACKAGE(Boost 1.54 COMPONENTS iostreams system filesystem REQUIRED)
+FIND_PACKAGE(Boost 1.52 COMPONENTS iostreams system filesystem REQUIRED)
 FIND_PACKAGE(Armadillo 2.4.2 REQUIRED)
 
 include_directories(${ContactModellingLib_SOURCE_DIR}/inc)

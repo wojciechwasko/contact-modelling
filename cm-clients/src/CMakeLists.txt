@@ -1,6 +1,6 @@
 # FIXME To be removed (if possible) once SkinWare and other stuff is abstracted away
 
-FIND_PACKAGE(Boost 1.54 COMPONENTS iostreams system filesystem program_options REQUIRED)
+FIND_PACKAGE(Boost 1.52 COMPONENTS iostreams system filesystem program_options REQUIRED)
 FIND_PACKAGE(Armadillo 2.4.2 REQUIRED)
 
 include_directories(${ContactModellingClients_SOURCE_DIR}/inc)
