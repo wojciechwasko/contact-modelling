@@ -11,6 +11,11 @@ struct SkinAttributes {
    * Young modulus of the elastomer.
    */
   double E;
+
+  /**
+   * The area of one given taxel.
+   */
+  double taxelArea;
 };
 
 

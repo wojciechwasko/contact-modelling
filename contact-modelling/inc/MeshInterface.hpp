@@ -2,6 +2,8 @@
 #define MESHINTERFACE_HPP
 
 #include <cstdint>
+#include <ostream>
+#include <string>
 #include <boost/any.hpp>
 
 #include "MeshNode.hpp"
@@ -136,6 +138,46 @@ public:
   double minY() const;
   double maxX() const;
   double maxY() const;
+
+  /**
+   * \brief   Hackety hack! :D Return dx (spacing in x on the mesh and the length of x side on a
+   *                        cuboid representing value in a node)
+   *
+   * This method is virtual which means that if the deriving class overrides it, the derived
+   * implementation will be called. Otherwise the default will be called.
+   *
+   * The hack is in the fact that we take the base elements to be square of the area of the first
+   * node, i.e. the returned value will be sqrt(node_area(0)). While this is a gross generalisation
+   * and may not be accurate, this will do for what we want to achieve.
+   *
+   * If it later turns out we will *actually* be using meshes with variable node areas, it might
+   * still be useful to represent them as cuboids, but with different x,y sides lengths. In that
+   * case, matplotlib's dx,dy can be an array as well, meaning that this could be done.
+   *
+   * \note  If the base implementation of this method is called, it will log a WARN about the
+   *        simplification described above.
+   */
+  double dx() const;
+
+  /**
+   * \brief   Hackety hack! :D Return dy (spacing in y on the mesh and the length of y side on a
+   *                        cuboid representing value in a node)
+   *
+   * This method is virtual which means that if the deriving class overrides it, the derived
+   * implementation will be called. Otherwise the default will be called.
+   *
+   * The hack is in the fact that we take the base elements to be square of the area of the first
+   * node, i.e. the returned value will be sqrt(node_area(0)). While this is a gross generalisation
+   * and may not be accurate, this will do for what we want to achieve.
+   *
+   * If it later turns out we will *actually* be using meshes with variable node areas, it might
+   * still be useful to represent them as cuboids, but with different x,y sides lengths. In that
+   * case, matplotlib's dx,dy can be an array as well, meaning that this could be done.
+   *
+   * \note  If the base implementation of this method is called, it will log a WARN about the
+   *        simplification described above.
+   */
+  double dy() const;
 protected:
   void generateMinMax();
 
@@ -202,6 +244,8 @@ private:
    * \brief   Implementation of the node area function
    */
   virtual double impl_node_area(size_t i) const = 0;
+  virtual double impl_dx() const;
+  virtual double impl_dy() const;
 };
 
 

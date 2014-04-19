@@ -31,9 +31,13 @@ SkinYamlProvider::SkinYamlProvider(
   if (!attrs["E"]) {
     throw std::runtime_error("SkinYamlProvider: YAML must contain 'attributes:E'!");
   }
+  if (!attrs["taxelArea"]) {
+    throw std::runtime_error("SkinYamlProvider: YAML must contain 'attributes:taxelArea'!");
+  }
 
   skin_attributes_.h = attrs["h"].as<double>();
   skin_attributes_.E = attrs["E"].as<double>();
+  skin_attributes_.taxelArea = attrs["taxelArea"].as<double>();
 
   YAML::Node nodes = input["nodes"];
   typedef YAML::const_iterator yci;

@@ -82,5 +82,8 @@ private:
    * \brief   ceil((t1-t0)/d) ; no of nodes that wrap t0 and t1, with d distance between each pair
    */
   static size_t calculate_no_nodes_1D(double t0, double t1, double d);
+
+  double impl_dx() const;
+  double impl_dy() const;
 };
 #endif /* MESHREGULARSQUARE_HPP */

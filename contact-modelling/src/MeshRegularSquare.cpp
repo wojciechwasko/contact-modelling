@@ -106,3 +106,15 @@ MeshRegularSquare::calculate_no_nodes_1D(double t0, double t1, double d)
   }
   return std::ceil((t1-t0)/d);
 }
+
+double 
+MeshRegularSquare::impl_dx() const
+{
+  return d_;
+}
+
+double 
+MeshRegularSquare::impl_dy() const
+{
+  return d_;
+}

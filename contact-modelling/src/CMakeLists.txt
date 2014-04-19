@@ -34,6 +34,7 @@ add_library(ContactModelling
   Delaunay.cpp
   helpers/elastic_linear_model.cpp
   helpers/log.cpp
+  helpers/plot.cpp
   InterpolatorInterface.cpp
   InterpolatorLinearDelaunay.cpp
   MeshInterface.cpp

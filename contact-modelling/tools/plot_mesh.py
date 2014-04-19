@@ -64,7 +64,7 @@ def gen_colors(dz, R=7, G=5, B=15):
 def getdata(fname):
   from StringIO import StringIO
   import numpy as np
-  f = open('ifile', 'r')
+  f = open(fname, 'r')
   first_line = f.readline()
   try:
     dx, dy = [float(x) for x in first_line.split()]
@@ -76,7 +76,7 @@ def getdata(fname):
   vals = np.loadtxt(StringIO(f.readline()))
   return (dx,dy, xs, ys, vals)
 
-def plot(dx, dy, x, y, v, title=''):
+def plot(fname, dx, dy, x, y, v, title=''):
   if not (len(x) == len(y) == len(v)):
     raise ValueError, "x,y,v vectors have different lengths: %s,%s,%s" %(len(x),len(y),len(v))
   if dx <= 0:
@@ -85,6 +85,8 @@ def plot(dx, dy, x, y, v, title=''):
     raise ValueError, "dy must be > 0"
   import numpy as np
   # move the nodes to the centers of the bottom/top cuboid face
+  dx = dx*0.6
+  dy = dy*0.6
   x = np.subtract(x, dx/2.0)
   y = np.subtract(y, dy/2.0)
   import matplotlib.pyplot as plt
@@ -97,6 +99,7 @@ def plot(dx, dy, x, y, v, title=''):
   ax1.set_ylabel('y')
   ax1.set_title(title)
   plt.show()
+  #plt.savefig(fname + '.pdf', format='pdf')
 
 if __name__ == "__main__":
   import sys
@@ -105,6 +108,6 @@ if __name__ == "__main__":
     sys.exit(1)
 
   if len(sys.argv) == 2:
-    plot(*getdata(sys.argv[1]))
+    plot(sys.argv[1], *getdata(sys.argv[1]))
   else:
-    plot(*getdata(sys.argv[1]), title=sys.argv[2])
+    plot(sys.argv[1], *getdata(sys.argv[1]), title=sys.argv[2])

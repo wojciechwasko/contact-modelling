@@ -1,9 +1,11 @@
 #include "MeshInterface.hpp"
 
 #include <algorithm>
+#include <fstream>
 #include <limits>
 
 #include "helpers/container_algorithms.hpp"
+#include "helpers/log.hpp"
 
 MeshInterface::MeshInterface(const size_t dim, const size_t no_nodes)
   : D(dim),
@@ -147,8 +149,8 @@ MeshInterface::generateMinMax()
 {
   double min_x = std::numeric_limits<double>::max();
   double min_y = std::numeric_limits<double>::max();
-  double max_x = std::numeric_limits<double>::min();
-  double max_y = std::numeric_limits<double>::min();
+  double max_x = std::numeric_limits<double>::lowest();
+  double max_y = std::numeric_limits<double>::lowest();
 
   std::for_each(this->nodes_cbegin(), this->nodes_cend(), [&](const node_type& n) {
     if (n.x < min_x) min_x = n.x;
@@ -187,4 +189,32 @@ MeshInterface::maxY() const
   return max_y_;
 }
 
+double
+MeshInterface::dx() const
+{
+  return impl_dx();
+}
 
+double
+MeshInterface::dy() const
+{
+  return impl_dy();
+}
+
+double 
+MeshInterface::impl_dx() const
+{
+  LOG(WARN) << "Using default implementation of MeshInterface's dx, which means we're simplifying "
+    << "all the nodes in the mesh to be represented as square-based, with length of a side of the "
+    << "square defined as square root of the first node's area";
+  return sqrt(node_area(0));
+}
+
+double 
+MeshInterface::impl_dy() const
+{
+  LOG(WARN) << "Using default implementation of MeshInterface's dy, which means we're simplifying "
+    << "all the nodes in the mesh to be represented as square-based, with length of a side of the "
+    << "square defined as square root of the first node's area";
+  return sqrt(node_area(0));
+}

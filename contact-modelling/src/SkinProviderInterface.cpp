@@ -1,4 +1,5 @@
 #include "SkinProviderInterface.hpp"
+#include "MeshNatural.hpp"
 
 
 SkinProviderInterface::SkinProviderInterface(
@@ -11,7 +12,9 @@ SkinProviderInterface::SkinProviderInterface(
 MeshNatural*
 SkinProviderInterface::createMesh() const
 {
-  return impl_createMesh(); 
+  MeshNatural* m = impl_createMesh();
+  m->setForSkin();
+  return m; 
 }
 
 void
