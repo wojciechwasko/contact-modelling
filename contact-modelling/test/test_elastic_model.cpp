@@ -39,10 +39,10 @@ private:
 };
 
 // generated with gen/gen.py
-std::vector<double> expected_diff_3_3 = {-4.77612499182e-06,-3.32211154015e-06,1.15517619829e-05, -3.32211154015e-06,-7.05414433363e-06,1.61724667761e-05, 1.15517619829e-05,1.61724667761e-05,2.21751661574e-06};
-std::vector<double> expected_diff_1_3 = {1.15517619829e-05,1.61724667761e-05,2.21751661574e-06};
-std::vector<double> expected_diff_3_1 = {1.15517619829e-05,1.61724667761e-05,2.21751661574e-06};
-std::vector<double> expected_diff_1_1 = {2.21751661574e-06};
+std::vector<double> expected_diff_3_3 = {4.77612499182e-06,3.32211154015e-06,-1.15517619829e-05, 3.32211154015e-06,7.05414433363e-06,-1.61724667761e-05, -1.15517619829e-05,-1.61724667761e-05,-2.21751661574e-06};
+std::vector<double> expected_diff_1_3 = {-1.15517619829e-05,-1.61724667761e-05,-2.21751661574e-06};
+std::vector<double> expected_diff_3_1 = {-1.15517619829e-05,-1.61724667761e-05,-2.21751661574e-06};
+std::vector<double> expected_diff_1_1 = {-2.21751661574e-06};
 std::vector<double> expected_same_3_3 = {1.93137101012e-05,0,0, 0,1.93137101012e-05,0, 0,0,3.86274202023e-05};
 std::vector<double> expected_same_1_3 = {0,0,3.86274202023e-05};
 std::vector<double> expected_same_3_1 = {0,0,3.86274202023e-05};

@@ -13,15 +13,15 @@ dy_diff = node2_diff[1]-node1[1]
 dx_same = node2_same[0]-node1[0]
 dy_same = node2_same[1]-node1[1]
 
-xx_diff = lambda dx,dy,h,pi,G : 3 * (-(2*dx**2 + dy**2)/((dx**2 + dy**2)**1.5) + (2*dx**2 + dy**2 + h**2)/((dx**2 + dy**2 + h**2)**1.5))/(4*pi*G)
-yx_diff = lambda dx,dy,h,pi,G : 3 * (-(dx * dy) / ((dx**2 + dy**2)**1.5) + (dx * dy) / ((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)
-zx_diff = lambda dx,dy,h,pi,G : 3 * ((dx * h) / ((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)
-xy_diff = lambda dx,dy,h,pi,G : 3 * (-(dx*dy)/((dx**2+dy**2)**1.5) + (dx*dy)/((dx**2+dy**2+h**2)**1.5) ) / (4*pi*G)
-yy_diff = lambda dx,dy,h,pi,G : 3 * (-(dx**2+2*dy**2)/((dx**2+dy**2)**1.5) + (dx**2 + 2*dy**2 + h**2)/((dx**2 + dy**2 + h**2)**1.5)) /(4*pi*G)
-zy_diff = lambda dx,dy,h,pi,G : 3 * ((dy*h)/((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)
-xz_diff = lambda dx,dy,h,pi,G : 3 * ((dx * h) / ((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)
-yz_diff = lambda dx,dy,h,pi,G : 3 * ((dy * h) / ((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)
-zz_diff = lambda dx,dy,h,pi,G : 3 * (-1/((dx**2+dy**2)**0.5) + (dx**2+dy**2+2*h**2)/((dx**2+dy**2+h**2)**1.5)) / (4*pi*G)
+xx_diff = lambda dx,dy,h,pi,G : -3 * (-(2*dx**2 + dy**2)/((dx**2 + dy**2)**1.5) + (2*dx**2 + dy**2 + h**2)/((dx**2 + dy**2 + h**2)**1.5))/(4*pi*G)
+yx_diff = lambda dx,dy,h,pi,G : -3 * (-(dx * dy) / ((dx**2 + dy**2)**1.5) + (dx * dy) / ((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)
+zx_diff = lambda dx,dy,h,pi,G : -3 * ((dx * h) / ((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)
+xy_diff = lambda dx,dy,h,pi,G : -3 * (-(dx*dy)/((dx**2+dy**2)**1.5) + (dx*dy)/((dx**2+dy**2+h**2)**1.5) ) / (4*pi*G)
+yy_diff = lambda dx,dy,h,pi,G : -3 * (-(dx**2+2*dy**2)/((dx**2+dy**2)**1.5) + (dx**2 + 2*dy**2 + h**2)/((dx**2 + dy**2 + h**2)**1.5)) /(4*pi*G)
+zy_diff = lambda dx,dy,h,pi,G : -3 * ((dy*h)/((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)
+xz_diff = lambda dx,dy,h,pi,G : -3 * ((dx * h) / ((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)
+yz_diff = lambda dx,dy,h,pi,G : -3 * ((dy * h) / ((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)
+zz_diff = lambda dx,dy,h,pi,G : -3 * (-1/((dx**2+dy**2)**0.5) + (dx**2+dy**2+2*h**2)/((dx**2+dy**2+h**2)**1.5)) / (4*pi*G)
 
 xx_same = lambda pi,G : 9/(4*pi*G) * 0.25/0.0309019361618552
 yx_same = lambda pi,G : 0
