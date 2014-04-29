@@ -55,6 +55,7 @@ BOOST_AUTO_TEST_CASE(read_yaml_file)
   rootnode["attributes"] = YAML::Node();
   rootnode["attributes"]["h"] = 0.002;
   rootnode["attributes"]["E"] = 3e6;
+  rootnode["attributes"]["taxelArea"] = 0.002;
   std::ofstream out(tempstr);
   out << rootnode;
   out.close(); // close the file or YAML reader won't be able to open it.
