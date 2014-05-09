@@ -25,6 +25,7 @@ add_library(ContactModelling
   InterpolatorLinearDelaunay.cpp
   MeshInterface.cpp
   MeshNatural.cpp
+  MeshRegularRectangular.cpp
   MeshRegularSquare.cpp
   SensorValuesConverter.cpp
   SkinProviderInterface.cpp
