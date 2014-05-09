@@ -1,5 +1,6 @@
 FIND_PACKAGE(Boost 1.52 COMPONENTS iostreams system filesystem REQUIRED)
 FIND_PACKAGE(Armadillo 2.4.2 REQUIRED)
+FIND_PACKAGE(libtsnnls REQUIRED)
 
 include_directories(${ContactModellingLib_SOURCE_DIR}/inc)
 include_directories(${ContactModellingSuite_SOURCE_DIR}/triangle/inc)
@@ -13,6 +14,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 add_library(ContactModelling
   AlgDisplacementsToForces.cpp
+  AlgDisplacementsToNonnegativeNormalForces.cpp
   AlgForcesToDisplacements.cpp
   AlgInterface.cpp
   Delaunay.cpp
@@ -34,4 +36,5 @@ target_link_libraries(ContactModelling
   yaml-cpp
   ${Boost_LIBRARIES}
   ${ARMADILLO_LIBRARIES}
+  tsnnls
 )

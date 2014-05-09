@@ -16,7 +16,7 @@
 #include "MeshRegularSquare.hpp"
 #include "InterpolatorLinearDelaunay.hpp"
 #include "SkinYamlProvider.hpp"
-#include "AlgDisplacementsToForces.hpp"
+#include "AlgDisplacementsToNonnegativeNormalForces.hpp"
 #include "AlgForcesToDisplacements.hpp"
 #include "helpers/plot.hpp"
 #include "helpers/log.hpp"
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
   if (process_options(argc, argv, options))
     return 0;
 
-  LOG_SET_LEVEL(INFO)
+  LOG_SET_LEVEL(DEBUG2)
 
   SkinYamlProvider skin_provider(options.input_filename);
   std::unique_ptr<MeshInterface> natural_mesh((MeshInterface*) skin_provider.createMesh());
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
   if (options.source_pitch > 0) {
     // interpolate
     interp_mesh.reset(new MeshRegularSquare(*natural_mesh, options.source_pitch));
-    interpolator.reset(new InterpolatorLinearDelaunay(NIPP::InterpolateToZero));
+    interpolator.reset(new InterpolatorLinearDelaunay(NIPP::RemoveFromMesh));
   }
   std::unique_ptr<MeshInterface> forces_mesh(
     new MeshRegularSquare(*natural_mesh, options.forces_pitch, options.forces_dim)
@@ -50,57 +50,57 @@ int main(int argc, char** argv)
     new MeshRegularSquare(*natural_mesh, options.displacements_pitch, options.displacements_dim)
   );
 
-  AlgDisplacementsToForces AlgDToF;
+  AlgDisplacementsToNonnegativeNormalForces AlgDToF;
   AlgForcesToDisplacements AlgFToD;
 
-  AlgDisplacementsToForces::params_type AlgDToF_params;
+  AlgDisplacementsToNonnegativeNormalForces::params_type AlgDToF_params;
   AlgForcesToDisplacements::params_type AlgFToD_params;
 
   AlgDToF_params.skin_props = skin_provider.getAttributes();
   AlgFToD_params.skin_props = skin_provider.getAttributes();
 
-  LOG(DEBUG) << "Constructed all the required objects.";
-  LOG(DEBUG) << "Starting offline calculations.";
+  LOG(DEBUG1) << "Constructed all the required objects.";
+  LOG(DEBUG1) << "Starting offline calculations.";
 
   std::unique_ptr<MeshInterface>& source_mesh = (interpolator) ? interp_mesh : natural_mesh;
 
   if (interpolator) {
-    LOG(DEBUG) << "Starting offline interpolation phase.";
+    LOG(DEBUG2) << "Starting offline interpolation phase.";
     interpolator->offline(*natural_mesh, *interp_mesh);
-    LOG(DEBUG) << "Done with offline interpolation phase.";
+    LOG(DEBUG2) << "Done with offline interpolation phase.";
   }
 
-  LOG(DEBUG) << "Starting disps->forces offline.";
+  LOG(DEBUG2) << "Starting disps->forces offline.";
   boost::any AlgDToF_offline = AlgDToF.offline(*source_mesh, *forces_mesh, AlgDToF_params);
-  LOG(DEBUG) << "Done with disps->forces offline.";
-  LOG(DEBUG) << "Starting forces->disps offline.";
+  LOG(DEBUG2) << "Done with disps->forces offline.";
+  LOG(DEBUG2) << "Starting forces->disps offline.";
   boost::any AlgFToD_offline = AlgFToD.offline(*forces_mesh, *disps_mesh,  AlgFToD_params);
-  LOG(DEBUG) << "Done with forces->disps offline.";
+  LOG(DEBUG2) << "Done with forces->disps offline.";
 
   const arma::mat& mFD = boost::any_cast<const arma::mat&>(AlgFToD_offline);
   for (size_t i = 0; i < mFD.n_rows; ++i) {
     if (std::isnan(mFD(i,0))) {
-      LOG(DEBUG) << "x: " << disps_mesh->node(i).x << "y: " << disps_mesh->node(i).y;
+      LOG(DEBUG3) << "x: " << disps_mesh->node(i).x << "y: " << disps_mesh->node(i).y;
     }
   }
 
-  LOG(DEBUG) << "Done with offline calculations.";
+  LOG(DEBUG1) << "Done with offline calculations.";
 
-  LOG(DEBUG) << "Updating data in the mesh."; 
+  LOG(DEBUG2) << "Updating data in the mesh."; 
   skin_provider.update(natural_mesh->getRawValues());
-  LOG(DEBUG) << "Done updating data in the mesh.";
+  LOG(DEBUG2) << "Done updating data in the mesh.";
 
   if (interpolator) {
-    LOG(DEBUG) << "Starting online interpolation phase.";
+    LOG(DEBUG2) << "Starting online interpolation phase.";
     interpolator->interpolate(*natural_mesh, *interp_mesh);
-    LOG(DEBUG) << "Done with online interpolation phase.";
+    LOG(DEBUG2) << "Done with online interpolation phase.";
   }
-  LOG(DEBUG) << "Running disps->forces online.";
+  LOG(DEBUG2) << "Running disps->forces online.";
   AlgDToF.run(*source_mesh, *forces_mesh, AlgDToF_params, AlgDToF_offline);
-  LOG(DEBUG) << "Done with disps->forces online.";
-  LOG(DEBUG) << "Running forces->disps online.";
+  LOG(DEBUG2) << "Done with disps->forces online.";
+  LOG(DEBUG2) << "Running forces->disps online.";
   AlgFToD.run(*forces_mesh, *disps_mesh,  AlgFToD_params, AlgFToD_offline);
-  LOG(DEBUG) << "Done with forces->disps online.";
+  LOG(DEBUG2) << "Done with forces->disps online.";
 
   dumpForPlot(*natural_mesh, "natural");
   if (interpolator)
