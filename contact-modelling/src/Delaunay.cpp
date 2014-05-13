@@ -22,9 +22,8 @@ Delaunay::Delaunay(const MeshInterface& mesh)
   // N - don't copy pointlist into output struct; we don't use jettisoning vertices so it
   //     doesn't change anything. We're also using just Delaunay (no Steiner points), so again,
   //     no need for it.
-  // FUTURE:
   // Q : quiet, no output on the command line
-  const char*  triswitches_const = "zBcnN";
+  const char*  triswitches_const = "zBcnNQ";
   char* triswitches = new char[strlen(triswitches_const)+1]; // +1 for \0
   strncpy(triswitches, triswitches_const, strlen(triswitches_const)+1);
 
