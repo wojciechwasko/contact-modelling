@@ -15,8 +15,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_library(ContactModelling
   AlgDisplacementsToForces.cpp
   AlgDisplacementsToNonnegativeNormalForces.cpp
+  AlgDisplacementsToPressures.cpp
+  AlgDisplacementsToNonnegativePressures.cpp
   AlgForcesToDisplacements.cpp
   AlgInterface.cpp
+  AlgPressuresToDisplacements.cpp
   Delaunay.cpp
   helpers/elastic_linear_model.cpp
   helpers/log.cpp
@@ -25,6 +28,7 @@ add_library(ContactModelling
   InterpolatorLinearDelaunay.cpp
   MeshInterface.cpp
   MeshNatural.cpp
+  MeshRegularRectangular.cpp
   MeshRegularSquare.cpp
   SensorValuesConverter.cpp
   SkinProviderInterface.cpp

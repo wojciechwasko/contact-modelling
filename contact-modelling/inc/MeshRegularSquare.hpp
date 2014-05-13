@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "MeshInterface.hpp"
+#include "MeshRegularRectangular.hpp"
 
 /**
  * \brief   Regular mesh with square base element.
@@ -16,7 +16,7 @@
  * But would that be efficient? (POIROAE)
  * \endcond
  */
-class MeshRegularSquare : public MeshInterface
+class MeshRegularSquare : public MeshRegularRectangular
 {
 public:
   /**
@@ -65,25 +65,5 @@ public:
   MeshRegularSquare(MeshRegularSquare&&)                 = default;
   ~MeshRegularSquare()                                   = default;
 
-private:
-  /**
-   * \brief   "delta", distance between two neighbouring nodes in x or y direction (square base)
-   */
-  double d_;
-
-  double impl_node_area(size_t i) const;
-
-  /**
-   * \brief   How many nodes in total. The mesh is supposed to contain the x0,x1,y0,y1 points
-   */
-  static size_t calculate_no_nodes(double x0, double y0, double x1, double y1, double d);
-
-  /**
-   * \brief   ceil((t1-t0)/d) ; no of nodes that wrap t0 and t1, with d distance between each pair
-   */
-  static size_t calculate_no_nodes_1D(double t0, double t1, double d);
-
-  double impl_dx() const;
-  double impl_dy() const;
 };
 #endif /* MESHREGULARSQUARE_HPP */

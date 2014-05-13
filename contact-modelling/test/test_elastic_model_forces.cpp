@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE elastic_model
+#define BOOST_TEST_MODULE elastic_model_forces
 #include <boost/test/unit_test.hpp>
 #include "inc/custom_test_macros.hpp"
 

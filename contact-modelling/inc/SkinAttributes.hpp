@@ -13,6 +13,11 @@ struct SkinAttributes {
   double E;
 
   /**
+   * Poisson's ratio of the elastomer.
+   */
+  double nu;
+
+  /**
    * The area of one given taxel.
    */
   double taxelArea;

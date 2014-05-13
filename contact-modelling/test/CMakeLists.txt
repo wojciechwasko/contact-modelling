@@ -27,11 +27,17 @@ TARGET_LINK_LIBRARIES(test_alg_interface
   ${Boost_LIBRARIES})
 ADD_TEST(test_alg_interface test_alg_interface)
 
-ADD_EXECUTABLE(test_elastic_model test_elastic_model.cpp)
-TARGET_LINK_LIBRARIES(test_elastic_model
+ADD_EXECUTABLE(test_elastic_model_forces test_elastic_model_forces.cpp)
+TARGET_LINK_LIBRARIES(test_elastic_model_forces
   ContactModelling
   ${Boost_LIBRARIES})
-ADD_TEST(test_elastic_model test_elastic_model)
+ADD_TEST(test_elastic_model_forces test_elastic_model_forces)
+
+ADD_EXECUTABLE(test_elastic_model_pressures test_elastic_model_pressures.cpp)
+TARGET_LINK_LIBRARIES(test_elastic_model_pressures
+  ContactModelling
+  ${Boost_LIBRARIES})
+ADD_TEST(test_elastic_model_pressures test_elastic_model_pressures)
 
 ADD_EXECUTABLE(test_eq_almost test_eq_almost.cpp)
 TARGET_LINK_LIBRARIES(test_eq_almost 
@@ -73,7 +79,8 @@ ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPEN
   test_geometry
   test_erase_by_indices
   test_alg_interface
-  test_elastic_model
+  test_elastic_model_forces
+  test_elastic_model_pressures
   test_eq_almost
   test_skin_yaml_provider
   test_interpolator_linear_delaunay
