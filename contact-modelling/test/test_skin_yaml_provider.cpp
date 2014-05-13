@@ -55,6 +55,7 @@ BOOST_AUTO_TEST_CASE(read_yaml_file)
   rootnode["attributes"] = YAML::Node();
   rootnode["attributes"]["h"] = 0.002;
   rootnode["attributes"]["E"] = 3e6;
+  rootnode["attributes"]["nu"] = 0.5;
   rootnode["attributes"]["taxelArea"] = 0.002;
   std::ofstream out(tempstr);
   out << rootnode;
@@ -79,4 +80,5 @@ BOOST_AUTO_TEST_CASE(read_yaml_file)
   CHECK_CLOSE_COLLECTION(expected_update_values, update_values, 1e-4);
   BOOST_CHECK_EQUAL(provider.getAttributes().h, 0.002);
   BOOST_CHECK_EQUAL(provider.getAttributes().E, 3e6);
+  BOOST_CHECK_EQUAL(provider.getAttributes().nu, 0.5);
 }

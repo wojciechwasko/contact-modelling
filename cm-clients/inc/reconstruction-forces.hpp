@@ -5,7 +5,7 @@
 #include "MeshRegularSquare.hpp"
 #include "InterpolatorLinearDelaunay.hpp"
 #include "AlgForcesToDisplacements.hpp"
-#include "AlgDisplacementsToForces.hpp"
+#include "AlgDisplacementsToNonnegativeNormalForces.hpp"
 
 struct opts {
   double source_pitch;

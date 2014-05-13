@@ -9,13 +9,10 @@ using helpers::string::sb;
 
 MeshRegularRectangular::MeshRegularRectangular(const MeshInterface& base_mesh, const double dx, const double dy)
   : MeshRegularRectangular(
-      base_mesh.D,
-      base_mesh.minX(), 
-      base_mesh.minY(),
-      base_mesh.maxX(),
-      base_mesh.maxY(),
+      base_mesh,
       dx,
-      dy
+      dy,
+      base_mesh.D
     )
 {
 }
@@ -46,11 +43,10 @@ MeshRegularRectangular::MeshRegularRectangular(
 {
   const size_t nx       = calculate_no_nodes_1D(x0, x1, dx);
   const double diff_x   = nx * dx - (x1 - x0);
-  const double x_origin = x0 - diff_x / 2.;
+  const double x_origin = x0;
 
   const size_t ny       = calculate_no_nodes_1D(y0, y1, dy);
-  const double diff_y   = ny * dy - (y1 - y0);
-  const double y_origin = y0 - diff_y / 2.;
+  const double y_origin = y0;
 
   size_t in = 0;
   double x = x_origin;
@@ -97,13 +93,13 @@ MeshRegularRectangular::calculate_no_nodes_1D(double t0, double t1, double d)
 {
   if (!(t1 > t0)) {
     throw std::runtime_error(
-      sb()  << "Error constructing regular square mesh, !(t1 > t0); "
+      sb()  << "Error constructing regular rectangular mesh, !(t1 > t0); "
             << "t1 == " << t1 << "t0 == " << t0
     );
   }
   if (!(d > 0)) {
     throw std::runtime_error(
-      sb()  << "Error constructing regular square mesh, !(d > 0); "
+      sb()  << "Error constructing regular rectangular mesh, !(d > 0); "
             << "d == " << d
     );
   }

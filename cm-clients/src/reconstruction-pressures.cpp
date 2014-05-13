@@ -4,7 +4,7 @@
  *          file.
  */
 
-#include "reconstruction.hpp"
+#include "reconstruction-pressures.hpp"
 
 #include <iostream>
 #include <string>
@@ -16,8 +16,8 @@
 #include "MeshRegularSquare.hpp"
 #include "InterpolatorLinearDelaunay.hpp"
 #include "SkinYamlProvider.hpp"
-#include "AlgDisplacementsToNonnegativeNormalForces.hpp"
-#include "AlgForcesToDisplacements.hpp"
+#include "AlgPressuresToDisplacements.hpp"
+#include "AlgDisplacementsToPressures.hpp"
 #include "helpers/plot.hpp"
 #include "helpers/log.hpp"
 
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
   if (process_options(argc, argv, options))
     return 0;
 
-  LOG_SET_LEVEL(DEBUG2)
+  LOG_SET_LEVEL(DEBUG)
 
   SkinYamlProvider skin_provider(options.input_filename);
   std::unique_ptr<MeshInterface> natural_mesh((MeshInterface*) skin_provider.createMesh());
@@ -41,23 +41,23 @@ int main(int argc, char** argv)
   if (options.source_pitch > 0) {
     // interpolate
     interp_mesh.reset(new MeshRegularSquare(*natural_mesh, options.source_pitch));
-    interpolator.reset(new InterpolatorLinearDelaunay(NIPP::RemoveFromMesh));
+    interpolator.reset(new InterpolatorLinearDelaunay(NIPP::InterpolateToZero));
   }
-  std::unique_ptr<MeshInterface> forces_mesh(
-    new MeshRegularSquare(*natural_mesh, options.forces_pitch, options.forces_dim)
+  std::unique_ptr<MeshInterface> pressures_mesh(
+    new MeshRegularSquare(*natural_mesh, options.pressures_pitch, 1)
   );
   std::unique_ptr<MeshInterface> disps_mesh(
-    new MeshRegularSquare(*natural_mesh, options.displacements_pitch, options.displacements_dim)
+    new MeshRegularSquare(*natural_mesh, options.displacements_pitch, 1)
   );
 
-  AlgDisplacementsToNonnegativeNormalForces AlgDToF;
-  AlgForcesToDisplacements AlgFToD;
+  AlgDisplacementsToPressures AlgDToP;
+  AlgPressuresToDisplacements AlgPToD;
 
-  AlgDisplacementsToNonnegativeNormalForces::params_type AlgDToF_params;
-  AlgForcesToDisplacements::params_type AlgFToD_params;
+  AlgDisplacementsToPressures::params_type AlgDToP_params;
+  AlgPressuresToDisplacements::params_type AlgPToD_params;
 
-  AlgDToF_params.skin_props = skin_provider.getAttributes();
-  AlgFToD_params.skin_props = skin_provider.getAttributes();
+  AlgDToP_params.skin_props = skin_provider.getAttributes();
+  AlgPToD_params.skin_props = skin_provider.getAttributes();
 
   LOG(DEBUG1) << "Constructed all the required objects.";
   LOG(DEBUG1) << "Starting offline calculations.";
@@ -70,19 +70,19 @@ int main(int argc, char** argv)
     LOG(DEBUG2) << "Done with offline interpolation phase.";
   }
 
-  LOG(DEBUG2) << "Starting disps->forces offline.";
-  boost::any AlgDToF_offline = AlgDToF.offline(*source_mesh, *forces_mesh, AlgDToF_params);
-  LOG(DEBUG2) << "Done with disps->forces offline.";
-  LOG(DEBUG2) << "Starting forces->disps offline.";
-  boost::any AlgFToD_offline = AlgFToD.offline(*forces_mesh, *disps_mesh,  AlgFToD_params);
-  LOG(DEBUG2) << "Done with forces->disps offline.";
+  LOG(DEBUG2) << "Starting disps->pressures offline.";
+  boost::any AlgDToP_offline = AlgDToP.offline(*source_mesh, *pressures_mesh, AlgDToP_params);
+  LOG(DEBUG2) << "Done with disps->pressures offline.";
+  LOG(DEBUG2) << "Starting pressures->disps offline.";
+  boost::any AlgPToD_offline = AlgPToD.offline(*pressures_mesh, *disps_mesh,  AlgPToD_params);
+  LOG(DEBUG2) << "Done with pressures->disps offline.";
 
-  const arma::mat& mFD = boost::any_cast<const arma::mat&>(AlgFToD_offline);
-  for (size_t i = 0; i < mFD.n_rows; ++i) {
-    if (std::isnan(mFD(i,0))) {
-      LOG(DEBUG3) << "x: " << disps_mesh->node(i).x << "y: " << disps_mesh->node(i).y;
-    }
-  }
+  //const arma::mat& mFD = boost::any_cast<const arma::mat&>(AlgPToD_offline);
+  //for (size_t i = 0; i < mFD.n_rows; ++i) {
+  //  if (std::isnan(mFD(i,0))) {
+  //    LOG(DEBUG3) << "x: " << disps_mesh->node(i).x << "y: " << disps_mesh->node(i).y;
+  //  }
+  //}
 
   LOG(DEBUG1) << "Done with offline calculations.";
 
@@ -95,17 +95,17 @@ int main(int argc, char** argv)
     interpolator->interpolate(*natural_mesh, *interp_mesh);
     LOG(DEBUG2) << "Done with online interpolation phase.";
   }
-  LOG(DEBUG2) << "Running disps->forces online.";
-  AlgDToF.run(*source_mesh, *forces_mesh, AlgDToF_params, AlgDToF_offline);
-  LOG(DEBUG2) << "Done with disps->forces online.";
-  LOG(DEBUG2) << "Running forces->disps online.";
-  AlgFToD.run(*forces_mesh, *disps_mesh,  AlgFToD_params, AlgFToD_offline);
-  LOG(DEBUG2) << "Done with forces->disps online.";
+  LOG(DEBUG2) << "Running disps->pressures online.";
+  AlgDToP.run(*source_mesh, *pressures_mesh, AlgDToP_params, AlgDToP_offline);
+  LOG(DEBUG2) << "Done with disps->pressures online.";
+  LOG(DEBUG2) << "Running pressures->disps online.";
+  AlgPToD.run(*pressures_mesh, *disps_mesh,  AlgPToD_params, AlgPToD_offline);
+  LOG(DEBUG2) << "Done with pressures->disps online.";
 
   dumpForPlot(*natural_mesh, "natural");
   if (interpolator)
     dumpForPlot(*interp_mesh, "interpolated");
-  dumpForPlot(*forces_mesh, "forces");
+  dumpForPlot(*pressures_mesh, "pressures");
   dumpForPlot(*disps_mesh,  "reconstructed");
 
   return 0;
@@ -125,22 +125,14 @@ bool process_options(int argc, char** argv, opts& options)
       "Pitch of the mesh the sensors readings should be interpolated into. If <= 0, no interpolation "
       "will be performed (a natural mesh will be used. Pitch is the distance between two neighbouring "
       "nodes in either x or y direction, in meters. Default: 0.001 [m].")
-    ("forces_pitch,f",
-      po::value<double>(&options.forces_pitch)->default_value(0.001),
-      "Pitch of the forces mesh, i.e. distance between two neighbouring nodes in either x or y "
+    ("pressures_pitch,p",
+      po::value<double>(&options.pressures_pitch)->default_value(0.001),
+      "Pitch of the pressures mesh, i.e. distance between two neighbouring nodes in either x or y "
       "direction, in meters. Default: 0.001 [m].")
-    ("forces_dim",
-      po::value<size_t>(&options.forces_dim)->default_value(1),
-      "Dimensionality of the forces mesh. If 1, only normal forces will be considered. If 3, "
-      "three-dimensional forces will be considered. Default: 1.")
     ("displacements_pitch,d",
       po::value<double>(&options.displacements_pitch)->default_value(0.001),
       "Pitch of the (resulting) displacements mesh, i.e. distance between two neighbourint nodes in "
       "either x or y direction, in meters. Default: 0.001 [m].")
-    ("displacements_dim",
-      po::value<size_t>(&options.displacements_dim)->default_value(1),
-      "Dimensionality of the (resulting) displacements mesh. If 1, only normal displacements "
-      "will be considered. If 3, three-dimensional displacements will be considered. Default: 1.")
   ;
 
   po::variables_map vm;

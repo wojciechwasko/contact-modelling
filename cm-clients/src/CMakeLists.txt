@@ -21,11 +21,20 @@ include_directories(${ContactModellingLib_SOURCE_DIR}/inc)
 #   source tree. If no CMakeLists.txt file changes when a source is added or
 #   regenerate.)
 
-add_executable(reconstruction
-  reconstruction.cpp
+add_executable(reconstruction-forces
+  reconstruction-forces.cpp
 )
 
-target_link_libraries(reconstruction
+target_link_libraries(reconstruction-forces
+  ContactModelling
+  ${Boost_LIBRARIES}
+)
+
+add_executable(reconstruction-pressures
+  reconstruction-pressures.cpp
+)
+
+target_link_libraries(reconstruction-pressures
   ContactModelling
   ${Boost_LIBRARIES}
 )

@@ -1,7 +1,7 @@
 #include "MeshRegularSquare.hpp"
 
 MeshRegularSquare::MeshRegularSquare(const MeshInterface& base_mesh, const double d)
-  : MeshRegularRectangular(base_mesh, d, d)
+  : MeshRegularSquare(base_mesh, d, base_mesh.D)
 {}
 
 MeshRegularSquare::MeshRegularSquare(const MeshInterface& base_mesh, const double d, const size_t dim)
