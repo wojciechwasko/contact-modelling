@@ -103,6 +103,11 @@ AlgDisplacementsToNonnegativePressures::impl_run(
   std::vector<double> d_vals;
   d_vals.assign(disps.getRawValues().cbegin(), disps.getRawValues().cend());
   double* solution = t_snnls(pre.taucs_m.get(), d_vals.data(), &residualNorm, -1, 1);
+  if (!solution) {
+    throw std::runtime_error(
+      sb() << "libtsnnls returned nullptr as the solution"
+    );
+  }
   LOG(DEBUG) << "nnls residual norm: " << residualNorm;
   pressures.getRawValues().clear();
   pressures.getRawValues().reserve(pre.taucs_m->n);
