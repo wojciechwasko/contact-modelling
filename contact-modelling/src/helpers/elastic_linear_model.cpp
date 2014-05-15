@@ -22,6 +22,9 @@ namespace helpers {
     )
     {
       using helpers::math::eq_almost;
+      if (!eq_almost(skin_attr.nu, 0.5, 1e-3)) {
+        LOG(WARN) << "The equations implemented for the forces-to-displacements model are only valid for nu=0.5";
+      }
       impl::sanity_checks_forces_to_displacements(f,d);
     
       const size_t f_stride = f.D;
