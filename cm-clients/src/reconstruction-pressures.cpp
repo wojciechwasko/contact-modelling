@@ -11,6 +11,7 @@
 #include <memory>
 #include <boost/program_options.hpp>
 #include <cmath>
+#include <algorithm>
 
 #include "MeshNatural.hpp"
 #include "MeshRegularSquare.hpp"
@@ -101,6 +102,12 @@ int main(int argc, char** argv)
   LOG(DEBUG2) << "Running pressures->disps online.";
   AlgPToD.run(*pressures_mesh, *disps_mesh,  AlgPToD_params, AlgPToD_offline);
   LOG(DEBUG2) << "Done with pressures->disps online.";
+
+  double total_force = 0;
+  for (size_t i = 0; i < pressures_mesh->no_nodes(); ++i) {
+    total_force += pressures_mesh->getValue(i, 0) * pressures_mesh->node_area(i);
+  }
+  std::cout << "Total force: " << total_force << std::endl;
 
   dumpForPlot(*natural_mesh, "natural");
   if (interpolator)
