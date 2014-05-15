@@ -20,6 +20,12 @@ class MeshRegularRectangular : public MeshInterface
 {
 public:
   /**
+   * \brief   (Almost) trivial constructor, empty mesh with no nodes.
+   * \param   dim   dimensionality of values in this mesh
+   */
+  MeshRegularRectangular(const size_t dim, const double dx, const double dy);
+
+  /**
    * \brief   Constructor for a regular rectangular mesh spanning a mesh of sensors -- from a "Natural
    *          Mesh" instance.
    * \param   base_mesh Any mesh supporting .min/maxX/Y(), but that's only natural meshes so far

@@ -20,6 +20,13 @@ class MeshRegularSquare : public MeshRegularRectangular
 {
 public:
   /**
+   * \brief   (Almost) trivial constructor, empty mesh, no nodes.
+   * \param   dim   dimensionality of values in this mesh
+   * \param   d     dimension of the base element in this mesh
+   */
+  MeshRegularSquare(const size_t dim, const double d);
+
+  /**
    * \brief   Constructor for a regular square mesh spanning a mesh of sensors -- from a "Natural
    *          Mesh" instance.
    * \param   base_mesh Any mesh supporting .min/maxX/Y(), but that's only natural meshes so far

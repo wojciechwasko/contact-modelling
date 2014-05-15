@@ -27,6 +27,14 @@ public:
   typedef std::vector<size_t>                        bad_nodes_type;
 
   /**
+   * \brief   Copy the nodes over from clone_from mesh.
+   *
+   * Removes all the nodes (and values and metadata) from this mesh and adds nodes with the
+   * coordinates of the nodes from the clone_from mesh.
+   */
+  void clone_structure(const MeshInterface& clone_from);
+
+  /**
    * \brief   Get number of nodes in the mesh.
    */
   size_t no_nodes() const;
@@ -34,7 +42,6 @@ public:
    * \brief   Get number of nodes in the mesh.
    */
   size_t size() const;
-
 
   /**
    * \brief   Get non-const iterator to the bein of nodes.

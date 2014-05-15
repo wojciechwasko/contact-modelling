@@ -1,5 +1,9 @@
 #include "MeshRegularSquare.hpp"
 
+  MeshRegularSquare::MeshRegularSquare(const size_t dim, const double d)
+  : MeshRegularRectangular(dim, d, d)
+{}
+
 MeshRegularSquare::MeshRegularSquare(const MeshInterface& base_mesh, const double d)
   : MeshRegularSquare(base_mesh, d, base_mesh.D)
 {}

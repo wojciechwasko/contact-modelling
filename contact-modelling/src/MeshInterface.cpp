@@ -14,6 +14,26 @@ MeshInterface::MeshInterface(const size_t dim, const size_t no_nodes)
     metadata_(no_nodes)
 {}
 
+void
+MeshInterface::clone_structure(const MeshInterface& clone_from)
+{
+  // remove existing nodes
+  nodes_.clear(); 
+  metadata_.clear();
+  values_.clear();
+
+  nodes_.reserve(clone_from.no_nodes());
+  
+  std::for_each(clone_from.nodes_cbegin(), clone_from.nodes_cend(), [&] (const MeshNode& n) {
+    nodes_.push_back(n);
+  });
+
+  metadata_.resize(clone_from.no_nodes());
+  values_.resize(D * clone_from.no_nodes());
+
+  generateMinMax();
+}
+
 size_t
 MeshInterface::no_nodes() const
 {

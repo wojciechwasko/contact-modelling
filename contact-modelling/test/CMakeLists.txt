@@ -75,6 +75,12 @@ TARGET_LINK_LIBRARIES(test_dump_mesh
   ${Boost_LIBRARIES})
 ADD_TEST(test_dump_mesh test_dump_mesh)
 
+ADD_EXECUTABLE(test_mesh_interface test_mesh_interface.cpp)
+TARGET_LINK_LIBRARIES(test_mesh_interface
+  ContactModelling
+  ${Boost_LIBRARIES})
+ADD_TEST(test_mesh_interface test_mesh_interface)
+
 ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPENDS
   test_geometry
   test_erase_by_indices
@@ -87,4 +93,5 @@ ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPEN
   test_log
   test_log_plateau_level
   test_dump_mesh
+  test_mesh_interface
 )

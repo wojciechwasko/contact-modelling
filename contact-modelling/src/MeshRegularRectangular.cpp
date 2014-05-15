@@ -7,6 +7,11 @@
 
 using helpers::string::sb;
 
+MeshRegularRectangular::MeshRegularRectangular(const size_t dim, const double dx, const double dy)
+  : MeshInterface(dim, 0), dx_(dx), dy_(dy)
+{
+}
+
 MeshRegularRectangular::MeshRegularRectangular(const MeshInterface& base_mesh, const double dx, const double dy)
   : MeshRegularRectangular(
       base_mesh,
