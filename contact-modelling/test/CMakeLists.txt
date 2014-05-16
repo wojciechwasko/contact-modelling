@@ -4,8 +4,8 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
 
 INCLUDE_DIRECTORIES(${ContactModellingLib_SOURCE_DIR}/inc)
-include_directories(${ContactModellingSuite_SOURCE_DIR}/yaml-cpp/include)
-include_directories(${ContactModellingSuite_SOURCE_DIR}/gnuplot-iostream/inc)
+include_directories(${YAML_CPP_SOURCE_DIR}/include)
+include_directories(${gnuplot_iostream_SOURCE_DIR}/inc)
 # ugly hack to enable C++11
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
