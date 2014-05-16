@@ -2,19 +2,19 @@
 #include <boost/test/unit_test.hpp>
 #include "inc/custom_test_macros.hpp"
 
-#include "MeshRegularSquare.hpp"
+#include "cm/mesh/square_base.hpp"
 
 struct MockNode {
   double x;
   double y;
 };
 
-class MockMesh : public MeshInterface {
+class MockMesh : public cm::MeshInterface {
 private:
   size_t offset;
 
 public:
-  MockMesh(size_t dim, size_t no_nodes) : MeshInterface(dim, no_nodes), offset(0) {}
+  MockMesh(size_t dim, size_t no_nodes) : cm::MeshInterface(dim, no_nodes), offset(0) {}
   void add_node(MockNode n)
   {
     node(offset).x = n.x;
@@ -37,8 +37,8 @@ BOOST_AUTO_TEST_CASE(test_clone_structure)
   s.add_node({1.23,4.56});
   s.add_node({2.34,5.67});
 
-  MeshRegularSquare t(1, 0.01);
-  t.clone_structure((const MeshInterface&) s);
+  cm::MeshSquareBase t(1, 0.01);
+  t.clone_structure((const cm::MeshInterface&) s);
 
   BOOST_CHECK_EQUAL(t.no_nodes(), s.no_nodes());
   BOOST_CHECK_EQUAL(t.getRawValues().size(), 1*s.no_nodes());

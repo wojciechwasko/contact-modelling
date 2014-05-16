@@ -6,22 +6,22 @@
 #include <array>
 #include <vector>
 
-#include "AlgForcesToDisplacements.hpp"
+#include "cm/algorithm/forces_to_displacements.hpp"
 
-#include "external/armadillo.hpp"
-#include "MeshInterface.hpp"
+#include "cm/details/external/armadillo.hpp"
+#include "cm/mesh/interface.hpp"
 
 struct MockNode {
   double x;
   double y;
 };
 
-class MockMesh : public MeshInterface {
+class MockMesh : public cm::MeshInterface {
 private:
   size_t offset;
 
 public:
-  MockMesh(size_t dim, size_t no_nodes) : MeshInterface(dim, no_nodes), offset(0) {}
+  MockMesh(size_t dim, size_t no_nodes) : cm::MeshInterface(dim, no_nodes), offset(0) {}
   void add_node(MockNode n)
   {
     node(offset).x = n.x;
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(em_other_nodes_1_1_dim_3_3)
   forces_mesh.add_node({0.1,0.1});
   disps_mesh.add_node({0.105,0.107});
 
-  typedef AlgForcesToDisplacements alg_forces_to_disps;
+  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
   params_forces_to_disps.skin_props.E = 300000;
   params_forces_to_disps.skin_props.h  = 0.002;
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(em_other_nodes_1_1_dim_1_3)
   forces_mesh.add_node({0.1,0.1});
   disps_mesh.add_node({0.105,0.107});
 
-  typedef AlgForcesToDisplacements alg_forces_to_disps;
+  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
   params_forces_to_disps.skin_props.E = 300000;
   params_forces_to_disps.skin_props.h  = 0.002;
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(em_other_nodes_1_1_dim_3_1)
   forces_mesh.add_node({0.1,0.1});
   disps_mesh.add_node({0.105,0.107});
 
-  typedef AlgForcesToDisplacements alg_forces_to_disps;
+  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
   params_forces_to_disps.skin_props.E = 300000;
   params_forces_to_disps.skin_props.h  = 0.002;
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(em_other_nodes_1_1_dim_1_1)
   forces_mesh.add_node({0.1,0.1});
   disps_mesh.add_node({0.105,0.107});
 
-  typedef AlgForcesToDisplacements alg_forces_to_disps;
+  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
   params_forces_to_disps.skin_props.E = 300000;
   params_forces_to_disps.skin_props.h  = 0.002;
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(em_same_nodes_1_1_dim_3_3)
   forces_mesh.add_node({0.1,0.1});
   disps_mesh.add_node({0.1, 0.1});
 
-  typedef AlgForcesToDisplacements alg_forces_to_disps;
+  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
   params_forces_to_disps.skin_props.E = 300000;
   params_forces_to_disps.skin_props.h  = 0.002;
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(em_same_nodes_1_1_dim_1_3)
   forces_mesh.add_node({0.1,0.1});
   disps_mesh.add_node({0.1, 0.1});
 
-  typedef AlgForcesToDisplacements alg_forces_to_disps;
+  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
   params_forces_to_disps.skin_props.E = 300000;
   params_forces_to_disps.skin_props.h  = 0.002;
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(em_same_nodes_1_1_dim_3_1)
   forces_mesh.add_node({0.1,0.1});
   disps_mesh.add_node({0.1, 0.1});
 
-  typedef AlgForcesToDisplacements alg_forces_to_disps;
+  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
   params_forces_to_disps.skin_props.E = 300000;
   params_forces_to_disps.skin_props.h  = 0.002;
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(em_same_nodes_1_1_dim_1_1)
   forces_mesh.add_node({0.1,0.1});
   disps_mesh.add_node({0.1, 0.1});
 
-  typedef AlgForcesToDisplacements alg_forces_to_disps;
+  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
   alg_forces_to_disps::params_type                    params_forces_to_disps;
   params_forces_to_disps.skin_props.E = 300000;
   params_forces_to_disps.skin_props.h  = 0.002;

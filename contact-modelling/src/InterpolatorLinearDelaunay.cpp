@@ -1,7 +1,10 @@
-#include "InterpolatorLinearDelaunay.hpp"
+#include "cm/interpolator/linear_delaunay.hpp"
 
-#include "Delaunay.hpp"
-#include "MeshInterface.hpp"
+#include "cm/details/delaunay.hpp"
+#include "cm/mesh/interface.hpp"
+
+namespace cm {
+using details::Delaunay;
 
 InterpolatorLinearDelaunay::InterpolatorLinearDelaunay(NIPP::NIPP policy)
   : InterpolatorInterface(policy)
@@ -57,3 +60,5 @@ void InterpolatorLinearDelaunay::impl_interpolate(
     );
   }
 }
+
+} /* namespace cm */

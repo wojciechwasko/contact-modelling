@@ -9,23 +9,15 @@
 #include <iostream>
 #include <string>
 #include <memory>
-#include <boost/program_options.hpp>
 #include <cmath>
 #include <algorithm>
 
-#include "MeshNatural.hpp"
-#include "MeshRegularSquare.hpp"
-#include "InterpolatorLinearDelaunay.hpp"
-#include "SkinYamlProvider.hpp"
-#include "AlgPressuresToDisplacements.hpp"
-#include "AlgDisplacementsToPressures.hpp"
-#include "helpers/plot.hpp"
-#include "helpers/log.hpp"
+#include <armadillo>
+#include <boost/program_options.hpp>
 
-#include "external/armadillo.hpp"
+#include "cm/cm.hpp"
 
 namespace po = boost::program_options;
-using helpers::plot::dumpForPlot;
 
 int main(int argc, char** argv)
 {
@@ -35,27 +27,27 @@ int main(int argc, char** argv)
 
   LOG_SET_LEVEL(DEBUG)
 
-  SkinYamlProvider skin_provider(options.input_filename);
-  std::unique_ptr<MeshInterface> natural_mesh((MeshInterface*) skin_provider.createMesh());
-  std::unique_ptr<MeshInterface> interp_mesh;
-  std::unique_ptr<InterpolatorInterface> interpolator;
+  cm::SkinProviderYaml skin_provider(options.input_filename);
+  std::unique_ptr<cm::MeshInterface> natural_mesh((cm::MeshInterface*) skin_provider.createMesh());
+  std::unique_ptr<cm::MeshInterface> interp_mesh;
+  std::unique_ptr<cm::InterpolatorInterface> interpolator;
   if (options.source_pitch > 0) {
     // interpolate
-    interp_mesh.reset(new MeshRegularSquare(*natural_mesh, options.source_pitch));
-    interpolator.reset(new InterpolatorLinearDelaunay(NIPP::InterpolateToZero));
+    interp_mesh.reset(new cm::MeshSquareBase(*natural_mesh, options.source_pitch));
+    interpolator.reset(new cm::InterpolatorLinearDelaunay(cm::NIPP::InterpolateToZero));
   }
-  std::unique_ptr<MeshInterface> pressures_mesh(
-    new MeshRegularSquare(*natural_mesh, options.pressures_pitch, 1)
+  std::unique_ptr<cm::MeshInterface> pressures_mesh(
+    new cm::MeshSquareBase(*natural_mesh, options.pressures_pitch, 1)
   );
-  std::unique_ptr<MeshInterface> disps_mesh(
-    new MeshRegularSquare(*natural_mesh, options.displacements_pitch, 1)
+  std::unique_ptr<cm::MeshInterface> disps_mesh(
+    new cm::MeshSquareBase(*natural_mesh, options.displacements_pitch, 1)
   );
 
-  AlgDisplacementsToPressures AlgDToP;
-  AlgPressuresToDisplacements AlgPToD;
+  cm::AlgDisplacementsToPressures AlgDToP;
+  cm::AlgPressuresToDisplacements AlgPToD;
 
-  AlgDisplacementsToPressures::params_type AlgDToP_params;
-  AlgPressuresToDisplacements::params_type AlgPToD_params;
+  cm::AlgDisplacementsToPressures::params_type AlgDToP_params;
+  cm::AlgPressuresToDisplacements::params_type AlgPToD_params;
 
   AlgDToP_params.skin_props = skin_provider.getAttributes();
   AlgPToD_params.skin_props = skin_provider.getAttributes();
@@ -63,7 +55,7 @@ int main(int argc, char** argv)
   LOG(DEBUG1) << "Constructed all the required objects.";
   LOG(DEBUG1) << "Starting offline calculations.";
 
-  std::unique_ptr<MeshInterface>& source_mesh = (interpolator) ? interp_mesh : natural_mesh;
+  std::unique_ptr<cm::MeshInterface>& source_mesh = (interpolator) ? interp_mesh : natural_mesh;
 
   if (interpolator) {
     LOG(DEBUG2) << "Starting offline interpolation phase.";

@@ -1,11 +1,11 @@
 #define BOOST_TEST_MODULE geometry
 #include <boost/test/unit_test.hpp>
 
-#include "helpers/geometry.hpp"
+#include "cm/details/geometry.hpp"
 
 BOOST_AUTO_TEST_CASE(triangle_area_coordinates)
 {
-  using helpers::geometry::area_triangle;
+  using cm::details::area_triangle;
   const double x0 = 16;
   const double y0 = 15;
   const double x1 = 23;
@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(triangle_area_coordinates)
 
 BOOST_AUTO_TEST_CASE(triangle_area_points)
 {
-  using helpers::geometry::area_triangle;
+  using cm::details::area_triangle;
   struct P {
     double x;
     double y;

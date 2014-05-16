@@ -1,6 +1,7 @@
-#include "SkinProviderInterface.hpp"
-#include "MeshNatural.hpp"
+#include "cm/skin_provider/interface.hpp"
+#include "cm/mesh/natural.hpp"
 
+namespace cm {
 
 SkinProviderInterface::SkinProviderInterface(
   const size_t dim
@@ -28,3 +29,5 @@ SkinProviderInterface::getAttributes() const
 {
   return impl_getAttributes();
 }
+
+} /* namespace cm */

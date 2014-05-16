@@ -1,28 +1,30 @@
-#include "AlgDisplacementsToPressures.hpp"
+#include "cm/algorithm/displacements_to_pressures.hpp"
 
 #include <stdexcept>
 
-#include "MeshInterface.hpp"
-#include "MeshRegularRectangular.hpp"
-#include "external/armadillo.hpp"
-#include "helpers/string.hpp"
+#include "cm/mesh/interface.hpp"
+#include "cm/mesh/rectangular_base.hpp"
+#include "cm/details/external/armadillo.hpp"
+#include "cm/details/string.hpp"
+#include "cm/details/elastic_model_love.hpp"
+
+namespace cm {
+using details::sb;
 
 typedef arma::mat   precomputed_type;
-using helpers::string::sb;
 
-boost::any
-AlgDisplacementsToPressures::impl_offline(
+boost::any AlgDisplacementsToPressures::impl_offline(
   const MeshInterface& disps,
   const MeshInterface& pressures,
   const boost::any& params
 )
 {
-  const MeshRegularRectangular* p_mesh;
+  const MeshRectangularBase* p_mesh;
   try {
-    p_mesh = dynamic_cast<const MeshRegularRectangular*>(&pressures);
+    p_mesh = dynamic_cast<const MeshRectangularBase*>(&pressures);
   } catch (const std::bad_cast& e) {
     throw std::runtime_error(
-      sb()  << "Error downcasting MeshInterface to MeshRegularRectangular. "
+      sb()  << "Error downcasting MeshInterface to MeshRectangularBase. "
             << "Note: only rectangular-element-based meshes are currently supported for "
             << "pressures calculations. Original exception message: " << e.what()
     );
@@ -41,12 +43,11 @@ AlgDisplacementsToPressures::impl_offline(
     );
 
   const params_type& p = boost::any_cast<const params_type&>(params);
-  using helpers::elastic_linear_model::displacements_to_pressures_matrix;
+  using cm::details::displacements_to_pressures_matrix;
   return displacements_to_pressures_matrix(disps, *p_mesh, p.skin_props);
 }
 
-void
-AlgDisplacementsToPressures::impl_run(
+void AlgDisplacementsToPressures::impl_run(
   const MeshInterface& disps,
         MeshInterface& pressures,
   const boost::any& params,
@@ -69,3 +70,5 @@ AlgDisplacementsToPressures::impl_run(
   arma::colvec temp = pre * arma::conv_to<arma::colvec>::from(disps.getRawValues());
   pressures.getRawValues().assign(temp.begin(), temp.end());
 }
+
+} /* namespace cm */

@@ -7,16 +7,16 @@
 #include <memory>
 #include <stdexcept>
 
-#include "MeshInterface.hpp"
-#include "MeshNatural.hpp"
-#include "InterpolatorLinearDelaunay.hpp"
+#include "cm/mesh/interface.hpp"
+#include "cm/mesh/natural.hpp"
+#include "cm/interpolator/linear_delaunay.hpp"
 
 struct MockNode {
   std::array<double,2> relative_position;
 };
 
 // base it off equilateral triangle with center of gravity at (0,0)
-MeshInterface* createMockSourceMesh(size_t dim)
+cm::MeshInterface* createMockSourceMesh(size_t dim)
 {
   MockNode temp_node;
   std::vector<MockNode> mock_source;
@@ -39,11 +39,11 @@ MeshInterface* createMockSourceMesh(size_t dim)
   temp_node.relative_position[1] = 2 * height / 3.0;
   mock_source.push_back(temp_node);
 
-  return new MeshNatural(dim, mock_source.cbegin(), mock_source.cend());
+  return new cm::MeshNatural(dim, mock_source.cbegin(), mock_source.cend());
 }
 
 // smack in the middle (0,0)
-MeshInterface* createMockTargetMeshInside(size_t dim)
+cm::MeshInterface* createMockTargetMeshInside(size_t dim)
 {
   MockNode temp_node;
   std::vector<MockNode> mock_source;
@@ -52,11 +52,11 @@ MeshInterface* createMockTargetMeshInside(size_t dim)
   temp_node.relative_position[1] = 0;
   mock_source.push_back(temp_node);
 
-  return new MeshNatural(dim, mock_source.cbegin(), mock_source.cend());
+  return new cm::MeshNatural(dim, mock_source.cbegin(), mock_source.cend());
 }
 
 // some crazy point (100,100)
-MeshInterface* createMockTargetMeshOutside(size_t dim)
+cm::MeshInterface* createMockTargetMeshOutside(size_t dim)
 {
   MockNode temp_node;
   std::vector<MockNode> mock_source;
@@ -65,18 +65,18 @@ MeshInterface* createMockTargetMeshOutside(size_t dim)
   temp_node.relative_position[1] = 100;
   mock_source.push_back(temp_node);
 
-  return new MeshNatural(dim, mock_source.cbegin(), mock_source.cend());
+  return new cm::MeshNatural(dim, mock_source.cbegin(), mock_source.cend());
 }
 
 BOOST_AUTO_TEST_CASE(simple_test_1D_inside)
 {
   std::vector<double> values = {-1.23, 0.25, 4.23};
-  std::unique_ptr<MeshInterface> m_source(createMockSourceMesh(1));  
-  std::unique_ptr<MeshInterface> m_target(createMockTargetMeshInside(1));  
+  std::unique_ptr<cm::MeshInterface> m_source(createMockSourceMesh(1));  
+  std::unique_ptr<cm::MeshInterface> m_target(createMockTargetMeshInside(1));  
 
   m_source->getRawValues().assign(values.begin(), values.end());
 
-  InterpolatorLinearDelaunay interpolator(NIPP::InterpolateToZero);
+  cm::InterpolatorLinearDelaunay interpolator(cm::NIPP::InterpolateToZero);
   interpolator.offline(*m_source, *m_target);
   interpolator.interpolate(*m_source, *m_target);
 
@@ -89,12 +89,12 @@ BOOST_AUTO_TEST_CASE(simple_test_1D_inside)
 BOOST_AUTO_TEST_CASE(simple_test_1D_outside_NIPP_to_zero)
 {
   std::vector<double> values = {-1.23, 0.25, 4.23};
-  std::unique_ptr<MeshInterface> m_source(createMockSourceMesh(1));  
-  std::unique_ptr<MeshInterface> m_target(createMockTargetMeshOutside(1));  
+  std::unique_ptr<cm::MeshInterface> m_source(createMockSourceMesh(1));  
+  std::unique_ptr<cm::MeshInterface> m_target(createMockTargetMeshOutside(1));  
 
   m_source->getRawValues().assign(values.begin(), values.end());
 
-  InterpolatorLinearDelaunay interpolator(NIPP::InterpolateToZero);
+  cm::InterpolatorLinearDelaunay interpolator(cm::NIPP::InterpolateToZero);
   interpolator.offline(*m_source, *m_target);
   interpolator.interpolate(*m_source, *m_target);
 
@@ -107,12 +107,12 @@ BOOST_AUTO_TEST_CASE(simple_test_1D_outside_NIPP_to_zero)
 BOOST_AUTO_TEST_CASE(simple_test_1D_outside_NIPP_remove)
 {
   std::vector<double> values = {-1.23, 0.25, 4.23};
-  std::unique_ptr<MeshInterface> m_source(createMockSourceMesh(1));  
-  std::unique_ptr<MeshInterface> m_target(createMockTargetMeshOutside(1));  
+  std::unique_ptr<cm::MeshInterface> m_source(createMockSourceMesh(1));  
+  std::unique_ptr<cm::MeshInterface> m_target(createMockTargetMeshOutside(1));  
 
   m_source->getRawValues().assign(values.begin(), values.end());
 
-  InterpolatorLinearDelaunay interpolator(NIPP::RemoveFromMesh);
+  cm::InterpolatorLinearDelaunay interpolator(cm::NIPP::RemoveFromMesh);
   interpolator.offline(*m_source, *m_target);
   interpolator.interpolate(*m_source, *m_target);
 
@@ -124,9 +124,9 @@ BOOST_AUTO_TEST_CASE(simple_test_1D_outside_NIPP_remove)
 
 BOOST_AUTO_TEST_CASE(throw_1D_to_3D)
 {
-  std::unique_ptr<MeshInterface> m_source(createMockSourceMesh(1));  
-  std::unique_ptr<MeshInterface> m_target(createMockTargetMeshInside(3));  
-  InterpolatorLinearDelaunay interpolator(NIPP::RemoveFromMesh);
+  std::unique_ptr<cm::MeshInterface> m_source(createMockSourceMesh(1));  
+  std::unique_ptr<cm::MeshInterface> m_target(createMockTargetMeshInside(3));  
+  cm::InterpolatorLinearDelaunay interpolator(cm::NIPP::RemoveFromMesh);
   BOOST_CHECK_THROW(
     interpolator.offline(*m_source, *m_target),
     std::runtime_error
@@ -140,9 +140,9 @@ BOOST_AUTO_TEST_CASE(throw_1D_to_3D)
 
 BOOST_AUTO_TEST_CASE(throw_3D_to_1D)
 {
-  std::unique_ptr<MeshInterface> m_source(createMockSourceMesh(3));  
-  std::unique_ptr<MeshInterface> m_target(createMockTargetMeshInside(1));  
-  InterpolatorLinearDelaunay interpolator(NIPP::RemoveFromMesh);
+  std::unique_ptr<cm::MeshInterface> m_source(createMockSourceMesh(3));  
+  std::unique_ptr<cm::MeshInterface> m_target(createMockTargetMeshInside(1));  
+  cm::InterpolatorLinearDelaunay interpolator(cm::NIPP::RemoveFromMesh);
   BOOST_CHECK_THROW(
     interpolator.offline(*m_source, *m_target),
     std::runtime_error

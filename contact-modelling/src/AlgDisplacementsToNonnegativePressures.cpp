@@ -1,4 +1,4 @@
-#include "AlgDisplacementsToNonnegativePressures.hpp"
+#include "cm/algorithm/displacements_to_nonnegative_pressures.hpp"
 
 #include <stdexcept>
 #include <memory>
@@ -6,33 +6,35 @@
 #include <algorithm>
 #include <functional>
 
+#include "cm/details/external/armadillo.hpp"
 #include "libtsnnls/tsnnls.h"
 
-#include "MeshInterface.hpp"
-#include "MeshRegularRectangular.hpp"
-#include "external/armadillo.hpp"
-#include "helpers/string.hpp"
-#include "helpers/log.hpp"
+#include "cm/log/log.hpp"
+#include "cm/mesh/interface.hpp"
+#include "cm/mesh/rectangular_base.hpp"
+#include "cm/details/string.hpp"
+#include "cm/details/elastic_model_love.hpp"
+
+namespace cm {
+using details::sb;
 
 struct precomputed_type {
   typedef std::shared_ptr<taucs_ccs_matrix> sh_ptr_type;
   sh_ptr_type taucs_m;
 };
-using helpers::string::sb;
 
-boost::any
-AlgDisplacementsToNonnegativePressures::impl_offline(
+boost::any AlgDisplacementsToNonnegativePressures::impl_offline(
   const MeshInterface& disps,
   const MeshInterface& pressures,
   const boost::any& params
 )
 {
-  const MeshRegularRectangular* p_mesh;
+  const MeshRectangularBase* p_mesh;
   try {
-    p_mesh = dynamic_cast<const MeshRegularRectangular*>(&pressures);
+    p_mesh = dynamic_cast<const MeshRectangularBase*>(&pressures);
   } catch (const std::bad_cast& e) {
     throw std::runtime_error(
-      sb()  << "Error downcasting MeshInterface to MeshRegularRectangular. "
+      sb()  << "Error downcasting MeshInterface to MeshRectangularBase. "
             << "Note: only rectangular-element-based meshes are currently supported for "
             << "pressures calculations. Original exception message: " << e.what()
     );
@@ -50,7 +52,7 @@ AlgDisplacementsToNonnegativePressures::impl_offline(
             << disps.D << "; supported dimensionalities: (1,)"
     );
 
-  using helpers::elastic_linear_model::pressures_to_displacements_matrix;
+  using cm::details::pressures_to_displacements_matrix;
   const params_type& p = boost::any_cast<const params_type&>(params);
   arma::mat pd_matrix  = pressures_to_displacements_matrix(*p_mesh, disps, p.skin_props);
   // taucs_construct_sorted_ccs_matrix requires row-major ordering (as per README of libtsnnls).
@@ -73,8 +75,7 @@ AlgDisplacementsToNonnegativePressures::impl_offline(
   return ret;
 }
 
-void
-AlgDisplacementsToNonnegativePressures::impl_run(
+void AlgDisplacementsToNonnegativePressures::impl_run(
   const MeshInterface& disps,
         MeshInterface& pressures,
   const boost::any& params,
@@ -116,3 +117,5 @@ AlgDisplacementsToNonnegativePressures::impl_run(
   }
   free(solution);
 }
+
+} /* namespace cm */

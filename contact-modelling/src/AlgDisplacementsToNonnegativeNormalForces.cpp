@@ -1,4 +1,4 @@
-#include "AlgDisplacementsToNonnegativeNormalForces.hpp"
+#include "cm/algorithm/displacements_to_nonnegative_normal_forces.hpp"
 
 #include <stdexcept>
 #include <memory>
@@ -6,21 +6,23 @@
 #include <algorithm>
 #include <functional>
 
+#include "cm/details/external/armadillo.hpp"
 #include "libtsnnls/tsnnls.h"
 
-#include "MeshInterface.hpp"
-#include "external/armadillo.hpp"
-#include "helpers/string.hpp"
-#include "helpers/log.hpp"
+#include "cm/mesh/interface.hpp"
+#include "cm/log/log.hpp"
+#include "cm/details/string.hpp"
+#include "cm/details/elastic_model_boussinesq.hpp"
+
+namespace cm {
+using details::sb;
 
 struct precomputed_type {
   typedef std::shared_ptr<taucs_ccs_matrix> sh_ptr_type;
   sh_ptr_type taucs_m;
 };
-using helpers::string::sb;
 
-boost::any
-AlgDisplacementsToNonnegativeNormalForces::impl_offline(
+boost::any AlgDisplacementsToNonnegativeNormalForces::impl_offline(
   const MeshInterface& disps,
   const MeshInterface& forces,
   const boost::any& params
@@ -38,7 +40,7 @@ AlgDisplacementsToNonnegativeNormalForces::impl_offline(
             << disps.D << "; supported dimensionalities: (1,)"
     );
 
-  using helpers::elastic_linear_model::forces_to_displacements_matrix;
+  using cm::details::forces_to_displacements_matrix;
   const params_type& p = boost::any_cast<const params_type&>(params);
   arma::mat fd_matrix  = forces_to_displacements_matrix(forces, disps, p.skin_props);
   // 1st : taucs_construct_sorted_ccs_matrix requires row-major ordering (as per README of
@@ -62,8 +64,7 @@ AlgDisplacementsToNonnegativeNormalForces::impl_offline(
   return ret;
 }
 
-void
-AlgDisplacementsToNonnegativeNormalForces::impl_run(
+void AlgDisplacementsToNonnegativeNormalForces::impl_run(
   const MeshInterface& disps,
         MeshInterface& forces,
   const boost::any& params,
@@ -105,3 +106,5 @@ AlgDisplacementsToNonnegativeNormalForces::impl_run(
   }
   free(solution);
 }
+
+} /* namespace cm */

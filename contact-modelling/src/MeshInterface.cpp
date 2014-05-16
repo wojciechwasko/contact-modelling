@@ -1,11 +1,13 @@
-#include "MeshInterface.hpp"
+#include "cm/mesh/interface.hpp"
 
 #include <algorithm>
 #include <fstream>
 #include <limits>
 
-#include "helpers/container_algorithms.hpp"
-#include "helpers/log.hpp"
+#include "cm/details/container_algorithms.hpp"
+#include "cm/log/log.hpp"
+
+namespace cm {
 
 MeshInterface::MeshInterface(const size_t dim, const size_t no_nodes)
   : D(dim),
@@ -157,7 +159,7 @@ MeshInterface::erase(const std::vector<size_t>& indices)
 {
   if (indices.size() == 0)
     return;
-  using helpers::container_algorithms::erase_by_indices;
+  using details::erase_by_indices;
   erase_by_indices(nodes_,      indices);
   erase_by_indices(metadata_,   indices);
   erase_by_indices(values_,     indices, D);
@@ -238,3 +240,5 @@ MeshInterface::impl_dy() const
     << "square defined as square root of the first node's area";
   return sqrt(node_area(0));
 }
+
+} /* namespace cm */

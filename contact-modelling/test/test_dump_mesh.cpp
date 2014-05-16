@@ -7,15 +7,15 @@
 #include <fstream>
 #include <boost/filesystem.hpp>
 
-#include "MeshInterface.hpp"
-#include "helpers/plot.hpp"
+#include "cm/mesh/interface.hpp"
+#include "cm/mesh/plot.hpp"
 
 struct MockNode {
   double x;
   double y;
 };
 
-class MockMesh_nodxdy : public MeshInterface {
+class MockMesh_nodxdy : public cm::MeshInterface {
 private:
   size_t offset;
 
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(dump_to_ss)
   m.add_node({0.1, 0.2}, {1.23});
   m.add_node({0.3, 0.4}, {5.67});
   std::stringstream ss;
-  helpers::plot::dumpForPlot(m, ss);
+  cm::dumpForPlot(m, ss);
 
   // comparing strings would be pretty useless due to the differences in precision between stream
   // output values on various platforms. We'll read the values from the ss and compare floats by
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(dump_to_ss_nodxdy)
   m.add_node({0.1, 0.2}, {1.23});
   m.add_node({0.3, 0.4}, {5.67});
   std::stringstream ss;
-  helpers::plot::dumpForPlot(m, ss);
+  cm::dumpForPlot(m, ss);
 
   // comparing strings would be pretty useless due to the differences in precision between stream
   // output values on various platforms. We'll read the values from the ss and compare floats by
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(dump_to_f)
   MockMesh_dxdy m(1,2);
   m.add_node({0.1, 0.2}, {1.23});
   m.add_node({0.3, 0.4}, {5.67});
-  helpers::plot::dumpForPlot(m, tmpstr);
+  cm::dumpForPlot(m, tmpstr);
 
   // comparing strings would be pretty useless due to the differences in precision between stream
   // output values on various platforms. We'll read the values from the ss and compare floats by
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(dump_to_f_nodxdy)
   MockMesh_nodxdy m(1,2);
   m.add_node({0.1, 0.2}, {1.23});
   m.add_node({0.3, 0.4}, {5.67});
-  helpers::plot::dumpForPlot(m, tmpstr);
+  cm::dumpForPlot(m, tmpstr);
 
   // comparing strings would be pretty useless due to the differences in precision between stream
   // output values on various platforms. We'll read the values from the ss and compare floats by

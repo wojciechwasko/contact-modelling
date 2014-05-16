@@ -2,23 +2,27 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/any.hpp>
 
-#include "AlgInterface.hpp"
+#include "cm/algorithm/interface.hpp"
 
 #define PRECOMPUTED_VAL 2.0
 #define ONLINE_EXPR(i, pre) i * pre
 
 // mockup
+namespace cm {
+
 struct MeshInterface
 {
   double v;
 };
 
-struct MeshDerived : public MeshInterface
+} /* namespace cm */
+
+struct MeshDerived : public cm::MeshInterface
 {
 
 };
 
-class MyAlg : public AlgInterface
+class MyAlg : public cm::AlgInterface
 {
 public:
   typedef struct params_type {
@@ -28,8 +32,8 @@ public:
 
 private:
  boost::any impl_offline(
-    const MeshInterface& input,
-    const MeshInterface& output,
+    const cm::MeshInterface& input,
+    const cm::MeshInterface& output,
     const boost::any& params
   )
   {
@@ -38,8 +42,8 @@ private:
   }
 
   void impl_run(
-    const MeshInterface& input,
-          MeshInterface& output,
+    const cm::MeshInterface& input,
+          cm::MeshInterface& output,
     const boost::any& params,
     const boost::any& precomputed
   )
@@ -79,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_run_correctly_through_base)
   MeshDerived output;
   MyAlg::params_type params;
   MyAlg a;
-  AlgInterface* a_base = &a;
+  cm::AlgInterface* a_base = &a;
 
   boost::any precomputed = a_base->offline(input, output, params);
   double raw_precomputed = boost::any_cast<double>(precomputed);
