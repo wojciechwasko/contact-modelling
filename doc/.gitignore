@@ -1,4 +1,5 @@
 *
 !.gitignore
 !Doxyfile.in
+!Doxyfile-dev.in
 !documentation.html

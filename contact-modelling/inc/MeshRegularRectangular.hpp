@@ -8,7 +8,7 @@
 /**
  * \brief   Regular mesh with rectangular base element.
  *
- * \cond PRIVATE
+ * \cond DEV
  * Later on, it'd be nice to implement custom iterators instead
  * of having to populate some internal std::vector. After all,
  * (x,y) positions are very easy to calculate on-the-fly.
@@ -32,7 +32,7 @@ public:
    * \param   dx        Delta x, distance in x direction between two neighbouring nodes
    * \param   dy        Delta y, distance in y direction between two neighbouring nodes
    *
-   * \cond PRIVATE
+   * \cond DEV
    * This is merely a delegating constructor.
    * \endcond
    */

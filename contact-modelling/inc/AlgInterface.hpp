@@ -16,7 +16,7 @@ class MeshInterface;
  *        common forces instance. Rather, there is an offline phase (->offline()) which returns data
  *        to be stored by the user and later provided for the online (run) phase.
  *
- * \cond  PRIVATE
+ * \cond  DEV
  * \todo  Could applying the same interface to e.g. Interpolators be beneficial?
  * \endcond
  */

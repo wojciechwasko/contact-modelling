@@ -8,7 +8,7 @@
 /**
  * \brief   Regular mesh with square base element.
  *
- * \cond PRIVATE
+ * \cond DEV
  * Later on, it'd be nice to implement custom iterators instead
  * of having to populate some internal std::vector. After all,
  * (x,y) positions are very easy to calculate on-the-fly.
@@ -32,7 +32,7 @@ public:
    * \param   base_mesh Any mesh supporting .min/maxX/Y(), but that's only natural meshes so far
    * \param   d         Delta, distance in x/y direction between two neighbouring nodes
    *
-   * \cond PRIVATE
+   * \cond DEV
    * This is merely a delegating constructor.
    * \endcond
    */
