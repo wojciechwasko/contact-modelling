@@ -45,11 +45,11 @@ TARGET_LINK_LIBRARIES(test_eq_almost
   ${Boost_LIBRARIES})
 ADD_TEST(test_eq_almost test_eq_almost)
 
-ADD_EXECUTABLE(test_skin_yaml_provider test_skin_yaml_provider.cpp)
-TARGET_LINK_LIBRARIES(test_skin_yaml_provider
+ADD_EXECUTABLE(test_skin_provider_yaml test_skin_provider_yaml.cpp)
+TARGET_LINK_LIBRARIES(test_skin_provider_yaml
   ContactModelling
   ${Boost_LIBRARIES} yaml-cpp)
-ADD_TEST(test_skin_yaml_provider test_skin_yaml_provider)
+ADD_TEST(test_skin_provider_yaml test_skin_provider_yaml)
 
 ADD_EXECUTABLE(test_interpolator_linear_delaunay test_interpolator_linear_delaunay.cpp)
 TARGET_LINK_LIBRARIES(test_interpolator_linear_delaunay
@@ -88,7 +88,7 @@ ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure DEPEN
   test_elastic_model_forces
   test_elastic_model_pressures
   test_eq_almost
-  test_skin_yaml_provider
+  test_skin_provider_yaml
   test_interpolator_linear_delaunay
   test_log
   test_log_plateau_level

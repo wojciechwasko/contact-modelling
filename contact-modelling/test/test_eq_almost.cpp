@@ -1,8 +1,8 @@
 #define BOOST_TEST_MODULE eq_almost
 #include <boost/test/unit_test.hpp>
-#include "helpers/math.hpp"
+#include "cm/details/math.hpp"
 
-using helpers::math::eq_almost;
+using cm::details::eq_almost;
 
 BOOST_AUTO_TEST_CASE(eq_almost_larger)
 {

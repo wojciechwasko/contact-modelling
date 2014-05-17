@@ -1,6 +1,8 @@
-#include "MeshNatural.hpp"
+#include "cm/mesh/natural.hpp"
 
 #include <stdexcept>
+
+namespace cm {
 
 double 
 MeshNatural::impl_node_area(size_t i) const
@@ -30,3 +32,4 @@ MeshNatural::isForSkin() const
   return forSkin_;
 }
 
+} /* namespace cm */

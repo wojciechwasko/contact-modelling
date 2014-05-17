@@ -1,13 +1,16 @@
-#include "Delaunay.hpp"
+#include "cm/details/delaunay.hpp"
 
-#include "MeshInterface.hpp"
-#include "helpers/memory.hpp"
-#include "helpers/geometry.hpp"
+#include "cm/mesh/interface.hpp"
+#include "cm/details/memory.hpp"
+#include "cm/details/geometry.hpp"
+
+namespace cm {
+namespace details {
 
 Delaunay::Delaunay(const MeshInterface& mesh)
 {
-  using helpers::memory::delguard;
-  using helpers::geometry::area_triangle;
+  using cm::details::delguard;
+  using cm::details::area_triangle;
 
   // copy nodes over for our internal use
   nodes_.assign(mesh.nodes_cbegin(), mesh.nodes_cend());
@@ -93,7 +96,7 @@ Delaunay::getNoTriangles() const
 Delaunay::PointInTriangleMeta
 Delaunay::getTriangleInfoForPoint(const MeshNode& p)
 {
-  using helpers::geometry::area_triangle;
+  using cm::details::area_triangle;
   PointInTriangleMeta ret;
   std::get<FAIL>(ret)  = true;
   std::get<N0>(ret) = -1;
@@ -134,3 +137,7 @@ Delaunay::getTriangleInfoForPoint(const MeshNode& p)
 
   return ret;
 }
+
+} /* namespace details */
+} /* namespace cm */
+

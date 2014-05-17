@@ -8,29 +8,29 @@
 #include <vector>
 #include <stdexcept>
 
-#include "helpers/elastic_linear_model.hpp"
-#include "helpers/string.hpp"
+#include "cm/algorithm/pressures_to_displacements.hpp"
+#include "cm/algorithm/displacements_to_pressures.hpp"
+#include "cm/details/elastic_model_love.hpp"
+#include "cm/details/string.hpp"
 
-#include "external/armadillo.hpp"
-#include "MeshRegularRectangular.hpp"
-#include "MeshInterface.hpp"
-#include "SkinAttributes.hpp"
-#include "AlgDisplacementsToPressures.hpp"
-#include "AlgPressuresToDisplacements.hpp"
+#include "cm/details/external/armadillo.hpp"
+#include "cm/mesh/rectangular_base.hpp"
+#include "cm/mesh/interface.hpp"
+#include "cm/skin/attributes.hpp"
 
-using helpers::string::sb;
+using cm::details::sb;
 
 struct MockNode {
   double x;
   double y;
 };
 
-class MockMesh : public MeshInterface {
+class MockMesh : public cm::MeshInterface {
 private:
   size_t offset;
 
 public:
-  MockMesh(size_t dim, size_t no_nodes) : MeshInterface(dim, no_nodes), offset(0) {}
+  MockMesh(size_t dim, size_t no_nodes) : cm::MeshInterface(dim, no_nodes), offset(0) {}
   void add_node(MockNode n)
   {
     node(offset).x = n.x;
@@ -47,9 +47,9 @@ private:
   }
 };
 
-SkinAttributes generate_skin_attr()
+cm::SkinAttributes generate_skin_attr()
 {
-  SkinAttributes skin_attr;
+  cm::SkinAttributes skin_attr;
   skin_attr.E = 210000;
   skin_attr.nu = 0.49;
   skin_attr.h = 0.002;
@@ -65,14 +65,14 @@ MockMesh generate_disps_mesh()
   return disps_mesh;
 }
 
-MeshRegularRectangular generate_pressures_mesh() 
+cm::MeshRectangularBase generate_pressures_mesh() 
 {
-  // I don't like this. This requires MeshRegularRectangular to work properly
+  // I don't like this. This requires cm::MeshRectangularBase to work properly
   // But without hacking the code too much, I can't figure a better way.
   // Will (probably) check if the nodes are created the way I want them to.
   // The nodes should be:
   // (-0.01, -0.005), (-0.01, 0.005), (0.01, -0.005), (0.01, 0.005) (in that order)
-  MeshRegularRectangular pressure_mesh(1, -0.01, -0.005, 0.01+1e-7, 0.005+1e-7, 0.02, 0.01);
+  cm::MeshRectangularBase pressure_mesh(1, -0.01, -0.005, 0.01+1e-7, 0.005+1e-7, 0.02, 0.01);
   if (pressure_mesh.no_nodes() != 4) {
     throw std::runtime_error((sb() << "Wrong number of nodes in pressure_mesh: " << pressure_mesh.no_nodes()));
   }
@@ -109,9 +109,9 @@ MeshRegularRectangular generate_pressures_mesh()
 
 BOOST_AUTO_TEST_CASE(two_pressure_elements)
 {
-  MeshRegularRectangular pressure_mesh = generate_pressures_mesh();
+  cm::MeshRectangularBase pressure_mesh = generate_pressures_mesh();
   MockMesh disps_mesh = generate_disps_mesh();
-  SkinAttributes skin_attr = generate_skin_attr();
+  cm::SkinAttributes skin_attr = generate_skin_attr();
 
   arma::mat expected(3,4);
   expected
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(two_pressure_elements)
     <<  3.13761739997307e-10 <<  3.13761739997307e-10 <<   3.1376173999729e-10 <<   3.137617399973e-10 << arma::endr
     << -5.32421873288007e-11 << -8.80372111993546e-11 << -3.98913429923369e-10 << 2.12497799334448e-09 << arma::endr;
 
-  arma::mat calculated = helpers::elastic_linear_model::pressures_to_displacements_matrix(
+  arma::mat calculated = cm::details::pressures_to_displacements_matrix(
     pressure_mesh,
     disps_mesh,
     skin_attr
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(two_pressure_elements)
     << -167844429.803222 << 1388928221.52505 << -237938130.374302 << arma::endr
     <<  -29663110.206823 << 319669917.159797 <<  418667554.921006 << arma::endr;
 
-  arma::mat calculated_pinv = helpers::elastic_linear_model::displacements_to_pressures_matrix(
+  arma::mat calculated_pinv = cm::details::displacements_to_pressures_matrix(
     disps_mesh,
     pressure_mesh,
     skin_attr
@@ -145,10 +145,10 @@ BOOST_AUTO_TEST_CASE(two_pressure_elements)
 
 BOOST_AUTO_TEST_CASE(alg_pressures_to_disps)
 {
-  MeshRegularRectangular pressure_mesh = generate_pressures_mesh();
+  cm::MeshRectangularBase pressure_mesh = generate_pressures_mesh();
   MockMesh disps_mesh = generate_disps_mesh();
 
-  typedef AlgPressuresToDisplacements A_p_d;
+  typedef cm::AlgPressuresToDisplacements A_p_d;
   A_p_d::params_type params_p_d;
   params_p_d.skin_props = generate_skin_attr();
 
@@ -170,11 +170,11 @@ BOOST_AUTO_TEST_CASE(alg_pressures_to_disps)
 
 BOOST_AUTO_TEST_CASE(alg_disps_to_pressures)
 {
-  MeshRegularRectangular pressure_mesh = generate_pressures_mesh();
+  cm::MeshRectangularBase pressure_mesh = generate_pressures_mesh();
   MockMesh disps_mesh = generate_disps_mesh();
-  SkinAttributes skin_attr = generate_skin_attr();
+  cm::SkinAttributes skin_attr = generate_skin_attr();
 
-  typedef AlgDisplacementsToPressures A_d_p;
+  typedef cm::AlgDisplacementsToPressures A_d_p;
   A_d_p::params_type params_d_p;
   params_d_p.skin_props = generate_skin_attr();
 
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(alg_disps_to_pressures)
 
 BOOST_AUTO_TEST_CASE(love_r10)
 {
-  using helpers::elastic_linear_model::impl::love::rj0;
+  using cm::details::impl::love::rj0;
   const double r10 = 0.18547; // calculated by MATLAB(R) script
   const double cal = rj0<1>(0.1, 0.2, -1, 0.3, 0, 0.12);
   BOOST_CHECK_CLOSE(r10,cal,1e-2);
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(love_r10)
 
 BOOST_AUTO_TEST_CASE(love_r20)
 {
-  using helpers::elastic_linear_model::impl::love::rj0;
+  using cm::details::impl::love::rj0;
   const double r20 = 0.52383; // calculated by MATLAB(R) script
   const double cal = rj0<2>(0.1, 0.2, -1, 0.3, 0, 0.12);
   BOOST_CHECK_CLOSE(r20,cal,1e-2);
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(love_r20)
 
 BOOST_AUTO_TEST_CASE(love_beta10)
 {
-  using helpers::elastic_linear_model::impl::love::betaj0;
+  using cm::details::impl::love::betaj0;
   const double beta10 = 0.1562; // calculated by MATLAB(R) script
   const double cal = betaj0<1>(0.1, 0.2, -1, 0.3, 0, 0.12);
   BOOST_CHECK_CLOSE(beta10,cal,1e-2);
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(love_beta10)
 
 BOOST_AUTO_TEST_CASE(love_beta20)
 {
-  using helpers::elastic_linear_model::impl::love::betaj0;
+  using cm::details::impl::love::betaj0;
   const double beta20 = 0.5142; // calculated by MATLAB(R) script
   const double cal = betaj0<2>(0.1, 0.2, -1, 0.3, 0, 0.12);
   BOOST_CHECK_CLOSE(beta20,cal,1e-2);
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(love_beta20)
 
 BOOST_AUTO_TEST_CASE(love_psi10)
 {
-  using helpers::elastic_linear_model::impl::love::psij0;
+  using cm::details::impl::love::psij0;
   double psi10 = 0.29267; // calculated by MATLAB(R) script
   const double cal = psij0<1>(0.1, 0.2, -1, 0.3, 0, 0.12);
   BOOST_CHECK_CLOSE(psi10,cal,1e-2);
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(love_psi10)
 
 BOOST_AUTO_TEST_CASE(love_psi20)
 {
-  using helpers::elastic_linear_model::impl::love::psij0;
+  using cm::details::impl::love::psij0;
   const double psi20 = 0.096336; // calculated by MATLAB(R) script
   const double cal = psij0<2>(0.1, 0.2, -1, 0.3, 0, 0.12);
   BOOST_CHECK_CLOSE(psi20,cal,1e-2);
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(love_psi20)
 
 BOOST_AUTO_TEST_CASE(love_L1)
 {
-  using helpers::elastic_linear_model::impl::love::Lj;
+  using cm::details::impl::love::Lj;
   const double L1 = -0.27221;
   const double cal = Lj<1>(0.1, 0.2, -1, 0.3, 0, 0.12);
   BOOST_CHECK_CLOSE(L1,cal,1e-2);
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(love_L1)
 
 BOOST_AUTO_TEST_CASE(love_L1_z_0)
 {
-  using helpers::elastic_linear_model::impl::love::Lj;
+  using cm::details::impl::love::Lj;
   const double L1 = -0.50653;
   const double cal = Lj<1>(0.1, 0.2, -1, 0.3, 0, 0);
   BOOST_CHECK_CLOSE(L1,cal,1e-2);
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(love_L1_z_0)
 
 BOOST_AUTO_TEST_CASE(love_L1_x_a)
 {
-  using helpers::elastic_linear_model::impl::love::Lj;
+  using cm::details::impl::love::Lj;
   const double L1 = -0.31505;
   const double cal = Lj<1>(0.1, 0.2, -1, 0.2, 0, 0.01);
   BOOST_CHECK_CLOSE(L1,cal,1e-2);
@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(love_L1_x_a)
 
 BOOST_AUTO_TEST_CASE(love_L2)
 {
-  using helpers::elastic_linear_model::impl::love::Lj;
+  using cm::details::impl::love::Lj;
   const double L2 = -0.40631;
   const double cal = Lj<2>(0.1, 0.2, -1, 0.3, 0, 0.12);
   BOOST_CHECK_CLOSE(L2,cal,1e-2);
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(love_L2)
 
 BOOST_AUTO_TEST_CASE(love_L2_z_0)
 {
-  using helpers::elastic_linear_model::impl::love::Lj;
+  using cm::details::impl::love::Lj;
   const double L2 = -0.66085;
   const double cal = Lj<2>(0.1, 0.2, -1, 0.3, 0, 0);
   BOOST_CHECK_CLOSE(L2,cal,1e-2);
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(love_L2_z_0)
 
 BOOST_AUTO_TEST_CASE(love_L2_x_a)
 {
-  using helpers::elastic_linear_model::impl::love::Lj;
+  using cm::details::impl::love::Lj;
   const double L2 = -0.60831;
   const double cal = Lj<2>(0.1, 0.2, -1, 0.2, 0, 0.01);
   BOOST_CHECK_CLOSE(L2,cal,1e-2);
@@ -291,14 +291,14 @@ BOOST_AUTO_TEST_CASE(love_L2_x_a)
 
 BOOST_AUTO_TEST_CASE(love_coeff_z0)
 {
-  using helpers::elastic_linear_model::impl::love_coeff;
+  using cm::details::impl::love_coeff;
   const double l_coeff = 0.00043407;
   const double cal = love_coeff(0.001, 0.001, 210000, 0.49, 0.008, 0.007, 0);
 }
 
 BOOST_AUTO_TEST_CASE(love_coeff_zn0)
 {
-  using helpers::elastic_linear_model::impl::love_coeff;
+  using cm::details::impl::love_coeff;
   const double l_coeff = 0.00035869;
   const double cal = love_coeff(0.001, 0.001, 210000, 0.49, 0.008, 0.007, 0.02);
 }

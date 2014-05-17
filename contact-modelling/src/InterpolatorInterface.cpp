@@ -1,12 +1,14 @@
-#include "InterpolatorInterface.hpp"
+#include "cm/interpolator/interface.hpp"
 
 #include <stdexcept>
 #include <algorithm>
 
-#include "MeshInterface.hpp"
-#include "helpers/string.hpp"
+#include "cm/mesh/interface.hpp"
+#include "cm/details/string.hpp"
 
-using helpers::string::sb;
+namespace cm {
+
+using cm::details::sb;
 
 InterpolatorInterface::InterpolatorInterface(
   NIPP::NIPP policy
@@ -96,3 +98,5 @@ InterpolatorInterface::applyNippOnline(
   
   return false;
 }
+
+} /* namespace cm */

@@ -1,16 +1,19 @@
-#include "AlgDisplacementsToForces.hpp"
+#include "cm/algorithm/displacements_to_forces.hpp"
 
 #include <stdexcept>
 
-#include "MeshInterface.hpp"
-#include "external/armadillo.hpp"
-#include "helpers/string.hpp"
+#include "cm/mesh/interface.hpp"
+
+#include "cm/details/elastic_model_boussinesq.hpp"
+#include "cm/details/string.hpp"
+#include "cm/details/external/armadillo.hpp"
+
+namespace cm {
+using details::sb;
 
 typedef arma::mat   precomputed_type;
-using helpers::string::sb;
 
-boost::any
-AlgDisplacementsToForces::impl_offline(
+boost::any AlgDisplacementsToForces::impl_offline(
   const MeshInterface& disps,
   const MeshInterface& forces,
   const boost::any& params
@@ -29,12 +32,11 @@ AlgDisplacementsToForces::impl_offline(
     );
 
   const params_type& p = boost::any_cast<const params_type&>(params);
-  using helpers::elastic_linear_model::displacements_to_forces_matrix;
+  using cm::details::displacements_to_forces_matrix;
   return displacements_to_forces_matrix(disps, forces, p.skin_props);
 }
 
-void
-AlgDisplacementsToForces::impl_run(
+void AlgDisplacementsToForces::impl_run(
   const MeshInterface& disps,
         MeshInterface& forces,
   const boost::any& params,
@@ -57,3 +59,5 @@ AlgDisplacementsToForces::impl_run(
   arma::colvec temp = pre * arma::conv_to<arma::colvec>::from(disps.getRawValues());
   forces.getRawValues().assign(temp.begin(), temp.end());
 }
+
+} /* namespace cm */

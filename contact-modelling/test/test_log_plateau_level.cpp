@@ -5,7 +5,7 @@
 #include <sstream>
 
 #define MAX_LOGGING_LEVEL INFO
-#include "helpers/log.hpp"
+#include "cm/log/log.hpp"
 
 BOOST_AUTO_TEST_CASE(log_above_plateau)
 {

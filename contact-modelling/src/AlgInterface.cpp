@@ -1,7 +1,8 @@
-#include "AlgInterface.hpp"
+#include "cm/algorithm/interface.hpp"
 
-boost::any
-AlgInterface::offline(
+namespace cm {
+
+boost::any AlgInterface::offline(
   const MeshInterface& input,
   const MeshInterface& output,
   const boost::any& params
@@ -11,8 +12,7 @@ AlgInterface::offline(
   return impl_offline(input, output, params);
 }
 
-void
-AlgInterface::run(
+void AlgInterface::run(
   const MeshInterface& input,
         MeshInterface& output,
   const boost::any& params,
@@ -21,3 +21,5 @@ AlgInterface::run(
 {
   impl_run(input,output,params,precomputed);
 }
+
+} /* namespace cm */
