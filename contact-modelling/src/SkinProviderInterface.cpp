@@ -1,5 +1,5 @@
 #include "cm/skin_provider/interface.hpp"
-#include "cm/mesh/natural.hpp"
+#include "cm/grid/grid.hpp"
 
 namespace cm {
 
@@ -10,12 +10,10 @@ SkinProviderInterface::SkinProviderInterface(
     D(dim)
 {}
 
-MeshNatural*
-SkinProviderInterface::createMesh() const
+Grid*
+SkinProviderInterface::createGrid() const
 {
-  MeshNatural* m = impl_createMesh();
-  m->setForSkin();
-  return m; 
+  return impl_createGrid();
 }
 
 void

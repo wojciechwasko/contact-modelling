@@ -5,9 +5,66 @@
 
 #include "yaml-cpp/yaml.h"
 
-#include "cm/mesh/natural.hpp"
+#include "cm/grid/grid.hpp"
+#include "cm/grid/cell_shapes.hpp"
+
+struct HelperGridCell_and_Value {
+  cm::details::HelperGridCell cell;
+  double value;
+};
+
+namespace YAML {
+template<>
+struct convert<HelperGridCell_and_Value> {
+  static Node encode(const HelperGridCell_and_Value& rhs) {
+    Node node;
+    node["relative_position"].push_back(rhs.cell.relative_position[0]);
+    node["relative_position"].push_back(rhs.cell.relative_position[1]);
+    node["value"] = rhs.value;
+    return node;
+  }
+
+  static bool decode(const Node& node, HelperGridCell_and_Value& rhs) {
+    if (!node["relative_position"] || !node["relative_position"].IsSequence() ||
+      node["relative_position"].size() != 2 || !node["value"]) {
+      return false;
+    }
+
+    rhs.cell.relative_position[0] = node["relative_position"][0].as<double>();
+    rhs.cell.relative_position[1] = node["relative_position"][1].as<double>();
+    rhs.value = node["value"].as<double>();
+    return true;
+  }
+};
+
+template <>
+struct convert<cm::SkinAttributes> {
+  static Node encode(const cm::SkinAttributes& rhs) {
+    Node node;
+    node["h"] = rhs.h;
+    node["E"] = rhs.E;
+    node["nu"] = rhs.nu;
+    node["taxelRadius"] = rhs.taxelRadius;
+    return node;
+  }
+
+  static bool decode(const Node& node, cm::SkinAttributes& rhs) {
+    if (!node["h"] || !node["E"] || !node["nu"] || !node["taxelRadius"]) {
+      return false;
+    }
+    rhs.h = node["h"].as<double>();
+    rhs.E = node["E"].as<double>();
+    rhs.nu = node["nu"].as<double>();
+    rhs.taxelRadius = node["taxelRadius"].as<double>();
+    return true;
+  }
+};
+
+}
 
 namespace cm {
+
+using details::HelperGridCell;
 
 SkinProviderYaml::SkinProviderYaml(
   const std::string& filename
@@ -15,59 +72,25 @@ SkinProviderYaml::SkinProviderYaml(
   : SkinProviderInterface(1) // hard-coded to 1D sensors only
 {
   YAML::Node input = YAML::LoadFile(filename);
-  if (!input["nodes"]) {
-    throw std::runtime_error("SkinProviderYaml: YAML must contain 'nodes'!");
+  if (!input["cells"]) {
+    throw std::runtime_error("SkinProviderYaml: YAML must contain 'cells'!");
   }
-  if (!input["nodes"].IsSequence()) {
-    throw std::runtime_error("SkinProviderYaml: nodes must be a sequence!");
+  if (!input["cells"].IsSequence()) {
+    throw std::runtime_error("SkinProviderYaml: cells must be a sequence!");
   }
-
   if (!input["attributes"]) {
     throw std::runtime_error("SkinProviderYaml: YAML must contain 'attributes'!");
   }
-  // yaml-cpp does not support chaining on [] operator properly
-  YAML::Node attrs = input["attributes"];
-  if (!attrs["h"]) {
-    throw std::runtime_error("SkinProviderYaml: YAML must contain 'attributes:h'!");
-  }
-  if (!attrs["E"]) {
-    throw std::runtime_error("SkinProviderYaml: YAML must contain 'attributes:E'!");
-  }
-  if (!attrs["nu"]) {
-    throw std::runtime_error("SkinProviderYaml: YAML must contain 'attributes:nu'!");
-  }
-  if (!attrs["taxelArea"]) {
-    throw std::runtime_error("SkinProviderYaml: YAML must contain 'attributes:taxelArea'!");
-  }
+  skin_attributes_ = input["attributes"].as<SkinAttributes>();
 
-  skin_attributes_.h = attrs["h"].as<double>();
-  skin_attributes_.E = attrs["E"].as<double>();
-  skin_attributes_.nu = attrs["nu"].as<double>();
-  skin_attributes_.taxelArea = attrs["taxelArea"].as<double>();
-
-  YAML::Node nodes = input["nodes"];
+  YAML::Node cells = input["cells"];
   typedef YAML::const_iterator yci;
-  // FIXME probably should replace this fugly loop with a YAML::convert<> specialisation
-  for (yci it = nodes.begin(); it != nodes.end(); ++it) {
-    YAML::Node node = *it; 
-    if (
-      !node["relative_position"] ||
-      !node["relative_position"].IsSequence() ||
-      node["relative_position"].size() != 2
-    ) {
-      throw std::runtime_error("SkinProviderYaml: node must have "
-        "'relative_position' attribute -- a sequence of length 2");
-    }
-    if (!node["value"]) {
-      throw std::runtime_error("SkinProviderYaml: node must have "
-        "a 'value' (raw response) attribute");
-    }
+  HelperGridCell_and_Value temp_cell_val;
+  for (yci it = cells.begin(); it != cells.end(); ++it) {
+    temp_cell_val = it->as<HelperGridCell_and_Value>();
 
-    HelperMeshNode n;
-    std::get<0>(n.relative_position) = node["relative_position"][0].as<double>();
-    std::get<1>(n.relative_position) = node["relative_position"][1].as<double>();
-    nodes_.push_back(n);
-    values_.push_back(node["value"].as<double>());
+    cells_.push_back(temp_cell_val.cell);
+    values_.push_back(temp_cell_val.value);
   }
 }
 
@@ -77,10 +100,10 @@ SkinProviderYaml::impl_update(SkinProviderYaml::target_values_type& target_vec) 
   target_vec.assign(values_.cbegin(), values_.cend());
 }
 
-MeshNatural*
-SkinProviderYaml::impl_createMesh() const
+Grid*
+SkinProviderYaml::impl_createGrid() const
 {
-  return new MeshNatural(D, nodes_.cbegin(), nodes_.cend()); 
+  return Grid::fromSensors(D, Circle(skin_attributes_.taxelRadius), cells_.cbegin(), cells_.cend()); 
 }
 
 SkinAttributes

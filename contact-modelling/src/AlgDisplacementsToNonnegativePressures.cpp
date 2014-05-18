@@ -10,8 +10,7 @@
 #include "libtsnnls/tsnnls.h"
 
 #include "cm/log/log.hpp"
-#include "cm/mesh/interface.hpp"
-#include "cm/mesh/rectangular_base.hpp"
+#include "cm/grid/grid.hpp"
 #include "cm/details/string.hpp"
 #include "cm/details/elastic_model_love.hpp"
 
@@ -24,37 +23,26 @@ struct precomputed_type {
 };
 
 boost::any AlgDisplacementsToNonnegativePressures::impl_offline(
-  const MeshInterface& disps,
-  const MeshInterface& pressures,
+  const Grid& disps,
+  const Grid& pressures,
   const boost::any& params
 )
 {
-  const MeshRectangularBase* p_mesh;
-  try {
-    p_mesh = dynamic_cast<const MeshRectangularBase*>(&pressures);
-  } catch (const std::bad_cast& e) {
+  if (disps.dim() != 1)
     throw std::runtime_error(
-      sb()  << "Error downcasting MeshInterface to MeshRectangularBase. "
-            << "Note: only rectangular-element-based meshes are currently supported for "
-            << "pressures calculations. Original exception message: " << e.what()
-    );
-  }
-
-  if (disps.D != 1)
-    throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the displacements mesh: "
-            << disps.D << "; supported dimensionalities: (1,)"
+      sb()  << "Wrong dimensionality of the displacements grid: "
+            << disps.dim() << "; supported dimensionalities: (1,)"
     );
 
-  if (pressures.D != 1)
+  if (pressures.dim() != 1)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the pressures mesh: "
-            << disps.D << "; supported dimensionalities: (1,)"
+      sb()  << "Wrong dimensionality of the pressures grid: "
+            << disps.dim() << "; supported dimensionalities: (1,)"
     );
 
   using cm::details::pressures_to_displacements_matrix;
   const params_type& p = boost::any_cast<const params_type&>(params);
-  arma::mat pd_matrix  = pressures_to_displacements_matrix(*p_mesh, disps, p.skin_props);
+  arma::mat pd_matrix  = pressures_to_displacements_matrix(pressures, disps, p.skin_props);
   // taucs_construct_sorted_ccs_matrix requires row-major ordering (as per README of libtsnnls).
   std::vector<double> tempvec;
   tempvec.reserve(pd_matrix.size());
@@ -76,22 +64,22 @@ boost::any AlgDisplacementsToNonnegativePressures::impl_offline(
 }
 
 void AlgDisplacementsToNonnegativePressures::impl_run(
-  const MeshInterface& disps,
-        MeshInterface& pressures,
+  const Grid& disps,
+        Grid& pressures,
   const boost::any& params,
   const boost::any& precomputed
 )
 {
-  if (disps.D != 1)
+  if (disps.dim() != 1)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the displacements mesh: "
-            << disps.D << "; supported dimensionalities: (1,)"
+      sb()  << "Wrong dimensionality of the displacements grid: "
+            << disps.dim() << "; supported dimensionalities: (1,)"
     );
 
-  if (pressures.D != 1)
+  if (pressures.dim() != 1)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the pressures mesh: "
-            << disps.D << "; supported dimensionalities: (1,)"
+      sb()  << "Wrong dimensionality of the pressures grid: "
+            << disps.dim() << "; supported dimensionalities: (1,)"
     );
 
   const precomputed_type& pre = boost::any_cast<precomputed_type>(precomputed);

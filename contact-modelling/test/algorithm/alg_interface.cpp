@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE alg_interface
 #include <boost/test/unit_test.hpp>
 #include <boost/any.hpp>
 
@@ -10,14 +9,14 @@
 // mockup
 namespace cm {
 
-struct MeshInterface
+struct Grid
 {
   double v;
 };
 
 } /* namespace cm */
 
-struct MeshDerived : public cm::MeshInterface
+struct GridDerived : public cm::Grid
 {
 
 };
@@ -32,8 +31,8 @@ public:
 
 private:
  boost::any impl_offline(
-    const cm::MeshInterface& input,
-    const cm::MeshInterface& output,
+    const cm::Grid& input,
+    const cm::Grid& output,
     const boost::any& params
   )
   {
@@ -42,8 +41,8 @@ private:
   }
 
   void impl_run(
-    const cm::MeshInterface& input,
-          cm::MeshInterface& output,
+    const cm::Grid& input,
+          cm::Grid& output,
     const boost::any& params,
     const boost::any& precomputed
   )
@@ -54,11 +53,13 @@ private:
   }
 };
 
+BOOST_AUTO_TEST_SUITE(algorithm_interface)
+
 BOOST_AUTO_TEST_CASE(test_run_correctly_direct)
 {
-  MeshDerived input;
+  GridDerived input;
   input.v = 1;
-  MeshDerived output;
+  GridDerived output;
   MyAlg::params_type params;
   MyAlg a;
 
@@ -78,9 +79,9 @@ BOOST_AUTO_TEST_CASE(test_run_correctly_direct)
 
 BOOST_AUTO_TEST_CASE(test_run_correctly_through_base)
 {
-  MeshDerived input;
+  GridDerived input;
   input.v = 1;
-  MeshDerived output;
+  GridDerived output;
   MyAlg::params_type params;
   MyAlg a;
   cm::AlgInterface* a_base = &a;
@@ -98,3 +99,5 @@ BOOST_AUTO_TEST_CASE(test_run_correctly_through_base)
     output.v
   );
 }
+
+BOOST_AUTO_TEST_SUITE_END()

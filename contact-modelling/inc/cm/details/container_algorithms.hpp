@@ -1,6 +1,15 @@
 #ifndef CONTAINER_ALGORITHMS_HPP
 #define CONTAINER_ALGORITHMS_HPP
 
+/**
+ * \cond DEV
+ */
+
+/**
+ * \file
+ * \brief   Assorted functions that operate on (stl-like) containers.
+ */
+
 #include <cstddef> // for size_t
 
 namespace cm {
@@ -15,8 +24,8 @@ namespace details {
  *          cnt. Must be sorted in ascending order!
  * \param   stride  optional, proceed as if one index corresponded to stride elements, e.g.
  *                  if stride == 3, index 0 corresponds to cnt[0], cnt[1] and cnt[2]. Useful if
- *                  you have to delete values in a multidimensional-valued mesh, but have only
- *                  indices of nodes to be deleted.
+ *                  you have to delete values in a multidimensional-valued grid, but have only
+ *                  indices of cells to be deleted.
  * \note    The indices in the indices vector should be unique and sorted!
  */
 template <class C>
@@ -45,5 +54,10 @@ void erase_by_indices(C& cnt, const std::vector<size_t>& indices, const size_t s
 
 } /* namespace details */
 } /* namespace cm */
+
+
+/**
+ * \endcond
+ */
 
 #endif /* CONTAINER_ALGORITHMS_HPP */

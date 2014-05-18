@@ -21,15 +21,15 @@
 // logging
 #include "cm/log/log.hpp"
 
-// meshes
-#include "cm/mesh/interface.hpp"
-#include "cm/mesh/natural.hpp"
-#include "cm/mesh/rectangular_base.hpp"
-#include "cm/mesh/square_base.hpp"
+// grids
+#include "cm/grid/cell.hpp"
+#include "cm/grid/cell_shapes.hpp"
+#include "cm/grid/grid.hpp"
+#include "cm/grid/plot.hpp"
 
-// meshes - other files
-#include "cm/mesh/node.hpp"
-#include "cm/mesh/plot.hpp"
+// grides - other files
+#include "cm/grid/cell.hpp"
+#include "cm/grid/plot.hpp"
 
 // skin attributes
 #include "cm/skin/attributes.hpp"

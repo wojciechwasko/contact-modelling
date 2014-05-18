@@ -1,10 +1,13 @@
 INPUT = "@CMAKE_CURRENT_SOURCE_DIR@/../contact-modelling" \
   "@CMAKE_CURRENT_SOURCE_DIR@/../README.md"
-EXCLUDE_PATTERNS = "*/test/*"
+EXCLUDE_PATTERNS = */test/* \
+  */details/*
 
 RECURSIVE = YES
 GENERATE_LATEX = NO
 GENERATE_HTML = YES
+
+MARKDOWN_SUPPORT = YES
 
 PROJECT_NAME = "Contact-modelling library"
 USE_MDFILE_AS_MAINPAGE = "README.md"

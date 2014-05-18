@@ -3,10 +3,19 @@
 
 #include "cm/details/external/armadillo.hpp"
 
+/**
+ * \cond DEV
+ */
+
+/**
+ * \file 
+ * \brief   Implementation of the Love model (uniform pressures over rectangular
+ * area)
+ */
+
 namespace cm {
 
-class MeshInterface;
-class MeshRectangularBase;
+class Grid;
 class SkinAttributes;
 
 namespace details {
@@ -14,26 +23,26 @@ namespace details {
 /**
  * \brief   Calculate a matrix, which post-multiplied by the pressures vector will yield the
  *          displacements vector.
- * \param  p    pressures mesh. Required for length and locations and such
- * \tparam d    displacements mesh. Required for number of nodes, locations, etc.
+ * \param  p    pressures grid. Required for length and locations and such
+ * \tparam d    displacements grid. Required for number of cells, locations, etc.
  */
 arma::mat pressures_to_displacements_matrix(
-  const MeshRectangularBase& p,
-  const MeshInterface& d,
+  const Grid& p,
+  const Grid& d,
   const SkinAttributes& skin_attr
 );
 
 /**
  * \brief   Calculate a matrix, which post-multiplied by the displacements vector will yield the
  *          pressures vector. (in least RMSE sense)
- * \param  p    pressures mesh. Required for length and locations and such
- * \tparam d    displacements mesh. Required for number of nodes, locations, etc.
+ * \param  p    pressures grid. Required for length and locations and such
+ * \tparam d    displacements grid. Required for number of cells, locations, etc.
  *
  * Basically returns a pinv of pressures_to_displacements_matrix()
  */
 arma::mat displacements_to_pressures_matrix(
-  const MeshInterface& d,
-  const MeshRectangularBase& p,
+  const Grid& d,
+  const Grid& p,
   const SkinAttributes& skin_attr
 );
 
@@ -44,8 +53,8 @@ namespace impl {
  */
 void
 sanity_checks_pressures_to_displacements(
-  const MeshRectangularBase& p,
-  const MeshInterface& d
+  const Grid& p,
+  const Grid& d
 );
 
 /**
@@ -67,6 +76,11 @@ double love_coeff(
   const double x, const double y, const double z
 );
 
+/**
+ * \brief   Helper functions for Love's problem.
+ *
+ * Separated as to not create name clashes due to very short function names.
+ */
 namespace love {
 
 /**
@@ -119,6 +133,11 @@ double psij0(
 } /* namespace impl */
 } /* namespace details */
 } /* namespace cm */
+
+
+/**
+ * \endcond
+ */
 
 
 #endif /* ELASTIC_MODEL_LOVE_HPP */

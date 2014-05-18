@@ -1,10 +1,22 @@
-#define BOOST_TEST_MODULE log
 #include <boost/test/unit_test.hpp>
-#include "inc/custom_test_macros.hpp"
+#include "custom_test_macros.hpp"
 
 #include <sstream>
 
 #include "cm/log/log.hpp"
+
+struct F {
+  std::ostream& saved_log_stream;
+  F()
+    : saved_log_stream(cm::log::Logger::getOutputStream())
+  {}
+  ~F()
+  {
+    LOG_SET_STREAM(saved_log_stream);
+  }
+};
+
+BOOST_FIXTURE_TEST_SUITE(logging, F)
 
 BOOST_AUTO_TEST_CASE(log_simple)
 {
@@ -63,3 +75,5 @@ BOOST_AUTO_TEST_CASE(iflog_nobraces)
   IFLOG(INFO) i = 2;
   BOOST_CHECK_EQUAL(i,2);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

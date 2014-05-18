@@ -1,12 +1,12 @@
-#define BOOST_TEST_MODULE elastic_model_pressures
 #include <boost/test/unit_test.hpp>
 #include <boost/any.hpp>
-#include "inc/custom_test_macros.hpp"
+#include "custom_test_macros.hpp"
 
 #include <cstddef>
 #include <array>
 #include <vector>
 #include <stdexcept>
+#include <memory>
 
 #include "cm/algorithm/pressures_to_displacements.hpp"
 #include "cm/algorithm/displacements_to_pressures.hpp"
@@ -14,36 +14,23 @@
 #include "cm/details/string.hpp"
 
 #include "cm/details/external/armadillo.hpp"
-#include "cm/mesh/rectangular_base.hpp"
-#include "cm/mesh/interface.hpp"
+#include "cm/grid/grid.hpp"
 #include "cm/skin/attributes.hpp"
+#include "cm/grid/cell_shapes.hpp"
 
 using cm::details::sb;
 
-struct MockNode {
-  double x;
-  double y;
+struct MockCell {
+  MockCell(double x, double y) : relative_position{x,y} {};
+  std::array<double, 2> relative_position;
 };
 
-class MockMesh : public cm::MeshInterface {
-private:
-  size_t offset;
+struct MockGrid {
+  std::vector<MockCell> cells;
 
-public:
-  MockMesh(size_t dim, size_t no_nodes) : cm::MeshInterface(dim, no_nodes), offset(0) {}
-  void add_node(MockNode n)
+  std::unique_ptr<cm::Grid> create(size_t dim, const cm::GridCellShape& cell_shape)
   {
-    node(offset).x = n.x;
-    node(offset).y = n.y;
-    for (size_t i = 0; i < D; ++i)
-      setValue(offset, i, 0);
-    ++offset;
-  }
-
-private:
-  double impl_node_area(size_t i) const
-  {
-    return 0.002;
+    return std::unique_ptr<cm::Grid>(cm::Grid::fromSensors(dim, cell_shape, cells.cbegin(), cells.cend()));
   }
 };
 
@@ -56,61 +43,66 @@ cm::SkinAttributes generate_skin_attr()
   return skin_attr;
 }
 
-MockMesh generate_disps_mesh()
+std::unique_ptr<cm::Grid> generate_disps_grid()
 {
-  MockMesh disps_mesh(1, 3);
-  disps_mesh.add_node({-0.015, -0.007});
-  disps_mesh.add_node({0, 0});
-  disps_mesh.add_node({0.01, 0.005});
-  return disps_mesh;
+  MockGrid disps_grid;
+  disps_grid.cells.push_back({-0.015, -0.007});
+  disps_grid.cells.push_back({0, 0});
+  disps_grid.cells.push_back({0.01, 0.005});
+  return disps_grid.create(1, cm::Rectangle({0.001,0.002}));
 }
 
-cm::MeshRectangularBase generate_pressures_mesh() 
+std::unique_ptr<cm::Grid> generate_pressures_grid() 
 {
-  // I don't like this. This requires cm::MeshRectangularBase to work properly
-  // But without hacking the code too much, I can't figure a better way.
-  // Will (probably) check if the nodes are created the way I want them to.
-  // The nodes should be:
+  // The cells should be:
   // (-0.01, -0.005), (-0.01, 0.005), (0.01, -0.005), (0.01, 0.005) (in that order)
-  cm::MeshRectangularBase pressure_mesh(1, -0.01, -0.005, 0.01+1e-7, 0.005+1e-7, 0.02, 0.01);
-  if (pressure_mesh.no_nodes() != 4) {
-    throw std::runtime_error((sb() << "Wrong number of nodes in pressure_mesh: " << pressure_mesh.no_nodes()));
+  MockGrid source;
+  source.cells.push_back({-0.01, -0.005});
+  source.cells.push_back({-0.01,  0.005});
+  source.cells.push_back({ 0.01, -0.005});
+  source.cells.push_back({ 0.01,  0.005});
+  auto ret = source.create(1, cm::Rectangle({0.02, 0.01}));
+
+  if (ret->num_cells() != 4) {
+    throw std::runtime_error((sb() << "Wrong number of cells in pressure_grid: " << ret->num_cells()));
   }
 
-  if (pressure_mesh.node(0).x != -0.01 || pressure_mesh.node(0).y != -0.005) {
+  if (ret->cell(0).x != -0.01 || ret->cell(0).y != -0.005) {
     throw std::runtime_error(sb() 
-      << "Mismatch with first node: "
-      << "(" << pressure_mesh.node(0).x << "," << pressure_mesh.node(0).y << ")"
+      << "Mismatch with first cell: "
+      << "(" << ret->cell(0).x << "," << ret->cell(0).y << ")"
     );
   }
 
-  if (pressure_mesh.node(1).x != -0.01 || pressure_mesh.node(1).y != 0.005) {
+  if (ret->cell(1).x != -0.01 || ret->cell(1).y != 0.005) {
     throw std::runtime_error(sb() 
-      << "Mismatch with second node: "
-      << "(" << pressure_mesh.node(1).x << "," << pressure_mesh.node(1).y << ")"
+      << "Mismatch with second cell: "
+      << "(" << ret->cell(1).x << "," << ret->cell(1).y << ")"
     );
   }
 
-  if (pressure_mesh.node(2).x != 0.01 || pressure_mesh.node(2).y != -0.005) {
+  if (ret->cell(2).x != 0.01 || ret->cell(2).y != -0.005) {
     throw std::runtime_error(sb() 
-      << "Mismatch with third node: "
-      << "(" << pressure_mesh.node(2).x << "," << pressure_mesh.node(2).y << ")"
+      << "Mismatch with third cell: "
+      << "(" << ret->cell(2).x << "," << ret->cell(2).y << ")"
     );
   }
 
-  if (pressure_mesh.node(3).x != 0.01 || pressure_mesh.node(3).y != 0.005) {
+  if (ret->cell(3).x != 0.01 || ret->cell(3).y != 0.005) {
     throw std::runtime_error(sb() 
-      << "Mismatch with fourth node: "
-      << "(" << pressure_mesh.node(3).x << "," << pressure_mesh.node(3).y << ")"
+      << "Mismatch with fourth cell: "
+      << "(" << ret->cell(3).x << "," << ret->cell(3).y << ")"
     );
   }
-  return pressure_mesh;
+  return ret;
 }
+
+BOOST_AUTO_TEST_SUITE(elastic_models__pressures)
 
 BOOST_AUTO_TEST_CASE(two_pressure_elements)
 {
-  cm::MeshRectangularBase pressure_mesh = generate_pressures_mesh();
-  MockMesh disps_mesh = generate_disps_mesh();
+  auto pressure_grid = generate_pressures_grid();
+  auto disps_grid = generate_disps_grid();
   cm::SkinAttributes skin_attr = generate_skin_attr();
 
   arma::mat expected(3,4);
@@ -120,8 +112,8 @@ BOOST_AUTO_TEST_CASE(two_pressure_elements)
     << -5.32421873288007e-11 << -8.80372111993546e-11 << -3.98913429923369e-10 << 2.12497799334448e-09 << arma::endr;
 
   arma::mat calculated = cm::details::pressures_to_displacements_matrix(
-    pressure_mesh,
-    disps_mesh,
+    *pressure_grid,
+    *disps_grid,
     skin_attr
   );
 
@@ -135,8 +127,8 @@ BOOST_AUTO_TEST_CASE(two_pressure_elements)
     <<  -29663110.206823 << 319669917.159797 <<  418667554.921006 << arma::endr;
 
   arma::mat calculated_pinv = cm::details::displacements_to_pressures_matrix(
-    disps_mesh,
-    pressure_mesh,
+    *disps_grid,
+    *pressure_grid,
     skin_attr
   );
 
@@ -145,52 +137,52 @@ BOOST_AUTO_TEST_CASE(two_pressure_elements)
 
 BOOST_AUTO_TEST_CASE(alg_pressures_to_disps)
 {
-  cm::MeshRectangularBase pressure_mesh = generate_pressures_mesh();
-  MockMesh disps_mesh = generate_disps_mesh();
+  auto pressure_grid = generate_pressures_grid();
+  auto disps_grid = generate_disps_grid();
 
   typedef cm::AlgPressuresToDisplacements A_p_d;
   A_p_d::params_type params_p_d;
   params_p_d.skin_props = generate_skin_attr();
 
-  boost::any pre_p_d = A_p_d().offline(pressure_mesh, disps_mesh, params_p_d);
+  boost::any pre_p_d = A_p_d().offline(*pressure_grid, *disps_grid, params_p_d);
 
-  pressure_mesh.setValue(0,0,0.489764395788231);
-  pressure_mesh.setValue(1,0,0.445586200710899);
-  pressure_mesh.setValue(2,0,0.646313010111265);
-  pressure_mesh.setValue(3,0,0.709364830858073);
+  pressure_grid->setValue(0,0,0.489764395788231);
+  pressure_grid->setValue(1,0,0.445586200710899);
+  pressure_grid->setValue(2,0,0.646313010111265);
+  pressure_grid->setValue(3,0,0.709364830858073);
 
-  A_p_d().run(pressure_mesh, disps_mesh, params_p_d, pre_p_d);
+  A_p_d().run(*pressure_grid, *disps_grid, params_p_d, pre_p_d);
   std::vector<double> expected_disps_values;
   expected_disps_values.push_back(1.06638870742382e-09);
   expected_disps_values.push_back(7.18837068923401e-10);
   expected_disps_values.push_back(1.18425742099131e-09);
 
-  CHECK_CLOSE_COLLECTION(disps_mesh.getRawValues(), expected_disps_values, 1e-5);
+  CHECK_CLOSE_COLLECTION(disps_grid->getRawValues(), expected_disps_values, 1e-5);
 }
 
 BOOST_AUTO_TEST_CASE(alg_disps_to_pressures)
 {
-  cm::MeshRectangularBase pressure_mesh = generate_pressures_mesh();
-  MockMesh disps_mesh = generate_disps_mesh();
+  auto pressure_grid = generate_pressures_grid();
+  auto disps_grid = generate_disps_grid();
   cm::SkinAttributes skin_attr = generate_skin_attr();
 
   typedef cm::AlgDisplacementsToPressures A_d_p;
   A_d_p::params_type params_d_p;
   params_d_p.skin_props = generate_skin_attr();
 
-  boost::any pre_d_p = A_d_p().offline(disps_mesh, pressure_mesh, params_d_p);
-  disps_mesh.setValue(0,0,7.54686681982361e-06);
-  disps_mesh.setValue(1,0,2.76025076998578e-06);
-  disps_mesh.setValue(2,0,6.79702676853675e-06);
+  boost::any pre_d_p = A_d_p().offline(*disps_grid, *pressure_grid, params_d_p);
+  disps_grid->setValue(0,0,7.54686681982361e-06);
+  disps_grid->setValue(1,0,2.76025076998578e-06);
+  disps_grid->setValue(2,0,6.79702676853675e-06);
 
-  A_d_p().run(disps_mesh, pressure_mesh, params_d_p, pre_d_p);
+  A_d_p().run(*disps_grid, *pressure_grid, params_d_p, pre_d_p);
   std::vector<double> expected_pressure_values;
   expected_pressure_values.push_back(3217.20811023926);
   expected_pressure_values.push_back(1126.05576208363);
   expected_pressure_values.push_back(949.818793335635);
   expected_pressure_values.push_back(3504.20017070488);
  
-  CHECK_CLOSE_COLLECTION(pressure_mesh.getRawValues(), expected_pressure_values, 1e-5);
+  CHECK_CLOSE_COLLECTION(pressure_grid->getRawValues(), expected_pressure_values, 1e-5);
 }
 
 BOOST_AUTO_TEST_CASE(love_r10)
@@ -302,6 +294,8 @@ BOOST_AUTO_TEST_CASE(love_coeff_zn0)
   const double l_coeff = 0.00035869;
   const double cal = love_coeff(0.001, 0.001, 210000, 0.49, 0.008, 0.007, 0.02);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 /*
  * Test solutions developed with a Matlab(R) prototype of the solutions. To generate output, just

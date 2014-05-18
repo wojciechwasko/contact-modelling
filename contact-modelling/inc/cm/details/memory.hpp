@@ -3,6 +3,16 @@
 
 #include <memory>
 
+/**
+ * \cond DEV
+ */
+
+
+/**
+ * \file 
+ * \brief   Memory-management helpers
+ */
+
 namespace cm {
 namespace details {
 
@@ -41,5 +51,9 @@ public:
 
 } /* namespace details */
 } /* namespace cm */
+
+/**
+ * \endcond
+ */
 
 #endif /* MEMORY_HPP */

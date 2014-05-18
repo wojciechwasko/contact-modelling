@@ -3,8 +3,8 @@
 namespace cm {
 
 boost::any AlgInterface::offline(
-  const MeshInterface& input,
-  const MeshInterface& output,
+  const Grid& input,
+  const Grid& output,
   const boost::any& params
 )
 {
@@ -13,8 +13,8 @@ boost::any AlgInterface::offline(
 }
 
 void AlgInterface::run(
-  const MeshInterface& input,
-        MeshInterface& output,
+  const Grid& input,
+        Grid& output,
   const boost::any& params,
   const boost::any& precomputed
 )

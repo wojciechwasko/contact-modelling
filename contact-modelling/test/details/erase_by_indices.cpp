@@ -1,8 +1,8 @@
-#define BOOST_TEST_MODULE erase_by_indices
 #include <boost/test/unit_test.hpp>
 
 #include "cm/details/container_algorithms.hpp"
 
+BOOST_AUTO_TEST_SUITE(details__erase_by_indices)
 BOOST_AUTO_TEST_CASE(test_simple_erasure)
 {
   using cm::details::erase_by_indices;
@@ -114,3 +114,5 @@ BOOST_AUTO_TEST_CASE(test_erasure_stride_larger_than_container_2)
     corr_res.begin(), corr_res.end()
   );
 }
+
+BOOST_AUTO_TEST_SUITE_END()

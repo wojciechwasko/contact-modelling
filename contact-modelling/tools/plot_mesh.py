@@ -55,7 +55,7 @@ def plot(fname, dx, dy, x, y, v, title=''):
 if __name__ == "__main__":
   import sys
   if len(sys.argv) < 2:
-    sys.stderr.write("Usage: %s mesh_file [plot_title]\n" % sys.argv[0])
+    sys.stderr.write("Usage: %s grid_file [plot_title]\n" % sys.argv[0])
     sys.exit(1)
 
   if len(sys.argv) == 2:

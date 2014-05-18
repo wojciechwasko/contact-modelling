@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "cm/mesh/interface.hpp"
+#include "cm/grid/grid.hpp"
 #include "cm/details/string.hpp"
 
 namespace cm {
@@ -11,30 +11,30 @@ namespace cm {
 using cm::details::sb;
 
 InterpolatorInterface::InterpolatorInterface(
-  NIPP::NIPP policy
-) : bad_node_policy(policy)
+  NIPP policy
+) : bad_cell_policy(policy)
 {
 
 }
 
 void
-InterpolatorInterface::offline(const MeshInterface& from, MeshInterface& to)
+InterpolatorInterface::offline(const Grid& from, Grid& to)
 {
-  if (from.D !=  to.D) {
+  if (from.dim() !=  to.dim()) {
     throw std::runtime_error(
-      sb()  << "Incompatible dimensionality of from and to mesh: "
-            << from.D << " vs. " << to.D
+      sb()  << "Incompatible dimensionality of from and to grid: "
+            << from.dim() << " vs. " << to.dim()
     );
   }
 
   std::vector<size_t> bad_points = impl_offline(from, to);
   applyNippOffline(to, bad_points);
-  to.setBadNodes(bad_points);
+  to.setBadCells(bad_points);
 }
 
 void 
 InterpolatorInterface::applyNippOffline(
-  MeshInterface& to,
+  Grid& to,
   std::vector<size_t>& bad_points
 )
 {
@@ -43,35 +43,34 @@ InterpolatorInterface::applyNippOffline(
   // make unique
   bad_points.erase(std::unique(bad_points.begin(), bad_points.end()), bad_points.end());
 
-  if (bad_node_policy == NIPP::RemoveFromMesh) {
+  if (bad_cell_policy == NIPP::RemoveFromGrid) {
     to.erase(bad_points);
     bad_points.clear();
-  } else if (bad_node_policy == NIPP::InterpolateToZero) {
+  } else if (bad_cell_policy == NIPP::InterpolateToZero) {
     // do nothing, essentially. This will be applied online 
   } else {
     throw std::runtime_error(
-      sb()  << "Unrecognized Non-interpolable Point Policy: "
-            << bad_node_policy
+      sb()  << "Unrecognized Non-interpolable Point Policy."
     );
   }
 }
 
 void
 InterpolatorInterface::interpolate(
-  const MeshInterface& from,
-        MeshInterface& to
+  const Grid& from,
+        Grid& to
 )
 {
-  if (from.D !=  to.D) {
+  if (from.dim() !=  to.dim()) {
     throw std::runtime_error(
-      sb()  << "Incompatible dimensionality of from and to mesh: "
-            << from.D << " vs. " << to.D
+      sb()  << "Incompatible dimensionality of from and to grid: "
+            << from.dim() << " vs. " << to.dim()
     );
   }
 
-  const std::vector<size_t>& bad_nodes = to.getBadNodes();
-  for (size_t n = 0; n < to.no_nodes(); ++n) {
-    if (applyNippOnline(to, bad_nodes, n))
+  const std::vector<size_t>& bad_cells = to.getBadCells();
+  for (size_t n = 0; n < to.num_cells(); ++n) {
+    if (applyNippOnline(to, bad_cells, n))
       continue;
     impl_interpolate(from, to, n);
   }
@@ -79,19 +78,19 @@ InterpolatorInterface::interpolate(
 
 bool
 InterpolatorInterface::applyNippOnline(
-  MeshInterface& to,
-  const std::vector<size_t>& bad_nodes, 
+  Grid& to,
+  const std::vector<size_t>& bad_cells, 
   const size_t n
 )
 {
-  if (bad_node_policy == NIPP::RemoveFromMesh)
+  if (bad_cell_policy == NIPP::RemoveFromGrid)
     return false;
 
   if (
-    bad_node_policy == NIPP::InterpolateToZero &&
-    std::binary_search(bad_nodes.cbegin(), bad_nodes.cend(), n)
+    bad_cell_policy == NIPP::InterpolateToZero &&
+    std::binary_search(bad_cells.cbegin(), bad_cells.cend(), n)
   ) {
-    for (size_t vi = 0; vi < to.D; ++vi)
+    for (size_t vi = 0; vi < to.dim(); ++vi)
       to.setValue(n, vi, 0);
     return true;
   }

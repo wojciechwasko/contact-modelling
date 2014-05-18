@@ -38,6 +38,7 @@ std::ostream& operator<<(std::ostream& stream, const loglvl& lvl)
   return stream;
 }
 
+std::ostream onull(0); 
 std::ostream* Logger::os  = &std::clog;
 loglvl Logger::max_lvl    = loglvl::INFO;
 bool Logger::do_newline   = true;
@@ -72,6 +73,11 @@ void Logger::setReportingLevel(loglvl lvl)
 void Logger::setOutputStream(std::ostream& rhs)
 {
   Logger::os = &rhs;
+}
+
+std::ostream& Logger::getOutputStream()
+{
+  return *os;
 }
 
 void Logger::enableNewline()

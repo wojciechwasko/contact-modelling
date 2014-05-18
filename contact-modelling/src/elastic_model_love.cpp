@@ -4,8 +4,7 @@
 #include <stdexcept>
 
 #include "cm/skin/attributes.hpp"
-#include "cm/mesh/interface.hpp"
-#include "cm/mesh/rectangular_base.hpp"
+#include "cm/grid/grid.hpp"
 
 #include "cm/details/math.hpp"
 #include "cm/details/string.hpp"
@@ -15,22 +14,22 @@ namespace cm {
 namespace details {
 
 arma::mat pressures_to_displacements_matrix(
-  const MeshRectangularBase& p,
-  const MeshInterface& d,
+  const Grid& p,
+  const Grid& d,
   const SkinAttributes& skin_attr
 )
 {
   impl::sanity_checks_pressures_to_displacements(p,d);
   arma::mat ret(d.getRawValues().size(), p.getRawValues().size());
-  const double load_cell_dx = p.dx()/2.0;
-  const double load_cell_dy = p.dy()/2.0;
+  const double load_cell_dx = p.getCellShape().dx()/2.0;
+  const double load_cell_dy = p.getCellShape().dy()/2.0;
   const double E = skin_attr.E;
   const double nu = skin_attr.nu;
   const double h = skin_attr.h;
-  for (size_t id = 0; id < d.size(); ++id) {
-    for (size_t ip = 0; ip < p.size(); ++ip) {
-      const double x = d.node(id).x - p.node(ip).x;
-      const double y = d.node(id).y - p.node(ip).y;
+  for (size_t id = 0; id < d.num_cells(); ++id) {
+    for (size_t ip = 0; ip < p.num_cells(); ++ip) {
+      const double x = d.cell(id).x - p.cell(ip).x;
+      const double y = d.cell(id).y - p.cell(ip).y;
       ret(id,ip) = 
         impl::love_coeff(load_cell_dx, load_cell_dy, E, nu, x, y, 0)
         - impl::love_coeff(load_cell_dx, load_cell_dy, E, nu, x, y, h);
@@ -40,8 +39,8 @@ arma::mat pressures_to_displacements_matrix(
 }
 
 arma::mat displacements_to_pressures_matrix(
-  const MeshInterface& d,
-  const MeshRectangularBase& p,
+  const Grid& d,
+  const Grid& p,
   const SkinAttributes& skin_attr
 )
 {
@@ -64,24 +63,31 @@ namespace impl {
 
 void
 sanity_checks_pressures_to_displacements(
-  const MeshRectangularBase& p,
-  const MeshInterface& d
+  const Grid& p,
+  const Grid& d
 )
 {
-  if (p.D != 1) {
-    throw std::runtime_error((sb()
-      << "p's nodes have an unsupported dimensionality: "
-      << p.D
-      << ". Currently, only normal pressures are allowed."
-    ).str());
+  if (!p.getCellShape().isRectangular()) {
+    throw std::runtime_error(sb()
+      << "Love's algorithm is currently only implemented for grids with rectangular "
+      << "cell shape. Hopefully, this will be expanded in the future."
+    );
   }
 
-  if (d.D != 1) {
-    throw std::runtime_error((sb()
-      << "d's nodes have an unsupported dimensionality: "
-      << d.D
+  if (p.dim() != 1) {
+    throw std::runtime_error(sb()
+      << "p's cells have an unsupported dimensionality: "
+      << p.dim()
+      << ". Currently, only normal pressures are allowed."
+    );
+  }
+
+  if (d.dim() != 1) {
+    throw std::runtime_error(sb()
+      << "d's cells have an unsupported dimensionality: "
+      << d.dim()
       << ". Currently, only normal displacements are allowed."
-    ).str());
+    );
   }
 }
 

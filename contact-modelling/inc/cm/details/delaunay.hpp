@@ -2,7 +2,12 @@
 #define DELAUNAY_HPP
 
 /**
- * This wraps around the actual triangulation library, to allow some modularity.
+ * \cond DEV
+ */
+
+/**
+ * \file
+ * \brief   Adapter for the triangle library.
  */
 
 #include <iterator>
@@ -14,37 +19,48 @@
 
 #include "triangle.h"
 
-#include "cm/mesh/node.hpp"
+#include "cm/grid/cell.hpp"
 
 namespace cm {
-class MeshInterface;
+class Grid;
 
 namespace details {
 
 /**
  * \brief   Adapter for the delaunay triangulation.
+ *
+ * Wraps around the [Shewchuk's triangle library][triangle] and provides a nice,
+ * C++-oriented interface.
+ *
+ * [triangle]: http://www.cs.cmu.edu/~quake/triangle.html
  */
 class Delaunay
 {
-  std::vector<MeshNode> nodes_;
-
-  // technically, it'd be more sound to use size_t, but let's stick with the convention of
-  // Triangle library
+  /**
+   * \brief   Copy of the cells from the grid the triangulation is performed
+   * upon.
+   */
+  std::vector<GridCell> cells_;
+  /**
+   * \brief   Type used for single triangle -- indices of three nodes.
+   * \note    Technically, it'd be more sound to use size_t, but let's stick with the convention of
+   * the Triangle library, which uses ints for that purpose.
+   */
   typedef std::array<int,3>   triangle_type;
+  /**
+   * \brief   All triangles created through Delaunay triangulation.
+   */
   std::vector<triangle_type>  triangles_;
-  std::vector<double>         triangles_areas_;
-  size_t                      no_triangles_;
 
 public:
   /**
    * \brief   Default constructor, performs the actual triangulation.
-   * \param   begin   iterator to the beginning of the points sequence.
-   * \param   end     invalid iterator indicating the end of iteration.
+   * \param   grid  The grid over which to perform the triangulation.
    *
    * The constructor performs the actual triangulation (in this aspect, it is similar to CGAL's
    * interface.)
    */
-  Delaunay(const MeshInterface& mesh);
+  Delaunay(const Grid& grid);
 
   Delaunay& operator=(const Delaunay&) = default;
   Delaunay(const Delaunay&)            = default;
@@ -52,33 +68,55 @@ public:
   Delaunay(Delaunay&&)                 = default;
   ~Delaunay()                          = default;
 
-  size_t getNoTriangles() const;
+  /**
+   * \brief   How many triangles are there in the triangulation?
+   */
+  size_t getNumTriangles() const;
 
   /// for meaning of fields, refer to PointInTriangleMetaIndex
+  /**
+   * \brief   Metadata type for a point.
+   *
+   * \todo  A tuple with 7 elements? It's a code smell, that's for sure. Rather,
+   * create a custom return type and return it (like I've written on my
+   * [blog][blogpost]).
+   * [blogpost]: http://blog.merlotatnight.com/2014/05/c-do-not-fear-custom-return-types-for.html
+   *
+   *
+   */
   typedef std::tuple<bool, int, int, int, double, double, double> PointInTriangleMeta;
+
   /**
    * \brief   Easy-to-read indices for the PointInTriangleMeta tuple
+   *
+   * Will be deleted once PointInTriangleMeta becomes a regular struct.
    */
   enum PointInTriangleMetaIndex {
-    FAIL,  /// whether the point is outside ALL triangles. true if the point is not inside the triangulation
-    N0,    /// ID of 0th node of the triangle
-    N1,    /// ID of 1st node of the triangle
-    N2,    /// ID of 2nd node of the triangle
-    KSI0,  /// barycentric coordinate w.r.t. 0th node
-    KSI1,  /// barycentric coordinate w.r.t. 1st node
-    KSI2   /// barycentric coordinate w.r.t. 2nd node
+    /// whether the point is outside ALL triangles. true if the point is not inside the triangulation
+    FAIL,  
+    /// ID of 0th cell of the triangle
+    N0,    
+    /// ID of 1st cell of the triangle
+    N1,    
+    /// ID of 2nd cell of the triangle
+    N2,    
+    /// barycentric coordinate w.r.t. 0th cell
+    KSI0,  
+    /// barycentric coordinate w.r.t. 1st cell
+    KSI1,  
+    /// barycentric coordinate w.r.t. 2nd cell
+    KSI2   
   };
 
   /**
    * \brief Check which triangle a point is inside of (if any).
-   * \tparam MeshPoint  type for the query point. *NOTE* query points are from a different mesh!
    * \param p   query point 
    * \return  metadata on the relative position.
    *
    * If the point is not inside any of the triangles, true is returned as std::get<FAIL>(return).
    * Metadata on the relative position include:
-   * - ids of the nodes of the triangle
-   * - barycentric coordinates to each of the triangle's nodes, in the same order as the nodes of
+   * - ids of the cells of the triangle
+   * - barycentric coordinates to each of the triangle's cells, in the same order as the cells of
    *   the triangle
    *
    * If the point lies on the edge of the triangulation or coincides with a vertex of the
@@ -91,10 +129,14 @@ public:
    * much point in spending too much time optimising this method. Obviously, it'd be more than
    * welcome, but there are priorities.
    */
-  PointInTriangleMeta getTriangleInfoForPoint(const MeshNode& p);
+  PointInTriangleMeta getTriangleInfoForPoint(const GridCell& p);
 };
 
 } /* namespace details */
 } /* namespace cm */
+
+/**
+ * \endcond
+ */
 
 #endif /* DELAUNAY_HPP */

@@ -25,7 +25,7 @@ attributes:
   h: 0.002
   E: 210000
   nu: 0.5
-  taxelArea: 1.2566e-05
+  taxelRadius: 1.2566e-05
 """
 
 

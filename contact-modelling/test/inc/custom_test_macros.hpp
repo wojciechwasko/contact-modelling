@@ -2,6 +2,7 @@
 #define CUSTOM_TEST_MACROS_HPP
 
 #include <string>
+#include <stdexcept>
 
 // rip-off from http://stackoverflow.com/a/17503436/312650
 // Have to make it a macro so that it reports exact line numbers when checks fail.
@@ -15,6 +16,14 @@
     for(; a != ae; ++a, ++b) { \
         BOOST_CHECK_CLOSE(*a, *b, tolerance); \
     } \
+}
+
+#define CHECK_DOWNCAST(obj, type) { \
+  try { \
+    dynamic_cast<type>(obj); \
+  } catch (std::bad_cast& e) { \
+    BOOST_FAIL(e.what()); \
+  } \
 }
 
 #define CHECK_EQUAL_STR( s, t ) \

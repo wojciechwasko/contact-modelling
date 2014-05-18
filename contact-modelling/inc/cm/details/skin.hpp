@@ -3,6 +3,15 @@
 
 #include <cstddef>
 
+/**
+ * \cond DEV
+ */
+
+/**
+ * \file
+ * \brief   Functions to help interfaceing with SkinWare.
+ */
+
 namespace cm {
 namespace details {
 
@@ -13,6 +22,8 @@ namespace details {
  *
  * Due to crude implementation of skin's iterators, we can't use std::distance
  * on them. This is a replacement
+ *
+ * \todo  Specialise std::distance for SkinWare's iterators!
  */
 template <class I>
 size_t distance(I it1, I it2) {
@@ -26,5 +37,8 @@ size_t distance(I it1, I it2) {
 } /* namespace details */
 } /* namespace cm */
 
+/**
+ * \endcond
+ */
 
 #endif /* SKIN_HELPERS_HPP */

@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include "cm/skin/attributes.hpp"
-#include "cm/mesh/interface.hpp"
+#include "cm/grid/grid.hpp"
 
 #include "cm/details/math.hpp"
 #include "cm/details/string.hpp"
@@ -14,8 +14,8 @@ namespace cm {
 namespace details {
 
 arma::mat forces_to_displacements_matrix(
-  const MeshInterface& f,
-  const MeshInterface& d,
+  const Grid& f,
+  const Grid& d,
   const SkinAttributes& skin_attr
 )
 {
@@ -25,10 +25,10 @@ arma::mat forces_to_displacements_matrix(
   }
   impl::sanity_checks_forces_to_displacements(f,d);
 
-  const size_t f_stride = f.D;
-  const size_t d_stride = d.D;
-  const size_t nrows = d.no_nodes() * d_stride;        // number of rows: displacements 
-  const size_t ncols = f.no_nodes() * f_stride;        // number of cols: forces
+  const size_t f_stride = f.dim();
+  const size_t d_stride = d.dim();
+  const size_t nrows = d.num_cells() * d_stride;        // number of rows: displacements 
+  const size_t ncols = f.num_cells() * f_stride;        // number of cols: forces
 
   // helper variables, not to be computed at each iteration
   const double eps_samepoint      = 1e-5;
@@ -167,11 +167,11 @@ arma::mat forces_to_displacements_matrix(
     ;
   }; 
 
-  for (size_t nj = 0; nj < f.no_nodes(); ++nj) {
-    for (size_t ni = 0; ni < d.no_nodes(); ++ni) {
-      dx = d.node(ni).x - f.node(nj).x;   dx2 = dx*dx;
-      dy = d.node(ni).y - f.node(nj).y;   dy2 = dy*dy;
-      z0h = sqrt(f.node_area(nj) * 3.0 / (2*pi));
+  for (size_t nj = 0; nj < f.num_cells(); ++nj) {
+    for (size_t ni = 0; ni < d.num_cells(); ++ni) {
+      dx = d.cell(ni).x - f.cell(nj).x;   dx2 = dx*dx;
+      dy = d.cell(ni).y - f.cell(nj).y;   dy2 = dy*dy;
+      z0h = sqrt(f.getCellShape().area() * 3.0 / (2*pi));
       is_same = eq_almost(dx, 0, eps_samepoint) && eq_almost(dy, 0, eps_samepoint);
       coeff_inv_dxdy       = 1.0 / sqrt(dx2 + dy2);
       coeff_inv_dxdy_pow3  = pow(coeff_inv_dxdy, 3);
@@ -221,8 +221,8 @@ arma::mat forces_to_displacements_matrix(
 }
     
 arma::mat displacements_to_forces_matrix(
-  const MeshInterface& d,
-  const MeshInterface& f,
+  const Grid& d,
+  const Grid& f,
   const SkinAttributes& skin_attr
 )
 {
@@ -250,33 +250,33 @@ namespace impl {
  * appropriate message.
  *
  * Sometimes, those check could be done at compile time, but the moment we introduce
- * dynamically (e.g. SkinWare-) generated mesh or a Rectangular mesh spanning it, we enter the
+ * dynamically (e.g. SkinWare-) generated grid or a Rectangular grid spanning it, we enter the
  * dynamic realm.
  */
 void
 sanity_checks_forces_to_displacements(
-  const MeshInterface& f,
-  const MeshInterface& d
+  const Grid& f,
+  const Grid& d
 )
 {
-  if (f.D != 3 && f.D != 1) {
+  if (f.dim() != 3 && f.dim() != 1) {
     throw std::runtime_error(
-      "F's nodes have an unsupported dimensionality: " +
-      (sb() << f.D).str()
+      "F's cells have an unsupported dimensionality: " +
+      (sb() << f.dim()).str()
     );
   }
 
-  if (d.D != 3 && d.D != 1) {
-    throw std::runtime_error("D's nodes have an unsupported dimensionality.");
+  if (d.dim() != 3 && d.dim() != 1) {
+    throw std::runtime_error("D's cells have an unsupported dimensionality.");
   }
 
-  if (f.D == 3 && f.getRawValues().size() % 3 != 0) {
-    throw std::runtime_error("F's nodes have a dimensionality of 3 "
+  if (f.dim() == 3 && f.getRawValues().size() % 3 != 0) {
+    throw std::runtime_error("F's cells have a dimensionality of 3 "
         "but the number of values is not divisible by 3.");
   }
 
-  if (d.D == 3 && d.getRawValues().size() % 3 != 0) {
-    throw std::runtime_error("D's nodes have a dimensionality of 3 "
+  if (d.dim() == 3 && d.getRawValues().size() % 3 != 0) {
+    throw std::runtime_error("D's cells have a dimensionality of 3 "
         "but the number of values is not divisible by 3.");
   }
 }

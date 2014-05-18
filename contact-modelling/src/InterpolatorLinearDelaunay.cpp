@@ -1,36 +1,36 @@
 #include "cm/interpolator/linear_delaunay.hpp"
 
 #include "cm/details/delaunay.hpp"
-#include "cm/mesh/interface.hpp"
+#include "cm/grid/grid.hpp"
 
 namespace cm {
 using details::Delaunay;
 
-InterpolatorLinearDelaunay::InterpolatorLinearDelaunay(NIPP::NIPP policy)
+InterpolatorLinearDelaunay::InterpolatorLinearDelaunay(NIPP policy)
   : InterpolatorInterface(policy)
 {
 
 }
 
 std::vector<size_t>
-InterpolatorLinearDelaunay::impl_offline(const MeshInterface& from, MeshInterface& to)
+InterpolatorLinearDelaunay::impl_offline(const Grid& from, Grid& to)
 {
   Delaunay dt(from);
-  std::vector<size_t> nonInterpolableNodes;
+  std::vector<size_t> nonInterpolableCells;
 
-  for (size_t n = 0; n < to.no_nodes(); ++n) {
-    auto meta = dt.getTriangleInfoForPoint(to.node(n));
+  for (size_t n = 0; n < to.num_cells(); ++n) {
+    auto meta = dt.getTriangleInfoForPoint(to.cell(n));
     if (std::get<Delaunay::FAIL>(meta)) {
-      nonInterpolableNodes.push_back(n);
+      nonInterpolableCells.push_back(n);
     }
     to.setMetadata(n, meta);
   }
-  return nonInterpolableNodes;
+  return nonInterpolableCells;
 }
 
 void InterpolatorLinearDelaunay::impl_interpolate(
-  const MeshInterface& from,
-  MeshInterface& to,
+  const Grid& from,
+  Grid& to,
   const size_t n
 )
 {
@@ -52,7 +52,7 @@ void InterpolatorLinearDelaunay::impl_interpolate(
   const double ksi1 = std::get<Delaunay::KSI1>(meta);
   const double ksi2 = std::get<Delaunay::KSI2>(meta);
 
-  for (size_t dim = 0; dim < to.D; ++dim) {
+  for (size_t dim = 0; dim < to.dim(); ++dim) {
     to.setValue(n, dim, 
       ksi0 * from.getValue(n0, dim) +
       ksi1 * from.getValue(n1, dim) +

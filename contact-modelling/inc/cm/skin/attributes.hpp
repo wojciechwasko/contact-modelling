@@ -1,6 +1,11 @@
 #ifndef ATTRIBUTES_HPP
 #define ATTRIBUTES_HPP
 
+/**
+ * \file
+ * \brief   Definition of SkinAttributes struct
+ */
+
 namespace cm {
 
 /**
@@ -23,9 +28,9 @@ struct SkinAttributes {
   double nu;
 
   /**
-   * The area of one given taxel.
+   * The radius of one given taxel (Taxels are assumed to be circular).
    */
-  double taxelArea;
+  double taxelRadius;
 };
 
 } /* namespace cm */
