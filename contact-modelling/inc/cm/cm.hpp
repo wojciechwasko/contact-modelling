@@ -38,4 +38,11 @@
 #include "cm/skin_provider/interface.hpp"
 #include "cm/skin_provider/yaml.hpp"
 
+/**
+ * \brief   Main namespace for the contact-modelling library
+ */
+namespace cm {
+
+}
+
 #endif /* CM_HPP */

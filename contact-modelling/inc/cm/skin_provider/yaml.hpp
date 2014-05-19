@@ -9,6 +9,9 @@
 
 namespace cm {
 
+/**
+ * \cond DEV
+ */
 namespace details {
 /**
  * \brief   A helper struct to allow later creation of Grid through
@@ -18,6 +21,9 @@ struct HelperGridCell {
   std::array<double, 2> relative_position;
 };
 }
+/**
+ * \endcond
+ */
 
 /**
  * \brief   Get skin sensors and response from a YAML file.
@@ -31,6 +37,7 @@ struct HelperGridCell {
  * the YAML file
  *
  * Format:
+ *
  *     cells:
  *     - relative_position:
  *         - 1.23
