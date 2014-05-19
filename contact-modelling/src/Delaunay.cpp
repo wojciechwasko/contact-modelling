@@ -1,21 +1,18 @@
 #include "cm/details/delaunay.hpp"
 
-#include "cm/mesh/interface.hpp"
+#include "cm/grid/grid.hpp"
 #include "cm/details/memory.hpp"
 #include "cm/details/geometry.hpp"
 
 namespace cm {
 namespace details {
 
-Delaunay::Delaunay(const MeshInterface& mesh)
+Delaunay::Delaunay(const Grid& grid)
 {
-  using cm::details::delguard;
-  using cm::details::area_triangle;
+  // copy cells over for our internal use
+  cells_.assign(grid.cells_cbegin(), grid.cells_cend());
 
-  // copy nodes over for our internal use
-  nodes_.assign(mesh.nodes_cbegin(), mesh.nodes_cend());
-
-  size_t no_points = mesh.no_nodes();
+  size_t no_points = grid.num_cells();
   struct triangulateio in, out;
   // z - number stuff from 0, not from 1
   // B - no boundary markers in the output
@@ -45,7 +42,7 @@ Delaunay::Delaunay(const MeshInterface& mesh)
   in.regionlist              = (double *) NULL;
   // fill points
   auto point_from_array = in.pointlist;
-  std::for_each(mesh.nodes_cbegin(), mesh.nodes_cend(), [&](const MeshNode& p) {
+  std::for_each(grid.cells_cbegin(), grid.cells_cend(), [&](const GridCell& p) {
     *point_from_array = p.x;
     ++point_from_array;
     *point_from_array = p.y;
@@ -64,39 +61,32 @@ Delaunay::Delaunay(const MeshInterface& mesh)
   triangulate(triswitches, &in, &out, NULL);
 
   if (3 != out.numberofcorners) {
-    throw std::runtime_error("Triangles have more than 3 nodes! Verify if -o2 is not used!");
+    throw std::runtime_error("Triangles have more than 3 cells! Verify if -o2 is not used!");
   }
   if (1 > out.numberoftriangles) {
     throw std::runtime_error("Need at least one triangle in the triangulation!");
   }
 
-  no_triangles_ = out.numberoftriangles;
+  const size_t no_triangles = out.numberoftriangles;
   int *n0, *n1, *n2;
   n0 = out.trianglelist;
   n1 = out.trianglelist + 1;
   n2 = out.trianglelist + 2;
 
-  triangles_.reserve(no_triangles_);
-  triangles_areas_.reserve(no_triangles_);
-  for (size_t t = 0; t < no_triangles_; ++t) {
+  triangles_.reserve(no_triangles);
+  for (size_t t = 0; t < no_triangles; ++t) {
     triangles_.push_back(triangle_type{*n0, *n1, *n2});
-    triangles_areas_.push_back(
-      area_triangle(nodes_[*n0], nodes_[*n1], nodes_[*n2])
-    );
     n0 += 3; n1 += 3; n2 += 3;
   }
 }
 
-size_t 
-Delaunay::getNoTriangles() const
+size_t Delaunay::getNumTriangles() const
 {
   return triangles_.size(); 
 }
 
-Delaunay::PointInTriangleMeta
-Delaunay::getTriangleInfoForPoint(const MeshNode& p)
+Delaunay::PointInTriangleMeta Delaunay::getTriangleInfoForPoint(const GridCell& p)
 {
-  using cm::details::area_triangle;
   PointInTriangleMeta ret;
   std::get<FAIL>(ret)  = true;
   std::get<N0>(ret) = -1;
@@ -112,11 +102,10 @@ Delaunay::getTriangleInfoForPoint(const MeshNode& p)
     n0 = triangles_[i][0];
     n1 = triangles_[i][1];
     n2 = triangles_[i][2];
-    //area_whole = triangles_areas_[i];
-    area_whole = area_triangle(nodes_[n0], nodes_[n1], nodes_[n2]);
-    area0 = area_triangle(p, nodes_[n1], nodes_[n2]);
-    area1 = area_triangle(nodes_[n0], p, nodes_[n2]);
-    area2 = area_triangle(nodes_[n0], nodes_[n1], p);
+    area_whole = area_triangle(cells_[n0], cells_[n1], cells_[n2]);
+    area0 = area_triangle(p, cells_[n1], cells_[n2]);
+    area1 = area_triangle(cells_[n0], p, cells_[n2]);
+    area2 = area_triangle(cells_[n0], cells_[n1], p);
 
     // hack to verify if the problems with interpolation stem from roundoff error.
     // In fact, they do. Now I have to find a more robust solution, since this 10e-10 is UGLY.

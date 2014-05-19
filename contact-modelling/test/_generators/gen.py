@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-node1 = (0.1, 0.1)
-node2_diff = (0.105, 0.107)
-node2_same = (0.1, 0.1)
+cell1 = (0.1, 0.1)
+cell2_diff = (0.105, 0.107)
+cell2_same = (0.1, 0.1)
 h = 0.002
 G = 300000
 
-dx_diff = node2_diff[0]-node1[0]
-dy_diff = node2_diff[1]-node1[1]
+dx_diff = cell2_diff[0]-cell1[0]
+dy_diff = cell2_diff[1]-cell1[1]
 
-dx_same = node2_same[0]-node1[0]
-dy_same = node2_same[1]-node1[1]
+dx_same = cell2_same[0]-cell1[0]
+dy_same = cell2_same[1]-cell1[1]
 
 xx_diff = lambda dx,dy,h,pi,G : -3 * (-(2*dx**2 + dy**2)/((dx**2 + dy**2)**1.5) + (2*dx**2 + dy**2 + h**2)/((dx**2 + dy**2 + h**2)**1.5))/(4*pi*G)
 yx_diff = lambda dx,dy,h,pi,G : -3 * (-(dx * dy) / ((dx**2 + dy**2)**1.5) + (dx * dy) / ((dx**2 + dy**2 + h**2)**1.5)) / (4*pi*G)

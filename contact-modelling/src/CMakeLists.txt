@@ -21,16 +21,15 @@ add_library(ContactModelling
   AlgInterface.cpp
   AlgPressuresToDisplacements.cpp
   Delaunay.cpp
+  Grid.cpp
+  GridCellShapes.cpp
   InterpolatorInterface.cpp
   InterpolatorLinearDelaunay.cpp
-  MeshInterface.cpp
-  MeshNatural.cpp
-  MeshRectangularBase.cpp
-  MeshSquareBase.cpp
   SkinProviderInterface.cpp
   SkinProviderYaml.cpp
   elastic_model_boussinesq.cpp
   elastic_model_love.cpp
+  geometry.cpp
   log.cpp
   plot.cpp
 )

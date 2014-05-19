@@ -9,7 +9,7 @@
 #include "cm/details/external/armadillo.hpp"
 #include "libtsnnls/tsnnls.h"
 
-#include "cm/mesh/interface.hpp"
+#include "cm/grid/grid.hpp"
 #include "cm/log/log.hpp"
 #include "cm/details/string.hpp"
 #include "cm/details/elastic_model_boussinesq.hpp"
@@ -23,21 +23,21 @@ struct precomputed_type {
 };
 
 boost::any AlgDisplacementsToNonnegativeNormalForces::impl_offline(
-  const MeshInterface& disps,
-  const MeshInterface& forces,
+  const Grid& disps,
+  const Grid& forces,
   const boost::any& params
 )
 {
-  if (disps.D != 1 && disps.D != 3)
+  if (disps.dim() != 1 && disps.dim() != 3)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the displacements mesh: "
-            << disps.D << "; supported dimensionalities: (1,3)"
+      sb()  << "Wrong dimensionality of the displacements grid: "
+            << disps.dim() << "; supported dimensionalities: (1,3)"
     );
 
-  if (forces.D != 1)
+  if (forces.dim() != 1)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the forces mesh: "
-            << disps.D << "; supported dimensionalities: (1,)"
+      sb()  << "Wrong dimensionality of the forces grid: "
+            << disps.dim() << "; supported dimensionalities: (1,)"
     );
 
   using cm::details::forces_to_displacements_matrix;
@@ -65,22 +65,22 @@ boost::any AlgDisplacementsToNonnegativeNormalForces::impl_offline(
 }
 
 void AlgDisplacementsToNonnegativeNormalForces::impl_run(
-  const MeshInterface& disps,
-        MeshInterface& forces,
+  const Grid& disps,
+        Grid& forces,
   const boost::any& params,
   const boost::any& precomputed
 )
 {
-  if (disps.D != 1 && disps.D != 3)
+  if (disps.dim() != 1 && disps.dim() != 3)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the displacements mesh: "
-            << disps.D << "; supported dimensionalities: (1,3)"
+      sb()  << "Wrong dimensionality of the displacements grid: "
+            << disps.dim() << "; supported dimensionalities: (1,3)"
     );
 
-  if (forces.D != 1)
+  if (forces.dim() != 1)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the forces mesh: "
-            << disps.D << "; supported dimensionalities: (1,)"
+      sb()  << "Wrong dimensionality of the forces grid: "
+            << disps.dim() << "; supported dimensionalities: (1,)"
     );
 
   const precomputed_type& pre = boost::any_cast<precomputed_type>(precomputed);

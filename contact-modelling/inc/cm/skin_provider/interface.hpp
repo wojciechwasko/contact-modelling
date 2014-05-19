@@ -7,16 +7,17 @@
 
 #include "cm/skin/attributes.hpp"
 
+/**
+ * \file
+ * \brief   Definition of interface for skin providers
+ */
+
 namespace cm {
 
-class MeshNatural;
+class Grid;
 
 /**
  * \brief   A class which will provide the skin (location of taxels and their response values).
- *
- * \note  Response is taken to be a uint16_t, which later on may be a little bit limiting. So far
- *        we don't consider any skins which don't have a uint16_t response, but this is something to
- *        look out for.
  */
 class SkinProviderInterface {
 public:
@@ -28,20 +29,28 @@ public:
   const size_t D;
   
   /**
-   * \brief   Return a new Natural Mesh.
-   * \param   dim   dimensionality of the Netural Mesh'es values
-   * \return  a *bare* pointer to a newly constructed natural Mesh
+   * \brief   Return a new Grid.
+   * \param   dim   dimensionality of the Netural Grid'es values
+   * \return  a *bare* pointer to a newly constructed natural Grid
    *
-   * \note  This newly created mesh does *not* have values initialised.
+   * \note  This newly created grid does *not* have its values initialised.
    */
-  MeshNatural* createMesh() const;
+  Grid* createGrid() const;
 
+  /**
+   * \brief   Update values.
+   *
+   * New values are requested by the provider and than inserted into the
+   * target_vec vector.
+   */
   void update(target_values_type& target_vec) const;
 
+  /**
+   * \brief   Return information about physical aspects of the skin
+   */
   SkinAttributes getAttributes() const;
 
 protected:
-
   SkinProviderInterface(const size_t dim);
 
   SkinProviderInterface& operator=(const SkinProviderInterface&)  = default;
@@ -53,8 +62,17 @@ public:
   virtual ~SkinProviderInterface()                                = default;
 
 private:
-  virtual MeshNatural* impl_createMesh() const = 0;
+  /**
+   * \brief   To be overriden by implementation
+   */
+  virtual Grid* impl_createGrid() const = 0;
+  /**
+   * \brief   To be overriden by implementation
+   */
   virtual void impl_update(target_values_type& target_vec) const = 0;
+  /**
+   * \brief   To be overriden by implementation
+   */
   virtual SkinAttributes impl_getAttributes() const = 0;
 };
 

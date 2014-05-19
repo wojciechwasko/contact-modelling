@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "cm/mesh/interface.hpp"
+#include "cm/grid/grid.hpp"
 #include "cm/details/external/armadillo.hpp"
 #include "cm/details/string.hpp"
 #include "cm/details/elastic_model_boussinesq.hpp"
@@ -13,21 +13,21 @@ using details::sb;
 typedef arma::mat   precomputed_type;
 
 boost::any AlgForcesToDisplacements::impl_offline(
-  const MeshInterface& forces,
-  const MeshInterface& disps,
+  const Grid& forces,
+  const Grid& disps,
   const boost::any& params
 )
 {
-  if (disps.D != 1 && disps.D != 3)
+  if (disps.dim() != 1 && disps.dim() != 3)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the displacements mesh: "
-            << disps.D << "; supported dimensionalities: (1,3)"
+      sb()  << "Wrong dimensionality of the displacements grid: "
+            << disps.dim() << "; supported dimensionalities: (1,3)"
     );
 
-  if (forces.D != 1 && forces.D != 3)
+  if (forces.dim() != 1 && forces.dim() != 3)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the forces mesh: "
-            << disps.D << "; supported dimensionalities: (1,3)"
+      sb()  << "Wrong dimensionality of the forces grid: "
+            << disps.dim() << "; supported dimensionalities: (1,3)"
     );
 
   const params_type& p = boost::any_cast<const params_type&>(params);
@@ -36,22 +36,22 @@ boost::any AlgForcesToDisplacements::impl_offline(
 }
 
 void AlgForcesToDisplacements::impl_run(
-  const MeshInterface& forces,
-        MeshInterface& disps,
+  const Grid& forces,
+        Grid& disps,
   const boost::any& params,
   const boost::any& precomputed
 )
 {
-  if (disps.D != 1 && disps.D != 3)
+  if (disps.dim() != 1 && disps.dim() != 3)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the displacements mesh: "
-            << disps.D << "; supported dimensionalities: (1,3)"
+      sb()  << "Wrong dimensionality of the displacements grid: "
+            << disps.dim() << "; supported dimensionalities: (1,3)"
     );
 
-  if (forces.D != 1 && forces.D != 3)
+  if (forces.dim() != 1 && forces.dim() != 3)
     throw std::runtime_error(
-      sb()  << "Wrong dimensionality of the forces mesh: "
-            << disps.D << "; supported dimensionalities: (1,3)"
+      sb()  << "Wrong dimensionality of the forces grid: "
+            << disps.dim() << "; supported dimensionalities: (1,3)"
     );
 
   const precomputed_type& pre = boost::any_cast<const precomputed_type&>(precomputed);

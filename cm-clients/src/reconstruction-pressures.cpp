@@ -28,19 +28,20 @@ int main(int argc, char** argv)
   LOG_SET_LEVEL(DEBUG)
 
   cm::SkinProviderYaml skin_provider(options.input_filename);
-  std::unique_ptr<cm::MeshInterface> natural_mesh((cm::MeshInterface*) skin_provider.createMesh());
-  std::unique_ptr<cm::MeshInterface> interp_mesh;
+  std::unique_ptr<cm::Grid> natural_grid(skin_provider.createGrid());
+  std::unique_ptr<cm::Grid> interp_grid;
   std::unique_ptr<cm::InterpolatorInterface> interpolator;
   if (options.source_pitch > 0) {
     // interpolate
-    interp_mesh.reset(new cm::MeshSquareBase(*natural_mesh, options.source_pitch));
+    //interp_grid.reset(new cm::MeshSquareBase(*natural_grid, options.source_pitch));
+    interp_grid.reset(cm::Grid::fromFill(1, cm::Square(options.source_pitch), *natural_grid));
     interpolator.reset(new cm::InterpolatorLinearDelaunay(cm::NIPP::InterpolateToZero));
   }
-  std::unique_ptr<cm::MeshInterface> pressures_mesh(
-    new cm::MeshSquareBase(*natural_mesh, options.pressures_pitch, 1)
+  std::unique_ptr<cm::Grid> pressures_grid(
+    cm::Grid::fromFill(1, cm::Square(options.pressures_pitch), *natural_grid)
   );
-  std::unique_ptr<cm::MeshInterface> disps_mesh(
-    new cm::MeshSquareBase(*natural_mesh, options.displacements_pitch, 1)
+  std::unique_ptr<cm::Grid> disps_grid(
+    cm::Grid::fromFill(1, cm::Square(options.displacements_pitch), *natural_grid)
   );
 
   cm::AlgDisplacementsToPressures AlgDToP;
@@ -55,57 +56,57 @@ int main(int argc, char** argv)
   LOG(DEBUG1) << "Constructed all the required objects.";
   LOG(DEBUG1) << "Starting offline calculations.";
 
-  std::unique_ptr<cm::MeshInterface>& source_mesh = (interpolator) ? interp_mesh : natural_mesh;
+  std::unique_ptr<cm::Grid>& source_grid = (interpolator) ? interp_grid : natural_grid;
 
   if (interpolator) {
     LOG(DEBUG2) << "Starting offline interpolation phase.";
-    interpolator->offline(*natural_mesh, *interp_mesh);
+    interpolator->offline(*natural_grid, *interp_grid);
     LOG(DEBUG2) << "Done with offline interpolation phase.";
   }
 
   LOG(DEBUG2) << "Starting disps->pressures offline.";
-  boost::any AlgDToP_offline = AlgDToP.offline(*source_mesh, *pressures_mesh, AlgDToP_params);
+  boost::any AlgDToP_offline = AlgDToP.offline(*source_grid, *pressures_grid, AlgDToP_params);
   LOG(DEBUG2) << "Done with disps->pressures offline.";
   LOG(DEBUG2) << "Starting pressures->disps offline.";
-  boost::any AlgPToD_offline = AlgPToD.offline(*pressures_mesh, *disps_mesh,  AlgPToD_params);
+  boost::any AlgPToD_offline = AlgPToD.offline(*pressures_grid, *disps_grid,  AlgPToD_params);
   LOG(DEBUG2) << "Done with pressures->disps offline.";
 
   //const arma::mat& mFD = boost::any_cast<const arma::mat&>(AlgPToD_offline);
   //for (size_t i = 0; i < mFD.n_rows; ++i) {
   //  if (std::isnan(mFD(i,0))) {
-  //    LOG(DEBUG3) << "x: " << disps_mesh->node(i).x << "y: " << disps_mesh->node(i).y;
+  //    LOG(DEBUG3) << "x: " << disps_grid->cell(i).x << "y: " << disps_grid->cell(i).y;
   //  }
   //}
 
   LOG(DEBUG1) << "Done with offline calculations.";
 
-  LOG(DEBUG2) << "Updating data in the mesh."; 
-  skin_provider.update(natural_mesh->getRawValues());
-  LOG(DEBUG2) << "Done updating data in the mesh.";
+  LOG(DEBUG2) << "Updating data in the grid."; 
+  skin_provider.update(natural_grid->getRawValues());
+  LOG(DEBUG2) << "Done updating data in the grid.";
 
   if (interpolator) {
     LOG(DEBUG2) << "Starting online interpolation phase.";
-    interpolator->interpolate(*natural_mesh, *interp_mesh);
+    interpolator->interpolate(*natural_grid, *interp_grid);
     LOG(DEBUG2) << "Done with online interpolation phase.";
   }
   LOG(DEBUG2) << "Running disps->pressures online.";
-  AlgDToP.run(*source_mesh, *pressures_mesh, AlgDToP_params, AlgDToP_offline);
+  AlgDToP.run(*source_grid, *pressures_grid, AlgDToP_params, AlgDToP_offline);
   LOG(DEBUG2) << "Done with disps->pressures online.";
   LOG(DEBUG2) << "Running pressures->disps online.";
-  AlgPToD.run(*pressures_mesh, *disps_mesh,  AlgPToD_params, AlgPToD_offline);
+  AlgPToD.run(*pressures_grid, *disps_grid,  AlgPToD_params, AlgPToD_offline);
   LOG(DEBUG2) << "Done with pressures->disps online.";
 
   double total_force = 0;
-  for (size_t i = 0; i < pressures_mesh->no_nodes(); ++i) {
-    total_force += pressures_mesh->getValue(i, 0) * pressures_mesh->node_area(i);
+  for (size_t i = 0; i < pressures_grid->num_cells(); ++i) {
+    total_force += pressures_grid->getValue(i, 0) * pressures_grid->getCellShape().area();
   }
   std::cout << "Total force: " << total_force << std::endl;
 
-  dumpForPlot(*natural_mesh, "natural");
+  dumpForPlot(*natural_grid, "natural");
   if (interpolator)
-    dumpForPlot(*interp_mesh, "interpolated");
-  dumpForPlot(*pressures_mesh, "pressures");
-  dumpForPlot(*disps_mesh,  "reconstructed");
+    dumpForPlot(*interp_grid, "interpolated");
+  dumpForPlot(*pressures_grid, "pressures");
+  dumpForPlot(*disps_grid,  "reconstructed");
 
   return 0;
 }
@@ -121,16 +122,16 @@ bool process_options(int argc, char** argv, opts& options)
       "YAML file to be processed")
     ("source_pitch,s",
       po::value<double>(&options.source_pitch)->default_value(-1),
-      "Pitch of the mesh the sensors readings should be interpolated into. If <= 0, no interpolation "
-      "will be performed (a natural mesh will be used. Pitch is the distance between two neighbouring "
-      "nodes in either x or y direction, in meters. Default: 0.001 [m].")
+      "Pitch of the grid the sensors readings should be interpolated into. If <= 0, no interpolation "
+      "will be performed (a natural grid will be used. Pitch is the distance between two neighbouring "
+      "cells in either x or y direction, in meters. Default: 0.001 [m].")
     ("pressures_pitch,p",
       po::value<double>(&options.pressures_pitch)->default_value(0.001),
-      "Pitch of the pressures mesh, i.e. distance between two neighbouring nodes in either x or y "
+      "Pitch of the pressures grid, i.e. distance between two neighbouring cells in either x or y "
       "direction, in meters. Default: 0.001 [m].")
     ("displacements_pitch,d",
       po::value<double>(&options.displacements_pitch)->default_value(0.001),
-      "Pitch of the (resulting) displacements mesh, i.e. distance between two neighbourint nodes in "
+      "Pitch of the (resulting) displacements grid, i.e. distance between two neighbourint cells in "
       "either x or y direction, in meters. Default: 0.001 [m].")
   ;
 
