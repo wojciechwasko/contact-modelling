@@ -10,7 +10,15 @@
 namespace cm {
 using details::sb;
 
+/**
+ * \cond DEV
+ */
+namespace details {
 typedef arma::mat   precomputed_type;
+}
+/**
+ * \endcond
+ */
 
 boost::any AlgDisplacementsToPressures::impl_offline(
   const Grid& disps,
@@ -54,7 +62,7 @@ void AlgDisplacementsToPressures::impl_run(
             << disps.dim() << "; supported dimensionalities: (1,)"
     );
 
-  const precomputed_type& pre = boost::any_cast<precomputed_type>(precomputed);
+  const details::precomputed_type& pre = boost::any_cast<details::precomputed_type>(precomputed);
   arma::colvec temp = pre * arma::conv_to<arma::colvec>::from(disps.getRawValues());
   pressures.getRawValues().assign(temp.begin(), temp.end());
 }

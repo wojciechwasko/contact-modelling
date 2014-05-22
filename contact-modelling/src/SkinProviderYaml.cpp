@@ -8,6 +8,9 @@
 #include "cm/grid/grid.hpp"
 #include "cm/grid/cell_shapes.hpp"
 
+/**
+ * \cond DEV
+ */
 struct HelperGridCell_and_Value {
   cm::details::HelperGridCell cell;
   double value;
@@ -61,6 +64,10 @@ struct convert<cm::SkinAttributes> {
 };
 
 }
+
+/**
+ * \endcond
+ */
 
 namespace cm {
 

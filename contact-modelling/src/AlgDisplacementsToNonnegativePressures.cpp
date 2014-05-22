@@ -17,10 +17,18 @@
 namespace cm {
 using details::sb;
 
+/**
+ * \cond DEV
+ */
+namespace details {
 struct precomputed_type {
   typedef std::shared_ptr<taucs_ccs_matrix> sh_ptr_type;
   sh_ptr_type taucs_m;
 };
+}
+/**
+ * \endcond
+ */
 
 boost::any AlgDisplacementsToNonnegativePressures::impl_offline(
   const Grid& disps,
@@ -54,8 +62,8 @@ boost::any AlgDisplacementsToNonnegativePressures::impl_offline(
     }
   );
 
-  precomputed_type ret;
-  ret.taucs_m = precomputed_type::sh_ptr_type(
+  details::precomputed_type ret;
+  ret.taucs_m = details::precomputed_type::sh_ptr_type(
     taucs_construct_sorted_ccs_matrix(tempvec.data(), pd_matrix.n_cols, pd_matrix.n_rows),
     taucs_ccs_free
   );
@@ -82,7 +90,7 @@ void AlgDisplacementsToNonnegativePressures::impl_run(
             << disps.dim() << "; supported dimensionalities: (1,)"
     );
 
-  const precomputed_type& pre = boost::any_cast<precomputed_type>(precomputed);
+  const details::precomputed_type& pre = boost::any_cast<details::precomputed_type>(precomputed);
   // taucs_double is just double (as per taucs.h:117
   // so when we have to pass taucs_double* as b, we can take the data from disps.getRawValues()
   // (which is std::vector<double>)
