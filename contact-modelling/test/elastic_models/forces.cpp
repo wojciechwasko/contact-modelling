@@ -6,208 +6,121 @@
 #include <vector>
 
 #include "cm/algorithm/forces_to_displacements.hpp"
+#include "cm/algorithm/displacements_to_forces.hpp"
 
 #include "cm/details/external/armadillo.hpp"
 #include "cm/grid/grid.hpp"
 #include "cm/grid/cell_shapes.hpp"
 
-struct MockCell {
-  MockCell(double x, double y) : relative_position{x,y} {};
-  std::array<double, 2> relative_position;
+#include "forces_fixture.hpp"
+
+// make it have internal linkage
+static const double eps = 1e-5;
+
+BOOST_FIXTURE_TEST_SUITE(elastic_models__forces, BoussinesqFixture)
+
+BOOST_AUTO_TEST_CASE(test_alg_force1_disp1)
+{
+  std::vector<double> local_copy(disps11_grid->getRawValues());
+  cm::AlgForcesToDisplacements alg;
+  cm::AlgForcesToDisplacements::params_type   params;
+  params.skin_props = skin_attr;
+
+  boost::any pre = alg.offline(*force11_grid, *disps11_grid, params);
+  alg.run(*force11_grid, *disps11_grid, params, pre);
+
+  CHECK_CLOSE_COLLECTION(local_copy, disps11_grid->getRawValues(), eps);
 };
 
-struct MockGrid {
-  std::vector<MockCell> cells;
+BOOST_AUTO_TEST_CASE(test_alg_force1_disp3)
+{
+  std::vector<double> local_copy(disps13_grid->getRawValues());
+  cm::AlgForcesToDisplacements alg;
+  cm::AlgForcesToDisplacements::params_type   params;
+  params.skin_props = skin_attr;
 
-  std::unique_ptr<cm::Grid> create(size_t dim, const cm::GridCellShape& cell_shape)
-  {
-    return std::unique_ptr<cm::Grid>(cm::Grid::fromSensors(dim, cell_shape, cells.cbegin(), cells.cend()));
-  }
+  boost::any pre = alg.offline(*force13_grid, *disps13_grid, params);
+  alg.run(*force13_grid, *disps13_grid, params, pre);
+
+  CHECK_CLOSE_COLLECTION(local_copy, disps13_grid->getRawValues(), eps);
 };
 
-// generated with gen/gen.py
-std::vector<double> expected_diff_3_3 = {4.77612499182e-06,3.32211154015e-06,-1.15517619829e-05, 3.32211154015e-06,7.05414433363e-06,-1.61724667761e-05, -1.15517619829e-05,-1.61724667761e-05,-2.21751661574e-06};
-std::vector<double> expected_diff_1_3 = {-1.15517619829e-05,-1.61724667761e-05,-2.21751661574e-06};
-std::vector<double> expected_diff_3_1 = {-1.15517619829e-05,-1.61724667761e-05,-2.21751661574e-06};
-std::vector<double> expected_diff_1_1 = {-2.21751661574e-06};
-std::vector<double> expected_same_3_3 = {1.93137101012e-05,0,0, 0,1.93137101012e-05,0, 0,0,3.86274202023e-05};
-std::vector<double> expected_same_1_3 = {0,0,3.86274202023e-05};
-std::vector<double> expected_same_3_1 = {0,0,3.86274202023e-05};
-std::vector<double> expected_same_1_1 = {3.86274202023e-05};
-
-// -- TEST CASES: grid cells "far away", i.e. dx > eps_samepoint && dy > eps_samepoint
-// !begin
-
-BOOST_AUTO_TEST_SUITE(elastic_models__forces)
-BOOST_AUTO_TEST_CASE(em_other_cells_1_1_dim_3_3)
+BOOST_AUTO_TEST_CASE(test_alg_force3_disp1)
 {
-  MockGrid forces_source;
-  MockGrid disps_source;
+  std::vector<double> local_copy(disps31_grid->getRawValues());
+  cm::AlgForcesToDisplacements alg;
+  cm::AlgForcesToDisplacements::params_type   params;
+  params.skin_props = skin_attr;
 
-  forces_source.cells.push_back({0.1,0.1});
-  disps_source.cells.push_back({0.105,0.107});
+  boost::any pre = alg.offline(*force31_grid, *disps31_grid, params);
+  alg.run(*force31_grid, *disps31_grid, params, pre);
 
-  auto forces_grid = forces_source.create(3, cm::Square(0.044721));
-  auto disps_grid = disps_source.create(3, cm::Square(0.044721));
+  CHECK_CLOSE_COLLECTION(local_copy, disps31_grid->getRawValues(), eps);
+};
 
-  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
-  alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.E = 300000;
-  params_forces_to_disps.skin_props.h  = 0.002;
-  params_forces_to_disps.skin_props.nu = 0.5;
-  arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(*forces_grid, *disps_grid, params_forces_to_disps));
-  CHECK_CLOSE_COLLECTION(precomputed, expected_diff_3_3, 1e-3);
-}
-
-BOOST_AUTO_TEST_CASE(em_other_cells_1_1_dim_1_3)
+BOOST_AUTO_TEST_CASE(test_alg_force3_disp3)
 {
-  MockGrid forces_source;
-  MockGrid disps_source;
+  std::vector<double> local_copy(disps33_grid->getRawValues());
+  cm::AlgForcesToDisplacements alg;
+  cm::AlgForcesToDisplacements::params_type   params;
+  params.skin_props = skin_attr;
 
-  forces_source.cells.push_back({0.1,0.1});
-  disps_source.cells.push_back({0.105,0.107});
+  boost::any pre = alg.offline(*force33_grid, *disps33_grid, params);
+  alg.run(*force33_grid, *disps31_grid, params, pre);
 
-  auto forces_grid = forces_source.create(1, cm::Square(0.044721));
-  auto disps_grid = disps_source.create(3, cm::Square(0.044721));
+  CHECK_CLOSE_COLLECTION(local_copy, disps33_grid->getRawValues(), eps);
+};
 
-  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
-  alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.E = 300000;
-  params_forces_to_disps.skin_props.h  = 0.002;
-  params_forces_to_disps.skin_props.nu = 0.5;
-  arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(*forces_grid, *disps_grid, params_forces_to_disps));
-  CHECK_CLOSE_COLLECTION(precomputed, expected_diff_1_3, 1e-3);
-}
-
-BOOST_AUTO_TEST_CASE(em_other_cells_1_1_dim_3_1)
+BOOST_AUTO_TEST_CASE(test_alg_disps1_disp1)
 {
-  MockGrid forces_source;
-  MockGrid disps_source;
+  std::vector<double> local_copy(force11_grid->getRawValues());
+  cm::AlgDisplacementsToForces alg;
+  cm::AlgDisplacementsToForces::params_type   params;
+  params.skin_props = skin_attr;
 
-  forces_source.cells.push_back({0.1,0.1});
-  disps_source.cells.push_back({0.105,0.107});
+  boost::any pre = alg.offline(*disps11_grid, *force11_grid, params);
+  alg.run(*disps11_grid, *force11_grid, params, pre);
 
-  auto forces_grid = forces_source.create(3, cm::Square(0.044721));
-  auto disps_grid = disps_source.create(1, cm::Square(0.044721));
+  CHECK_CLOSE_COLLECTION(local_copy, force11_grid->getRawValues(), eps);
+};
 
-  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
-  alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.E = 300000;
-  params_forces_to_disps.skin_props.h  = 0.002;
-  params_forces_to_disps.skin_props.nu = 0.5;
-  arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(*forces_grid, *disps_grid, params_forces_to_disps));
-  CHECK_CLOSE_COLLECTION(precomputed, expected_diff_3_1, 1e-3);
-}
-
-BOOST_AUTO_TEST_CASE(em_other_cells_1_1_dim_1_1)
+BOOST_AUTO_TEST_CASE(test_alg_disps1_disp3)
 {
-  MockGrid forces_source;
-  MockGrid disps_source;
+  std::vector<double> local_copy(force13_grid->getRawValues());
+  cm::AlgDisplacementsToForces alg;
+  cm::AlgDisplacementsToForces::params_type   params;
+  params.skin_props = skin_attr;
 
-  // note: for generator dx = 0.0001, dy = 0.0004 (it'd disps.x/y - forces.x/y)
-  forces_source.cells.push_back({0.1,0.1});
-  disps_source.cells.push_back({0.105,0.107});
+  boost::any pre = alg.offline(*disps13_grid, *force13_grid, params);
+  alg.run(*disps13_grid, *force13_grid, params, pre);
 
-  auto forces_grid = forces_source.create(1, cm::Square(0.044721));
-  auto disps_grid = disps_source.create(1, cm::Square(0.044721));
+  CHECK_CLOSE_COLLECTION(local_copy, force13_grid->getRawValues(), eps);
+};
 
-  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
-  alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.E = 300000;
-  params_forces_to_disps.skin_props.h  = 0.002;
-  params_forces_to_disps.skin_props.nu = 0.5;
-  arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(*forces_grid, *disps_grid, params_forces_to_disps));
-  CHECK_CLOSE_COLLECTION(precomputed, expected_diff_1_1, 1e-3);
-}
-// !end
-
-
-// -- TEST CASES: grid cells "very close", i.e. dx < eps_samepoint && dy < eps_samepoint
-// !begin
-
-BOOST_AUTO_TEST_CASE(em_same_cells_1_1_dim_3_3)
+BOOST_AUTO_TEST_CASE(test_alg_disps3_disp1)
 {
-  MockGrid forces_source;
-  MockGrid disps_source;
+  std::vector<double> local_copy(force31_grid->getRawValues());
+  cm::AlgDisplacementsToForces alg;
+  cm::AlgDisplacementsToForces::params_type   params;
+  params.skin_props = skin_attr;
 
-  // note: for generator dx = 1e-5, dy = 1e-6 (it'd disps.x/y - forces.x/y)
-  forces_source.cells.push_back({0.1,0.1});
-  disps_source.cells.push_back({0.1, 0.1});
+  boost::any pre = alg.offline(*disps31_grid, *force31_grid, params);
+  alg.run(*disps31_grid, *force31_grid, params, pre);
 
-  auto forces_grid = forces_source.create(3, cm::Square(0.044721));
-  auto disps_grid = disps_source.create(3, cm::Square(0.044721));
+  CHECK_CLOSE_COLLECTION(local_copy, force31_grid->getRawValues(), eps);
+};
 
-  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
-  alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.E = 300000;
-  params_forces_to_disps.skin_props.h  = 0.002;
-  params_forces_to_disps.skin_props.nu = 0.5;
-  arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(*forces_grid, *disps_grid, params_forces_to_disps));
-  CHECK_CLOSE_COLLECTION(precomputed, expected_same_3_3, 1e-3);
-}
-
-BOOST_AUTO_TEST_CASE(em_same_cells_1_1_dim_1_3)
+BOOST_AUTO_TEST_CASE(test_alg_disps3_disp3)
 {
-  MockGrid forces_source;
-  MockGrid disps_source;
+  std::vector<double> local_copy(force33_grid->getRawValues());
+  cm::AlgDisplacementsToForces alg;
+  cm::AlgDisplacementsToForces::params_type   params;
+  params.skin_props = skin_attr;
 
-  // note: for generator dx = 1e-5, dy = 1e-6 (it'd disps.x/y - forces.x/y)
-  forces_source.cells.push_back({0.1,0.1});
-  disps_source.cells.push_back({0.1, 0.1});
+  boost::any pre = alg.offline(*disps33_grid, *force33_grid, params);
+  alg.run(*disps33_grid, *force31_grid, params, pre);
 
-  auto forces_grid = forces_source.create(1, cm::Square(0.044721));
-  auto disps_grid = disps_source.create(3, cm::Square(0.044721));
-
-  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
-  alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.E = 300000;
-  params_forces_to_disps.skin_props.h  = 0.002;
-  params_forces_to_disps.skin_props.nu = 0.5;
-  arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(*forces_grid, *disps_grid, params_forces_to_disps));
-  CHECK_CLOSE_COLLECTION(precomputed, expected_same_1_3, 1e-3);
-}
-
-BOOST_AUTO_TEST_CASE(em_same_cells_1_1_dim_3_1)
-{
-  MockGrid forces_source;
-  MockGrid disps_source;
-
-  // note: for generator dx = 1e-5, dy = 1e-6 (it'd disps.x/y - forces.x/y)
-  forces_source.cells.push_back({0.1,0.1});
-  disps_source.cells.push_back({0.1, 0.1});
-
-  auto forces_grid = forces_source.create(3, cm::Square(0.044721));
-  auto disps_grid = disps_source.create(1, cm::Square(0.044721));
-
-  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
-  alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.E = 300000;
-  params_forces_to_disps.skin_props.h  = 0.002;
-  params_forces_to_disps.skin_props.nu = 0.5;
-  arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(*forces_grid, *disps_grid, params_forces_to_disps));
-  CHECK_CLOSE_COLLECTION(precomputed, expected_same_3_1, 1e-3);
-}
-
-BOOST_AUTO_TEST_CASE(em_same_cells_1_1_dim_1_1)
-{
-  MockGrid forces_source;
-  MockGrid disps_source;
-
-  // note: for generator dx = 1e-5, dy = 1e-6 (it'd disps.x/y - forces.x/y)
-  forces_source.cells.push_back({0.1,0.1});
-  disps_source.cells.push_back({0.1, 0.1});
-
-  auto forces_grid = forces_source.create(1, cm::Square(0.044721));
-  auto disps_grid = disps_source.create(1, cm::Square(0.044721));
-
-  typedef cm::AlgForcesToDisplacements alg_forces_to_disps;
-  alg_forces_to_disps::params_type                    params_forces_to_disps;
-  params_forces_to_disps.skin_props.E = 300000;
-  params_forces_to_disps.skin_props.h  = 0.002;
-  params_forces_to_disps.skin_props.nu = 0.5;
-  arma::mat precomputed = boost::any_cast<arma::mat>(alg_forces_to_disps().offline(*forces_grid, *disps_grid, params_forces_to_disps));
-  CHECK_CLOSE_COLLECTION(precomputed, expected_same_1_1, 1e-3);
-}
+  CHECK_CLOSE_COLLECTION(local_copy, force33_grid->getRawValues(), eps);
+};
 
 BOOST_AUTO_TEST_SUITE_END()
-// !end
