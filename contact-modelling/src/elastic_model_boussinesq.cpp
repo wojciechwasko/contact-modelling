@@ -13,6 +13,221 @@
 namespace cm {
 namespace details {
 
+namespace impl {
+
+CoeffsBouss::CoeffsBouss(
+  const double E,
+  const double x,
+  const double y,
+  const double h,
+  const double s
+)
+:
+  c_3_4_pi_E(3.0/(4.0 * M_PI * E)),
+  c_3_4_pi_E_xy(c_3_4_pi_E / sqrt(x*x + y*y)),
+  c_3_4_pi_E_xy3(c_3_4_pi_E_xy / (x*x + y*y)),
+  c_3_4_pi_E_xyh3(c_3_4_pi_E / pow(x*x + y*y + h*h, 1.5)),
+  c_9_4_pi_E_psi_z0h((9.0/(4*M_PI*E)) * (psi(h/z0h(s))/z0h(s))),
+  c_9_2_pi_E_psi_z0h(2*c_9_4_pi_E_psi_z0h)
+{
+
+}
+
+double psi(const double v)
+{
+  return (0.2431 * v - 0.1814)/v;
+}
+
+double z0h(const double Ds)
+{
+  return sqrt(3*Ds/(2.0*M_PI));
+}
+
+double bouss_xx(const SkinAttributes& sa, const CoeffsBouss& cb, const double x, const double y)
+{
+  return (2*x*x + y*y) * cb.c_3_4_pi_E_xy3 - (2*x*x + y*y + sa.h*sa.h) * cb.c_3_4_pi_E_xyh3;
+}
+
+double bouss_xy(const SkinAttributes& sa, const CoeffsBouss& cb, const double x, const double y)
+{
+  return (x*y) * cb.c_3_4_pi_E_xy3 - (x*y) * cb.c_3_4_pi_E_xyh3;
+}
+
+double bouss_xz(const SkinAttributes& sa, const CoeffsBouss& cb, const double x, const double y)
+{
+  return - (x*sa.h) * cb.c_3_4_pi_E_xyh3;
+}
+
+double bouss_yx(const SkinAttributes& sa, const CoeffsBouss& cb, const double x, const double y)
+{
+  return bouss_xy(sa,cb,x,y);
+}
+
+double bouss_yy(const SkinAttributes& sa, const CoeffsBouss& cb, const double x, const double y)
+{
+  return (x*x + 2*y*y) * cb.c_3_4_pi_E_xy3 - (x*x + 2*y*y + sa.h*sa.h) * cb.c_3_4_pi_E_xyh3;
+}
+
+double bouss_yz(const SkinAttributes& sa, const CoeffsBouss& cb, const double x, const double y)
+{
+  return - (y*sa.h) * cb.c_3_4_pi_E_xyh3;
+}
+
+double bouss_zx(const SkinAttributes& sa, const CoeffsBouss& cb, const double x, const double y)
+{
+  return bouss_xz(sa,cb,x,y);
+}
+
+double bouss_zy(const SkinAttributes& sa, const CoeffsBouss& cb, const double x, const double y)
+{
+  return bouss_yz(sa,cb,x,y);
+}
+
+double bouss_zz(const SkinAttributes& sa, const CoeffsBouss& cb, const double x, const double y)
+{
+  return cb.c_3_4_pi_E_xy - (x*x + y*y + 2*sa.h*sa.h) * cb.c_3_4_pi_E_xyh3;
+}
+
+double appro_xx(const SkinAttributes& sa, const CoeffsBouss& cb)
+{
+  return cb.c_9_4_pi_E_psi_z0h;
+}
+
+double appro_yy(const SkinAttributes& sa, const CoeffsBouss& cb)
+{
+  return cb.c_9_4_pi_E_psi_z0h;
+}
+
+double appro_zz(const SkinAttributes& sa, const CoeffsBouss& cb)
+{
+  return cb.c_9_2_pi_E_psi_z0h;
+}
+
+arma::mat f2d_11(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
+{
+  arma::mat ret(d.num_cells(), f.num_cells());
+  for (size_t ind_d = 0; ind_d < d.num_cells(); ++ind_d) {
+    for (size_t ind_f = 0; ind_f < f.num_cells(); ++ind_f) {
+      const double x = d.cell(ind_d).x - f.cell(ind_f).x;
+      const double y = d.cell(ind_d).y - f.cell(ind_f).y;
+      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area());
+      const double a_zz = appro_zz(skin_attr, cb);
+      const double b_zz = bouss_zz(skin_attr, cb, x,y);
+      if ((x == 0 && y == 0) || std::fabs(a_zz) < std::fabs(b_zz)) {
+        ret(ind_d, ind_f) = a_zz;
+      } else {
+        ret(ind_d, ind_f) = b_zz;
+      }
+    }
+  }
+
+  return ret;
+}
+
+arma::mat f2d_13(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
+{
+  arma::mat ret(3*d.num_cells(), f.num_cells());
+  for (size_t ind_d = 0; ind_d < d.num_cells(); ++ind_d) {
+    for (size_t ind_f = 0; ind_f < f.num_cells(); ++ind_f) {
+      const double x = d.cell(ind_d).x - f.cell(ind_f).x;
+      const double y = d.cell(ind_d).y - f.cell(ind_f).y;
+      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area());
+      const double b_zz = bouss_zz(skin_attr, cb, x, y);
+      const double a_zz = appro_zz(skin_attr, cb);
+
+      if ((x == 0 && y == 0) || std::fabs(a_zz) < std::fabs(b_zz)) {
+        ret(3*ind_d +0, ind_f) = 0;
+        ret(3*ind_d +1, ind_f) = 0;
+        ret(3*ind_d +2, ind_f) = a_zz;
+      } else {
+        ret(3*ind_d +0, ind_f) = bouss_xz(skin_attr, cb, x, y);
+        ret(3*ind_d +1, ind_f) = bouss_yz(skin_attr, cb, x, y);
+        ret(3*ind_d +2, ind_f) = b_zz;
+      }
+    }
+  }
+
+  return ret;
+}
+
+arma::mat f2d_31(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
+{
+  arma::mat ret(d.num_cells(), 3*f.num_cells());
+  for (size_t ind_d = 0; ind_d < d.num_cells(); ++ind_d) {
+    for (size_t ind_f = 0; ind_f < f.num_cells(); ++ind_f) {
+      const double x = d.cell(ind_d).x - f.cell(ind_f).x;
+      const double y = d.cell(ind_d).y - f.cell(ind_f).y;
+      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area());
+      const double b_zz = bouss_zz(skin_attr, cb, x, y);
+      const double a_zz = appro_zz(skin_attr, cb);
+
+      if ((x == 0 && y == 0) || std::fabs(a_zz) < std::fabs(b_zz)) {
+        ret(ind_d, 3*ind_f +0) = 0;
+        ret(ind_d, 3*ind_f +1) = 0;
+        ret(ind_d, 3*ind_f +2) = a_zz;
+      } else {
+        ret(ind_d, 3*ind_f +0) = bouss_zx(skin_attr, cb, x, y);
+        ret(ind_d, 3*ind_f +1) = bouss_zy(skin_attr, cb, x, y);
+        ret(ind_d, 3*ind_f +2) = b_zz;
+      }
+    }
+  }
+
+  return ret;
+}
+
+arma::mat f2d_33(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
+{
+  arma::mat ret(3*d.num_cells(), 3*f.num_cells());
+  for (size_t ind_d = 0; ind_d < d.num_cells(); ++ind_d) {
+    for (size_t ind_f = 0; ind_f < f.num_cells(); ++ind_f) {
+      const double x = d.cell(ind_d).x - f.cell(ind_f).x;
+      const double y = d.cell(ind_d).y - f.cell(ind_f).y;
+      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area());
+
+      const double b_xx = bouss_xx(skin_attr, cb, x, y);
+      const double a_xx = appro_xx(skin_attr, cb);
+      if ((x == 0 && y == 0) || std::fabs(a_xx) < std::fabs(b_xx)) {
+        ret(3*ind_d +0, 3*ind_f +0) = appro_xx(skin_attr, cb);
+        ret(3*ind_d +0, 3*ind_f +1) = 0;
+        ret(3*ind_d +0, 3*ind_f +2) = 0;
+      } else {
+        ret(3*ind_d +0, 3*ind_f +0) = b_xx;
+        ret(3*ind_d +0, 3*ind_f +1) = bouss_xy(skin_attr, cb,  x, y);
+        ret(3*ind_d +0, 3*ind_f +2) = bouss_xz(skin_attr, cb,  x, y);
+      }
+
+      const double b_yy = bouss_yy(skin_attr, cb, x, y);
+      const double a_yy = appro_yy(skin_attr, cb);
+      if ((x == 0 && y == 0) || std::fabs(a_yy) < std::fabs(b_yy)) {
+        ret(3*ind_d +1, 3*ind_f +0) = 0;
+        ret(3*ind_d +1, 3*ind_f +1) = appro_yy(skin_attr, cb);
+        ret(3*ind_d +1, 3*ind_f +2) = 0;
+      } else {
+        ret(3*ind_d +1, 3*ind_f +0) = bouss_yx(skin_attr, cb,  x, y);
+        ret(3*ind_d +1, 3*ind_f +1) = b_yy;
+        ret(3*ind_d +1, 3*ind_f +2) = bouss_yz(skin_attr, cb,  x, y);
+      }
+
+      const double b_zz = bouss_zz(skin_attr, cb, x, y);
+      const double a_zz = appro_zz(skin_attr, cb);
+      if ((x == 0 && y == 0) || std::fabs(a_zz) < std::fabs(b_zz)) {
+        ret(3*ind_d +2, 3*ind_f +0) = 0;
+        ret(3*ind_d +2, 3*ind_f +1) = 0;
+        ret(3*ind_d +2, 3*ind_f +2) = a_zz;
+      } else {
+        ret(3*ind_d +2, 3*ind_f +0) = bouss_zx(skin_attr, cb,  x, y);
+        ret(3*ind_d +2, 3*ind_f +1) = bouss_zy(skin_attr, cb,  x, y);
+        ret(3*ind_d +2, 3*ind_f +2) = b_zz;
+      }
+    }
+  }
+
+  return ret;
+}
+
+}
+
 arma::mat forces_to_displacements_matrix(
   const Grid& f,
   const Grid& d,
@@ -25,201 +240,24 @@ arma::mat forces_to_displacements_matrix(
   }
   impl::sanity_checks_forces_to_displacements(f,d);
 
-  const size_t f_stride = f.dim();
-  const size_t d_stride = d.dim();
-  const size_t nrows = d.num_cells() * d_stride;        // number of rows: displacements 
-  const size_t ncols = f.num_cells() * f_stride;        // number of cols: forces
+  const size_t f_dim = f.dim();
+  const size_t d_dim = d.dim();
 
-  // helper variables, not to be computed at each iteration
-  const double eps_samepoint      = 1e-5;
-  const double pi = M_PI;
-  const double E = skin_attr.E;
-  const double h = skin_attr.h;
-  const double h2 = h*h;
-  const double coeff_samepoint_xy = 9.0/(4 * pi * E);
-  const double coeff_samepoint_z  = 9.0/(2 * pi * E);
-  const double coeff_other        = 3.0/(4 * pi * E);
-  const double psi                = 0.25; // Note this should be a function of h/zoh
-
-  arma::mat ret(nrows, ncols);
-  // a series of lambdas to faciliate filling the matrix.
-  // Notation:
-  //    xx | xy | xz
-  //    yx | yy | yz
-  //    zx | zy | zz
-  // that corresponds to the (3D forces, 3D displacements) case
-  //
-  // If we consider (3D forces, 1D (z-only) displacements), the following lambdas will be used:
-  //    zx | zy | zz
-  //
-  // If we consider (1D (z-only) forces, 3D displacements), the following lambdas will be used:
-  //    xz
-  //    yz
-  //    zz
-  //
-  // Finally, if we consider (1D forces, 1D displacements), obviously, only the "zz" lambda will
-  // be used.
-  //
-  // The chunk written to is [ni*d_stride ... ni*d_stride+d_stride-1] x [nj*f_stride .. nj*f_stride+f_stride-1] (rows x cols)
-  //
-  // Variable variables accessed by lamdas (through reference closure); will be set at each
-  // iteration of the for loops
-  bool is_same;
-  double dx, dx2;
-  double dy, dy2;
-  double z0h;
-  double coeff_inv_dxdy;
-  double coeff_inv_dxdy_pow3;
-  double coeff_inv_dxdyh_pow3;
-  // The lambdas; 
-  auto write_xx = [&](size_t row, size_t col) {
-    ret(row,col) = (is_same) ? 
-      coeff_samepoint_xy * psi / z0h
-    : 
-      coeff_other * (
-          coeff_inv_dxdy_pow3 *    (2*dx2 + dy2)
-        - coeff_inv_dxdyh_pow3 * (2*dx2 + dy2 + h2)
-      )
-    ;
-  };
-
-  auto write_xy = [&](size_t row, size_t col) {
-    ret(row,col) = (is_same) ? 
-      0
-    : 
-      coeff_other * (
-          coeff_inv_dxdy_pow3 *    (dx * dy)
-        - coeff_inv_dxdyh_pow3 * (dx * dy)
-      )
-    ;
-  }; 
-
-  auto write_xz = [&](size_t row, size_t col) {
-    ret(row,col) = (is_same) ? 
-      0
-    : 
-      coeff_other * (
-        - coeff_inv_dxdyh_pow3 *    (dx * h)
-      )
-    ;
-  };
-
-  auto write_yx = [&](size_t row, size_t col) {
-    ret(row,col) = (is_same) ? 
-      0
-    : 
-      coeff_other * (
-          coeff_inv_dxdy_pow3 *    (dx * dy)
-        - coeff_inv_dxdyh_pow3 * (dx * dy)
-      )
-    ;
-  };
-
-  auto write_yy = [&](size_t row, size_t col) {
-    ret(row,col) = (is_same) ? 
-      coeff_samepoint_xy * psi / z0h
-    : 
-      coeff_other * (
-          coeff_inv_dxdy_pow3 *    (dx2 + 2*dy2)
-        - coeff_inv_dxdyh_pow3 * (dx2 + 2*dy2 + h2)
-      )
-    ;
-  };
-
-  auto write_yz = [&](size_t row, size_t col) {
-    ret(row,col) = (is_same) ? 
-      0
-    : 
-      coeff_other * (
-        - coeff_inv_dxdyh_pow3 *    (dy * h)
-      )
-    ;
-  };
-
-  auto write_zx = [&](size_t row, size_t col) {
-    ret(row,col) = (is_same) ? 
-      0
-    : 
-      coeff_other * (
-        - coeff_inv_dxdyh_pow3 *    (dx *  h)
-      )
-    ;
-  };
-
-  auto write_zy = [&](size_t row, size_t col) {
-    ret(row,col) = (is_same) ? 
-      0
-    : 
-      coeff_other * (
-        - coeff_inv_dxdyh_pow3 *    (dy *  h)
-      )
-    ;
-  }; 
-
-  auto write_zz = [&](size_t row, size_t col) {
-    ret(row,col) = (is_same) ? 
-      coeff_samepoint_z * psi / z0h 
-    : 
-      coeff_other * (
-          coeff_inv_dxdy
-        - coeff_inv_dxdyh_pow3 *    (dx2 + dy2 + 2*h2)
-      )
-    ;
-  }; 
-
-  for (size_t nj = 0; nj < f.num_cells(); ++nj) {
-    for (size_t ni = 0; ni < d.num_cells(); ++ni) {
-      dx = d.cell(ni).x - f.cell(nj).x;   dx2 = dx*dx;
-      dy = d.cell(ni).y - f.cell(nj).y;   dy2 = dy*dy;
-      z0h = sqrt(f.getCellShape().area() * 3.0 / (2*pi));
-      is_same = eq_almost(dx, 0, eps_samepoint) && eq_almost(dy, 0, eps_samepoint);
-      coeff_inv_dxdy       = 1.0 / sqrt(dx2 + dy2);
-      coeff_inv_dxdy_pow3  = pow(coeff_inv_dxdy, 3);
-      coeff_inv_dxdyh_pow3 = pow(1.0 / sqrt(dx2 + dy2 + h2), 3);
-
-      if (f_stride == 1) {
-        if (d_stride == 1) {
-          // forces are only normal, displacements only normal
-          write_zz(ni*d_stride + 0, nj*f_stride + 0);
-        } else {
-          // forces are only normal, displacements are in 3D
-          write_xz(ni*d_stride + 0, nj*f_stride + 0);
-          write_yz(ni*d_stride + 1, nj*f_stride + 0);
-          write_zz(ni*d_stride + 2, nj*f_stride + 0);
-        }
-      } else {
-        if (d_stride == 1) {
-          // forces are in 3D, displacements only normal
-          write_zx(ni*d_stride + 0, nj*f_stride + 0);
-          write_zy(ni*d_stride + 0, nj*f_stride + 1);
-          write_zz(ni*d_stride + 0, nj*f_stride + 2);
-        } else {
-          // forces are in 3D, displacements are in 3D
-          write_xx(ni*d_stride + 0, nj*f_stride + 0);
-          write_xy(ni*d_stride + 0, nj*f_stride + 1);
-          write_xz(ni*d_stride + 0, nj*f_stride + 2);
-
-          write_yx(ni*d_stride + 1, nj*f_stride + 0);
-          write_yy(ni*d_stride + 1, nj*f_stride + 1);
-          write_yz(ni*d_stride + 1, nj*f_stride + 2);
-
-          write_zx(ni*d_stride + 2, nj*f_stride + 0);
-          write_zy(ni*d_stride + 2, nj*f_stride + 1);
-          write_zz(ni*d_stride + 2, nj*f_stride + 2);
-        }
-      }
-    }
+  if (1 == f_dim && 1 == d_dim) {
+    return impl::f2d_11(f,d,skin_attr);
   }
-  IFLOG(DEBUG2) {
-    static size_t sn = 0;
-    std::string fname = sb() << "fd-" << sn << ".csv";
-    LOG(DEBUG2) << "Saving the forces-to-displacements matrix to '" << fname << "'.";
-    ret.save(fname, arma::csv_ascii);
-    ++sn;
+  
+  if (1 == f_dim && 3 == d_dim) {
+    return impl::f2d_13(f,d,skin_attr);
   }
-  return ret;
+  
+  if (3 == f_dim && 1 == d_dim) {
+    return impl::f2d_31(f,d,skin_attr);
+  }
+  
+  return impl::f2d_33(f,d,skin_attr);
 }
-    
+
 arma::mat displacements_to_forces_matrix(
   const Grid& d,
   const Grid& f,
