@@ -17,7 +17,7 @@ tail_c = """0 // dummy element because actual last element has a comma after it
 """
 
 head_yaml = """
-nodes:
+cells:
 """
 
 tail_yaml = """
@@ -25,7 +25,7 @@ attributes:
   h: 0.002
   E: 210000
   nu: 0.5
-  taxelRadius: 1.2566e-05
+  taxelRadius: 0.002
 """
 
 

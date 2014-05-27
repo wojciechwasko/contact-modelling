@@ -1,21 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# A simple version which simply generates a Gaussian indention, not necessarily physical
-
-## Function which generates the sensor response at (x,y)
-def response(x,y):
-  from math import exp,pow
-  x0 = 0.01
-  y0 = -0.01
-  sigmaX = 0.012
-  sigmaY = 0.012
-  A = 0.001
-  v = A * exp(-pow(x-x0,2)/(2*sigmaX*sigmaX) - pow(y-y0,2)/(2*sigmaY*sigmaY))
-  if v > 0:
-    return v
-  return 0
-
 class Response(object):
   def __init__(self):
 ##    self.h = 0.002
