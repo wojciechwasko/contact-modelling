@@ -16,7 +16,7 @@ Obtaining the library
 ---------------------
 
 The source code -- licensed under GNU LGPL -- is available for download at [the
-author's website][http://www.jasoncantarella.com/wordpress/software/tsnnls/].
+author's website](http://www.jasoncantarella.com/wordpress/software/tsnnls/).
 
 Linking to libtsnnls
 --------------------

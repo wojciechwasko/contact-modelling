@@ -15,7 +15,7 @@ Obtaining the library
 ---------------------
 
 `triangle` can be freely obtained from 
-[the author's website][http://www.cs.cmu.edu/~quake/triangle.html]. The code is
+[the author's website](http://www.cs.cmu.edu/~quake/triangle.html). The code is
 licensed under a custom license which states that:
 
 > Private, research, and institutional use is free.

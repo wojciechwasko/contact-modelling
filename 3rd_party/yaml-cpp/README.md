@@ -12,7 +12,7 @@ Obtaining the library
 ---------------------
 
 `yaml-cpp` can be freely obtained from 
-[Google Code website][https://code.google.com/p/yaml-cpp/].
+[Google Code website](https://code.google.com/p/yaml-cpp/).
 The source code is licensed under MIT license.  
 
 Making yaml-cpp available to contact-modelling
