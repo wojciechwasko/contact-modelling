@@ -149,6 +149,8 @@ double z0h(const double Ds);
  * `x,y` aredistances between the point of application of the force and the
  * point in which the displacement is measured; along respective axes, i.e. x =
  * displacement.x - force.x
+ */
+
 /**\{*/
 double bouss_xx(const SkinAttributes& skin_attr, const CoeffsBouss& cb,const double x, const double y);
 double bouss_xy(const SkinAttributes& skin_attr, const CoeffsBouss& cb,const double x, const double y);

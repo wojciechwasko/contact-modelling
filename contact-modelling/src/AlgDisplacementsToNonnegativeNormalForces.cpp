@@ -109,7 +109,7 @@ void AlgDisplacementsToNonnegativeNormalForces::impl_run(
   LOG(DEBUG) << "nnls residual norm: " << residualNorm;
   forces.getRawValues().clear();
   forces.getRawValues().reserve(pre.taucs_m->n);
-  for (size_t i = 0; i < pre.taucs_m->n; ++i) {
+  for (size_t i = 0; i < (size_t)pre.taucs_m->n; ++i) {
     forces.getRawValues().push_back(*(solution+i));
   }
   free(solution);

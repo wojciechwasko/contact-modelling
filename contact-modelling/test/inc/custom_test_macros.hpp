@@ -6,6 +6,13 @@
 #include <stdexcept>
 #include <cmath>
 
+class test_error : public std::exception {
+  const std::string what_;
+public:
+  explicit test_error(const std::string& what) : what_(what) {}
+  const char* what() { return what_.c_str(); }
+};
+
 namespace testimpl {
 inline bool within_percent(double a, double b, double tol)
 {

@@ -15,6 +15,7 @@ ADD_EXECUTABLE(tests
   tests_driver.cpp
 
   algorithm/alg_interface.cpp
+  details/exception.cpp
   details/eq_almost.cpp
   details/erase_by_indices.cpp
   details/geometry.cpp
@@ -26,6 +27,8 @@ ADD_EXECUTABLE(tests
   interpolator/linear_delaunay.cpp
   log/logging.cpp
   skin_provider/yaml.cpp
+  skin_provider/luca.cpp
+  skin_provider/luca_details.cpp
 )
 TARGET_LINK_LIBRARIES(tests
   ContactModelling

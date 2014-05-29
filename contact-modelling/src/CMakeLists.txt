@@ -10,7 +10,7 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(${Armadillo_INCLUDE_DIR})
 
 # ugly hack to enable C++11
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 
 add_library(ContactModelling
   AlgDisplacementsToForces.cpp
@@ -26,6 +26,7 @@ add_library(ContactModelling
   InterpolatorInterface.cpp
   InterpolatorLinearDelaunay.cpp
   SkinProviderInterface.cpp
+  SkinProviderLuca.cpp
   SkinProviderYaml.cpp
   elastic_model_boussinesq.cpp
   elastic_model_love.cpp
