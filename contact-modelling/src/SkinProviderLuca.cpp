@@ -5,6 +5,7 @@
 #include <fstream>
 #include <boost/filesystem.hpp>
 
+#include "cm/grid/grid.hpp"
 #include "cm/details/string.hpp"
 #include "cm/details/exception.hpp"
 
@@ -18,21 +19,49 @@ SkinProviderLuca::SkinProviderLuca(const std::string& dir_path)
   : SkinProviderInterface(1)
 {
   details::check_dir_validity_for_luca(dir_path); 
+
+  details::ReportTxtData report_data;
+  details::processReportTxt(dir_path, report_data);
+
+  dx_ = report_data.x_spacing;
+  dy_ = report_data.y_spacing;
+  h_  = report_data.h;
+  E_  = report_data.E;
+  // hard-coded, not contained in report.txt
+  nu_ = 0.5;
+  taxelRadius_ = 0.002;
+
+  grid_source_.reserve(report_data.x_num * report_data.y_num);
+  // NOTE we're constructing "column"-wise. This is the order Luca did it
+  double y = 0;
+  for (size_t iy = 0; iy < report_data.y_num; ++iy, y += dy_) {
+    double x = 0;
+    for (size_t ix = 0; ix < report_data.x_num; ++ix, x += dx_) {
+      grid_source_.push_back({x,y}); 
+    }
+  }
+
+  avg_values_ = details::getAverageData(dir_path, report_data.x_num * report_data.y_num);
 }
 
 void SkinProviderLuca::impl_update(target_values_type& target_vec) const
 {
-
+  target_vec.assign(avg_values_.cbegin(), avg_values_.cend());
 }
 
 Grid* SkinProviderLuca::impl_createGrid() const
 {
-
+  return Grid::fromSensors(1, cm::Rectangle(dx_,dy_), grid_source_.cbegin(), grid_source_.cend());
 }
 
 SkinAttributes SkinProviderLuca::impl_getAttributes() const
 {
-
+  SkinAttributes ret;
+  ret.h = h_;
+  ret.E = E_;
+  ret.nu = nu_;
+  ret.taxelRadius = taxelRadius_;
+  return ret;
 }
 
 namespace details {
@@ -168,6 +197,66 @@ void processReportTxt(const std::string& dir_path, ReportTxtData& save_to)
   extractx_spacing(report, save_to);
   extracty_spacing(report, save_to);
 } /* processReportTxt() */
+
+std::vector<double> getAverageData(const std::string& root_dir, const size_t expected_num)
+{
+  std::vector<double> ret;
+  ret.resize(expected_num);
+  for (auto& v : ret) {
+    v = 0;
+  }
+
+  bfs::path root = root_dir;
+  const size_t num_files = 50;
+  for (size_t i = 0; i < num_files; ++i) {
+    bfs::path filepath = root;
+    filepath /= "delta";
+    filepath /= (std::string)(sb() << i << ".txt");
+    std::ifstream file(filepath.native());
+    if (!file) {
+      throw std::runtime_error(sb()
+        << "SkinProviderLuca: could not open file "
+        << filepath.native() << " to read values."
+      );
+    }
+    std::vector<double> vals = getDataFromOneFile(file, expected_num);
+    if (vals.size() != expected_num) {
+      throw std::runtime_error(sb()
+        << "SkinProviderLuca: not enough values when processing file "
+        << filepath.native() << ". Expected number: " << expected_num << " "
+        << ", actual number: " << vals.size()
+      );
+    }
+    for (size_t i_val = 0; i_val < expected_num; ++i_val) {
+      ret.at(i_val) += vals.at(i_val) / (double)num_files;
+    }
+  }
+
+  return ret;
+} /* getAverageData */
+
+std::vector<double> getDataFromOneFile(std::istream& datafile, const size_t expected_num)
+{
+  std::vector<double> ret; 
+  
+  ret.reserve(expected_num);
+
+  std::string line;
+  while (datafile) {
+    getline(datafile, line);
+    std::stringstream ss;
+    ss.str(line);
+    double temp;
+    while (ss) {
+      ss >> temp;
+      if (ss) {
+       ret.push_back(temp);
+      }
+    }
+  }
+  return ret;
+} /* getDataFromOneFile */
+
 
 } /* namespace details */
 } /* namespace cm */

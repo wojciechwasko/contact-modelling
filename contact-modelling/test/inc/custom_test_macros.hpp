@@ -1,6 +1,7 @@
 #ifndef CUSTOM_TEST_MACROS_HPP
 #define CUSTOM_TEST_MACROS_HPP
 
+#include <iostream>
 #include <iomanip> // for setprecision
 #include <string>
 #include <stdexcept>
@@ -82,6 +83,28 @@ struct sb
 
 #define CHECK_EQUAL_STR( s, t ) \
   BOOST_CHECK_EQUAL(std::string(s), std::string(t));
+
+#define CHECK_STD_NO_THROW_IMPL( S, TL )                                                      \
+    try {                                                                                       \
+    S;                                                                                          \
+    BOOST_CHECK_IMPL( true, "no exceptions thrown by " BOOST_STRINGIZE( S ), TL, CHECK_MSG ); } \
+    catch( const std::exception & e ) {                                                         \
+    std::cerr << std::endl                                                                      \
+    << "-----------------------------------------------" << std::endl                   \
+    << std::endl << "exception message: " << e.what() << std::endl;                 \
+    BOOST_CHECK_IMPL( false, "exception thrown by " BOOST_STRINGIZE( S ), TL, CHECK_MSG );      \
+    }                                                                                           \
+    catch( ... ) {                                                                              \
+    std::cerr << std::endl                                                                      \
+    << "-----------------------------------------------" << std::endl                   \
+    << std::endl << "exception message : <unkown exception>" << std::endl;          \
+    BOOST_CHECK_IMPL( false, "exception thrown by " BOOST_STRINGIZE( S ), TL, CHECK_MSG );      \
+    }                                                                                           \
+    /**/
+
+#define WARN_STD_NO_THROW( S )            CHECK_STD_NO_THROW_IMPL( S, WARN )
+#define CHECK_STD_NO_THROW( S )           CHECK_STD_NO_THROW_IMPL( S, CHECK )
+#define REQUIRE_STD_NO_THROW( S )         CHECK_STD_NO_THROW_IMPL( S, REQUIRE )
 
 
 #endif /* CUSTOM_TEST_MACROS_HPP */

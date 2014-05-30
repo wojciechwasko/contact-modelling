@@ -85,6 +85,18 @@ private:
   Grid* impl_createGrid() const;
   SkinAttributes impl_getAttributes() const;
 
+  struct SourceCell {
+    std::array<double, 2>  relative_position;
+  };
+
+  std::vector<SourceCell> grid_source_;
+  std::vector<double> avg_values_;
+  double dx_;
+  double dy_;
+  double h_;
+  double E_;
+  double nu_;
+  double taxelRadius_;
 };
 
 /**
@@ -149,6 +161,9 @@ void extractElasticModulus(std::istream& stream, ReportTxtData& save_to);
 void extractSkinThickness(std::istream& stream, ReportTxtData& save_to);
 void extractx_spacing(std::istream& stream, ReportTxtData& save_to);
 void extracty_spacing(std::istream& stream, ReportTxtData& save_to);
+
+std::vector<double> getAverageData(const std::string& root_dir, const size_t expected_num);
+std::vector<double> getDataFromOneFile(std::istream& datafile, const size_t expected_num);
 
 } /* namespace details */
 
