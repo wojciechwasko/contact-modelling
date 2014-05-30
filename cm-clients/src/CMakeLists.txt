@@ -14,6 +14,7 @@ include_directories(${Armadillo_INCLUDE_DIR})
 
 # ugly hack to enable C++11
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 include_directories(${ContactModellingLib_SOURCE_DIR}/inc)
 # From CMake manual:
@@ -21,20 +22,15 @@ include_directories(${ContactModellingLib_SOURCE_DIR}/inc)
 #   source tree. If no CMakeLists.txt file changes when a source is added or
 #   regenerate.)
 
-add_executable(reconstruction-forces
-  reconstruction-forces.cpp
+
+add_executable(reconstruction
+  construct_suite.cpp
+  reconstruction.cpp
+  istream_specialisations.cpp
+  process_options.cpp
 )
 
-target_link_libraries(reconstruction-forces
-  ContactModelling
-  ${Boost_LIBRARIES}
-)
-
-add_executable(reconstruction-pressures
-  reconstruction-pressures.cpp
-)
-
-target_link_libraries(reconstruction-pressures
+target_link_libraries(reconstruction
   ContactModelling
   ${Boost_LIBRARIES}
 )

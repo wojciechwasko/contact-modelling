@@ -36,6 +36,7 @@
 
 // skin providers
 #include "cm/skin_provider/interface.hpp"
+#include "cm/skin_provider/luca.hpp"
 #include "cm/skin_provider/yaml.hpp"
 
 /**
