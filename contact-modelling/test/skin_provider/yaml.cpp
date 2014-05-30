@@ -36,10 +36,21 @@ struct GridWrap {
 
 BOOST_AUTO_TEST_SUITE(skin_provider_yaml)
 
-BOOST_AUTO_TEST_CASE(read_yaml_file)
+struct YamlFile {
+  boost::filesystem::path temp;
+  YamlFile()
+    : temp(boost::filesystem::unique_path("test-yaml-%%%%-%%%%-%%%%-%%%%"))
+  {}
+
+  ~YamlFile()
+  {
+    boost::filesystem::remove_all(temp);
+  }
+};
+
+BOOST_FIXTURE_TEST_CASE(read_yaml_file, YamlFile)
 {
   // first, write the YAML representation
-  boost::filesystem::path temp = boost::filesystem::unique_path("test-yaml-%%%%-%%%%-%%%%-%%%%");
   const std::string tempstr    = temp.native();  // optional
   
   YAML::Node rootcell;

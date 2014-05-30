@@ -52,9 +52,21 @@ BOOST_AUTO_TEST_CASE(dump_to_ss)
   CHECK_CLOSE_COLLECTION(result,expected, 0.1);
 };
 
-BOOST_AUTO_TEST_CASE(dump_to_f)
+struct DumpToFile
 {
-  boost::filesystem::path tmp = boost::filesystem::unique_path("test-dump-grid-%%%%-%%%%-%%%%-%%%%");
+  boost::filesystem::path tmp;
+  DumpToFile()
+    : tmp(boost::filesystem::unique_path("test-dump-grid-%%%%-%%%%-%%%%-%%%%"))
+  {}
+
+  ~DumpToFile()
+  {
+    boost::filesystem::remove_all(tmp);
+  }
+};
+
+BOOST_FIXTURE_TEST_CASE(dump_to_f, DumpToFile)
+{
   const std::string tmpstr    = tmp.native();  // optional
 
   auto m = generateGrid();
