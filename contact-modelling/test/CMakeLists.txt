@@ -31,6 +31,7 @@ ADD_EXECUTABLE(tests
   skin_provider/luca_details.cpp
 )
 TARGET_LINK_LIBRARIES(tests
+  triangle
   ContactModelling
   ${Boost_LIBRARIES}
   yaml-cpp  

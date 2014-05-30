@@ -3,7 +3,7 @@ FIND_PACKAGE(Armadillo 2.4.2 REQUIRED)
 FIND_PACKAGE(libtsnnls REQUIRED)
 
 include_directories(${ContactModellingLib_SOURCE_DIR}/inc)
-include_directories(${triangle_SOURCE_DIR}/inc)
+include_directories(${triangle_SOURCE_DIR})
 include_directories(${YAML_CPP_SOURCE_DIR}/include)
 include_directories(${gnuplot_iostream_SOURCE_DIR}/inc)
 include_directories(${Boost_INCLUDE_DIR})

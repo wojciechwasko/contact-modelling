@@ -1,2 +1,3 @@
 project (triangle)
-add_subdirectory (src) 
+add_definitions(-DTRILIBRARY)
+add_library(triangle triangle.c)

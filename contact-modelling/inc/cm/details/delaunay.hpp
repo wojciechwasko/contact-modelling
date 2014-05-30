@@ -17,8 +17,6 @@
 #include <vector>
 #include <array>
 
-#include "triangle.h"
-
 #include "cm/grid/cell.hpp"
 
 namespace cm {

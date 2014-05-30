@@ -24,5 +24,10 @@ Making `triangle` available to contact-modelling
 ------------------------------------------------
 
 To make the `triangle` library available to `contact-modelling`, place
-`triangle.h` and `triangle.c` in `ROOT/3rd_party/triangle/{inc,src}/`
-respectively. It then becomes a build target for the CMake toolchain.
+`triangle.h` and `triangle.c` in `ROOT/3rd_party/triangle/`.
+It then becomes a build target for the CMake toolchain.
+
+`triangle` is -- after all -- pretty ancient. So after downloading and unzipping
+it to this directory, patch it with `triangle.patch`:
+
+     patch -s -p0 < triangle.patch

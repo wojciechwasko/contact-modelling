@@ -4,6 +4,8 @@
 #include "cm/details/memory.hpp"
 #include "cm/details/geometry.hpp"
 
+#include "triangle.h"
+
 namespace cm {
 namespace details {
 

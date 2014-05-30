@@ -1,0 +1,71 @@
+diff -ru ./triangle.c ../patched/triangle.c
+--- ./triangle.c	2005-07-29 00:11:32.000000000 +0200
++++ ../patched/triangle.c	2014-05-30 17:12:25.710661862 +0200
+@@ -194,28 +194,6 @@
+ /*                                                                           */
+ /*****************************************************************************/
+ 
+-/* For single precision (which will save some memory and reduce paging),     */
+-/*   define the symbol SINGLE by using the -DSINGLE compiler switch or by    */
+-/*   writing "#define SINGLE" below.                                         */
+-/*                                                                           */
+-/* For double precision (which will allow you to refine meshes to a smaller  */
+-/*   edge length), leave SINGLE undefined.                                   */
+-/*                                                                           */
+-/* Double precision uses more memory, but improves the resolution of the     */
+-/*   meshes you can generate with Triangle.  It also reduces the likelihood  */
+-/*   of a floating exception due to overflow.  Finally, it is much faster    */
+-/*   than single precision on 64-bit architectures like the DEC Alpha.  I    */
+-/*   recommend double precision unless you want to generate a mesh for which */
+-/*   you do not have enough memory.                                          */
+-
+-/* #define SINGLE */
+-
+-#ifdef SINGLE
+-#define REAL float
+-#else /* not SINGLE */
+-#define REAL double
+-#endif /* not SINGLE */
+-
+ /* If yours is not a Unix system, define the NO_TIMER compiler switch to     */
+ /*   remove the Unix-specific timing code.                                   */
+ 
+@@ -308,12 +286,6 @@
+ #define DEADVERTEX -32768
+ #define UNDEADVERTEX -32767
+ 
+-/* The next line is used to outsmart some very stupid compilers.  If your    */
+-/*   compiler is smarter, feel free to replace the "int" with "void".        */
+-/*   Not that it matters.                                                    */
+-
+-#define VOID int
+-
+ /* Two constants for algorithms based on random sampling.  Both constants    */
+ /*   have been chosen empirically to optimize their respective algorithms.   */
+ 
+diff -ru ./triangle.h ../patched/triangle.h
+--- ./triangle.h	2005-07-28 20:33:41.000000000 +0200
++++ ../patched/triangle.h	2014-05-30 17:12:19.972664772 +0200
+@@ -248,6 +248,14 @@
+ /*                                                                           */
+ /*****************************************************************************/
+ 
++#ifdef __cplusplus
++extern "C"{
++#endif 
++
++#define ANSI_DECLARATORS
++#define REAL double
++#define VOID void
++
+ struct triangulateio {
+   REAL *pointlist;                                               /* In / out */
+   REAL *pointattributelist;                                      /* In / out */
+@@ -287,3 +295,7 @@
+ void triangulate();
+ void trifree();
+ #endif /* not ANSI_DECLARATORS */
++
++#ifdef __cplusplus
++}
++#endif
