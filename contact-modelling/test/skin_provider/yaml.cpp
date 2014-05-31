@@ -81,7 +81,7 @@ BOOST_FIXTURE_TEST_CASE(read_yaml_file, YamlFile)
 
   cm::SkinProviderYaml provider(tempstr);
   std::unique_ptr<cm::Grid> m ((cm::Grid*) provider.createGrid());
-  provider.update(update_values);
+  update_values = provider.update();
   std::vector<double> grid_cells_coordinates;
   std::for_each(m->cells_begin(), m->cells_end(), [&] (cm::Grid::cell_type n) {
     grid_cells_coordinates.push_back(n.x);

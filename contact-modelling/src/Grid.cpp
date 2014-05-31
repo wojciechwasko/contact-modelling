@@ -9,6 +9,10 @@
 #include "cm/details/geometry.hpp"
 #include "cm/details/container_algorithms.hpp"
 #include "cm/log/log.hpp"
+#include "cm/details/string.hpp"
+
+
+using cm::details::sb;
 
 namespace cm {
 
@@ -171,10 +175,35 @@ const Grid::values_container& Grid::getRawValues() const
   return values_;
 }
 
-Grid::values_container& Grid::getRawValues() 
+void Grid::setRawValues(values_container&& other)
 {
-  return values_;
+  if (other.size() != values_.size()) {
+    throw std::runtime_error(sb()
+      << "Grid::setRawValues(rvalue): passed values of different size. "
+      << "My size: " << values_.size() << ", other size: " << other.size()
+    );
+  }
+
+  if (other.size() != dim_ * num_cells()) {
+    throw std::runtime_error(sb()
+      << "Grid::setRawValues(rvalue): passed values of inconsistent size. "
+      << "Other size: " << other.size() << ", dim * num_cells: " << dim_ * num_cells()
+    );
+  }
+
+  values_ = other;
 }
+
+void Grid::setRawValues(const values_container& other)
+{
+  values_container tmp(other);
+  setRawValues(std::move(tmp));
+}
+
+// Grid::values_container& Grid::getRawValues() 
+// {
+//   return values_;
+// }
 
 std::vector<Grid::value_type> Grid::getValues(size_t i) const
 {

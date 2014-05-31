@@ -65,7 +65,7 @@ void offline(suite_type& suite)
 void run(suite_type& suite)
 {
   // update values in the source mesh
-  suite.skin_provider->update(suite.raw_grid->getRawValues());
+  suite.raw_grid->setRawValues(suite.skin_provider->update());
 
   if (suite.interpolator && suite.interp_grid) {
     suite.interpolator->interpolate(*suite.raw_grid, *suite.interp_grid);

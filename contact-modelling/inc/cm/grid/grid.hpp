@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <utility>
 #include <cstdint>
 #include <vector>
 #include <boost/any.hpp>
@@ -237,9 +238,16 @@ public:
   const values_container& getRawValues() const;
 
   /**
-   * \brief   Get bulk access to the values vector (non-const version)
+   * \brief   Assign new values. Bounds-safe.
+   *
+   * \note  other will be moved from!
    */
-  values_container& getRawValues();
+  void setRawValues(values_container&& other);
+
+  /**
+   * \brief   Assign new values. Bounds-safe.
+   */
+  void setRawValues(const values_container& other);
 
   /**
    * \brief   Return a local copy of values for cell i

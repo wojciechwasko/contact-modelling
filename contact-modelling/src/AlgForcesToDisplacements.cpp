@@ -55,8 +55,11 @@ void AlgForcesToDisplacements::impl_run(
     );
 
   const precomputed_type& pre = boost::any_cast<const precomputed_type&>(precomputed);
-  arma::colvec temp = pre * arma::conv_to<arma::colvec>::from(forces.getRawValues());
-  disps.getRawValues().assign(temp.begin(), temp.end());
+
+  std::vector<double> tmp = arma::conv_to<std::vector<double>>::from(
+      pre * arma::conv_to<arma::colvec>::from(forces.getRawValues())
+    );
+  disps.setRawValues(std::move(tmp));
 }
 
 } /* namespace cm */

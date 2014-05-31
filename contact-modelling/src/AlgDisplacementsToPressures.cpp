@@ -63,8 +63,12 @@ void AlgDisplacementsToPressures::impl_run(
     );
 
   const details::precomputed_type& pre = boost::any_cast<details::precomputed_type>(precomputed);
-  arma::colvec temp = pre * arma::conv_to<arma::colvec>::from(disps.getRawValues());
-  pressures.getRawValues().assign(temp.begin(), temp.end());
+  std::vector<double> tmp = arma::conv_to<std::vector<double>>::from(
+      pre * arma::conv_to<arma::colvec>::from(disps.getRawValues())
+    );
+  pressures.setRawValues(
+     std::move(tmp) 
+  );
 }
 
 } /* namespace cm */

@@ -44,9 +44,9 @@ SkinProviderLuca::SkinProviderLuca(const std::string& dir_path)
   avg_values_ = details::getAverageData(dir_path, report_data.x_num * report_data.y_num);
 }
 
-void SkinProviderLuca::impl_update(target_values_type& target_vec) const
+SkinProviderLuca::target_values_type SkinProviderLuca::impl_update(void) const
 {
-  target_vec.assign(avg_values_.cbegin(), avg_values_.cend());
+  return avg_values_;
 }
 
 Grid* SkinProviderLuca::impl_createGrid() const

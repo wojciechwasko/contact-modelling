@@ -47,7 +47,7 @@ BOOST_FIXTURE_TEST_CASE(good_luca, GoodLuca)
   // construct it again
   auto provider = cm::SkinProviderLuca(luca_path.native());
   std::unique_ptr<cm::Grid> grid(provider.createGrid()); 
-  provider.update(grid->getRawValues());
+  grid->setRawValues(provider.update());
 
   BOOST_CHECK_EQUAL(100, grid->num_cells());
 

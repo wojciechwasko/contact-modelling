@@ -43,7 +43,7 @@ public:
    * New values are requested by the provider and than inserted into the
    * target_vec vector.
    */
-  void update(target_values_type& target_vec) const;
+  target_values_type update(void) const;
 
   /**
    * \brief   Return information about physical aspects of the skin
@@ -69,7 +69,7 @@ private:
   /**
    * \brief   To be overriden by implementation
    */
-  virtual void impl_update(target_values_type& target_vec) const = 0;
+  virtual target_values_type impl_update(void) const = 0;
   /**
    * \brief   To be overriden by implementation
    */

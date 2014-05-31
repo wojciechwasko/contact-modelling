@@ -55,6 +55,9 @@ function [] = print_result(dxf,dyf,E,h, F11,D11,C11,Cp11, F13,D13,C13,Cp13, ...
   disp(' * (PROJECT_ROOT)/contact-modelling/test/_generators/forces_model/Agen_for_unit_tests.m');
   disp(' */');
 
+  disp('');
+  disp('');
+  disp('#include <utility>'); % for std::move()
 
   disp('');
   disp('');
@@ -249,10 +252,14 @@ end
 function [s] = grid_set_values(name, values, indent)
   values = values(:);
   s = '';
+  s = sprintf('%s%sstd::vector<double> tmp_%s;\n', s, indent, name);
+  s = sprintf('%s%stmp_%s.reserve(%d);\n', s, indent, name, size(values,1));
   for i = 1:size(values,1)
-    s = sprintf('%s%s%s->getRawValues().at(%d) = %.20g;\n', ...
-      s, indent, name, i-1, values(i));
+    s = sprintf('%s%stmp_%s.push_back(%.20g);\n', ...
+      s, indent, name, values(i));
   end
+  s = sprintf('%s%s%s->setRawValues(std::move(tmp_%s));\n', ...
+    s, indent, name, name);
 end
 
 function [s] = mat2armadillo_fill(name, mat, indent)

@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(simple_test_1D_inside)
   std::unique_ptr<cm::Grid> m_source(createMockSourceGrid(1));  
   std::unique_ptr<cm::Grid> m_target(createMockTargetGridInside(1));  
 
-  m_source->getRawValues().assign(values.begin(), values.end());
+  m_source->setRawValues(values);
 
   cm::InterpolatorLinearDelaunay interpolator(cm::NIPP::InterpolateToZero);
   interpolator.offline(*m_source, *m_target);
@@ -86,11 +86,10 @@ BOOST_AUTO_TEST_CASE(simple_test_1D_inside)
 
 BOOST_AUTO_TEST_CASE(simple_test_1D_outside_NIPP_to_zero)
 {
-  std::vector<double> values = {-1.23, 0.25, 4.23};
   std::unique_ptr<cm::Grid> m_source(createMockSourceGrid(1));  
   std::unique_ptr<cm::Grid> m_target(createMockTargetGridOutside(1));  
 
-  m_source->getRawValues().assign(values.begin(), values.end());
+  m_source->setRawValues({-1.23, 0.25, 4.23});
 
   cm::InterpolatorLinearDelaunay interpolator(cm::NIPP::InterpolateToZero);
   interpolator.offline(*m_source, *m_target);
@@ -104,11 +103,10 @@ BOOST_AUTO_TEST_CASE(simple_test_1D_outside_NIPP_to_zero)
 
 BOOST_AUTO_TEST_CASE(simple_test_1D_outside_NIPP_remove)
 {
-  std::vector<double> values = {-1.23, 0.25, 4.23};
   std::unique_ptr<cm::Grid> m_source(createMockSourceGrid(1));  
   std::unique_ptr<cm::Grid> m_target(createMockTargetGridOutside(1));  
 
-  m_source->getRawValues().assign(values.begin(), values.end());
+  m_source->setRawValues({-1.23, 0.25, 4.23});
 
   cm::InterpolatorLinearDelaunay interpolator(cm::NIPP::RemoveFromGrid);
   interpolator.offline(*m_source, *m_target);

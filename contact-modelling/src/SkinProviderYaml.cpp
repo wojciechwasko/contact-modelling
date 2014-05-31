@@ -101,10 +101,10 @@ SkinProviderYaml::SkinProviderYaml(
   }
 }
 
-void
-SkinProviderYaml::impl_update(SkinProviderYaml::target_values_type& target_vec) const
+SkinProviderYaml::target_values_type
+SkinProviderYaml::impl_update(void) const
 {
-  target_vec.assign(values_.cbegin(), values_.cend());
+  return values_;
 }
 
 Grid*

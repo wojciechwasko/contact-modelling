@@ -16,10 +16,10 @@ SkinProviderInterface::createGrid() const
   return impl_createGrid();
 }
 
-void
-SkinProviderInterface::update(SkinProviderInterface::target_values_type& target_vec) const
+SkinProviderInterface::target_values_type
+SkinProviderInterface::update(void) const
 {
-  impl_update(target_vec);
+  return impl_update();
 }
 
 SkinAttributes

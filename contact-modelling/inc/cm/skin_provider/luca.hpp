@@ -81,7 +81,7 @@ public:
   SkinProviderLuca(const std::string& dir_path);
 
 private:
-  void impl_update(target_values_type& target_vec) const;
+  target_values_type impl_update(void) const;
   Grid* impl_createGrid() const;
   SkinAttributes impl_getAttributes() const;
 
