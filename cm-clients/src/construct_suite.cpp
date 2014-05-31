@@ -13,8 +13,31 @@ suite_type construct_suite(const options_type& opts)
     ret.interp_grid.reset(cm::Grid::fromFill(1, cm::Square(opts.source_pitch), *(ret.raw_grid)));
     ret.interpolator.reset(new cm::InterpolatorLinearDelaunay(opts.interpolator_policy));
   }
-  ret.tractions_grid.reset(cm::Grid::fromFill(1, cm::Square(opts.tractions_pitch), *(ret.raw_grid)));
-  ret.reconstructed_grid.reset(cm::Grid::fromFill(1, cm::Square(opts.reconstructed_pitch), *(ret.raw_grid)));
+
+  if (opts.tractions_pitch <= 0) {
+    if (ret.interp_grid && ret.interpolator) {
+      ret.tractions_grid.reset(cm::Grid::fromEmpty(1, ret.interp_grid->getCellShape()));
+      ret.tractions_grid->clone_structure(*ret.interp_grid);
+    } else {
+      ret.tractions_grid.reset(cm::Grid::fromEmpty(1, ret.raw_grid->getCellShape()));
+      ret.tractions_grid->clone_structure(*ret.raw_grid);
+    }
+  } else {
+    ret.tractions_grid.reset(cm::Grid::fromFill(1, cm::Square(opts.tractions_pitch), *(ret.raw_grid)));
+  }
+
+  if (opts.reconstructed_pitch <= 0) {
+    if (ret.interp_grid && ret.interpolator) {
+      ret.reconstructed_grid.reset(cm::Grid::fromEmpty(1, ret.interp_grid->getCellShape()));
+      ret.reconstructed_grid->clone_structure(*ret.interp_grid);
+    } else {
+      ret.reconstructed_grid.reset(cm::Grid::fromEmpty(1, ret.raw_grid->getCellShape()));
+      ret.reconstructed_grid->clone_structure(*ret.raw_grid);
+    }
+  } else {
+    ret.reconstructed_grid.reset(cm::Grid::fromFill(1, cm::Square(opts.reconstructed_pitch), *(ret.raw_grid)));
+  }
+
 
   if (opts.traction_type == TractionType::pressures) {
     ret.to_reconstructed.reset(new cm::AlgPressuresToDisplacements());

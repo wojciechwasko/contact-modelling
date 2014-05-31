@@ -2,6 +2,9 @@
 #include <exception>
 
 #include "cm/cm.hpp"
+#include "cm/details/string.hpp"
+
+using cm::details::sb;
 
 int main_impl(int argc, char** argv);
 
@@ -21,6 +24,7 @@ int main_impl(int argc, char** argv) {
   run(suite);
   std::cout << "Done with online calculations. Dumping data.\n";
   dump(suite);
+  std::cout << "Data dumped.\n";
 
   if (options.traction_type == TractionType::pressures) {
     double acc = 0;

@@ -38,11 +38,13 @@ options_type process_options(int argc, char** argv)
     ("tractions_pitch",
       po::value<double>(&options.tractions_pitch)->default_value(0.001),
       "Pitch of the tractions grid, i.e. distance between two neighbouring cells in either x or y "
-      "direction, in meters. Default: 0.001 [m].")
+      "direction, in meters. Default: 0.001 [m]. If <= 0, it will be cloned from the source grid "
+      "(interpolated or not).")
     ("displacements_pitch",
       po::value<double>(&options.reconstructed_pitch)->default_value(0.001),
       "Pitch of the (resulting) displacements grid, i.e. distance between two neighbourint cells in "
-      "either x or y direction, in meters. Default: 0.001 [m].")
+      "either x or y direction, in meters. Default: 0.001 [m]. If <= 0, it will be cloned from the "
+      "source grid (interpolated or not).")
   ;
 
   po::variables_map vm;
