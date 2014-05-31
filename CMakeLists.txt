@@ -6,6 +6,8 @@ directory and build there (cd build/ && cmake .. && make)")
 endif("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+
 ENABLE_TESTING()
 add_subdirectory (3rd_party)
 add_subdirectory (data)

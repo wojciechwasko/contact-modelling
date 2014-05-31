@@ -201,6 +201,16 @@ double psij0(
   static_assert(j == 1 || j == 2, "psij0: j must ==1 or ==2");
   return (yp-y) / (rj0<j>(yp,dx,dy,x,y,z) + betaj0<j>(yp,dx,dy,x,y,z));
 }
+
+template double betaj0<1>(const double, const double, const double, const double, const double, const double);
+template double betaj0<2>(const double, const double, const double, const double, const double, const double);
+
+template double psij0<1>(const double, const double, const double, const double, const double, const double);
+template double psij0<2>(const double, const double, const double, const double, const double, const double);
+
+template double rj0<1>(const double, const double, const double, const double, const double, const double);
+template double rj0<2>(const double, const double, const double, const double, const double, const double);
+
 } /* namespace love */
 } /* namespace impl */
 } /* namespace details */
