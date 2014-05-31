@@ -2,11 +2,17 @@
 
 #include "cm/grid/grid.hpp"
 
+#include <stdexcept>
+
 namespace cm {
 
 void 
 dumpForPlot(const Grid& m, std::ostream& s)
 {
+  if (!m.num_cells()) {
+    throw std::runtime_error("Empty grid passed to dumpForPlot. No cells!");
+  }
+
   s << m.getCellShape().dx() << " " << m.getCellShape().dy() << "\n";
 
   // I guess if somebody wants to make performance improvements, they can later rewrite the code
