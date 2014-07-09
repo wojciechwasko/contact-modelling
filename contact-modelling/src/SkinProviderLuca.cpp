@@ -37,7 +37,7 @@ SkinProviderLuca::SkinProviderLuca(const std::string& dir_path)
   for (size_t iy = 0; iy < report_data.y_num; ++iy, y += dy_) {
     double x = 0;
     for (size_t ix = 0; ix < report_data.x_num; ++ix, x += dx_) {
-      grid_source_.push_back({x,y}); 
+      grid_source_.push_back({x,-y}); 
     }
   }
 
