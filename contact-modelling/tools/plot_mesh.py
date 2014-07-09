@@ -41,16 +41,22 @@ def plot(fname, dx, dy, x, y, v, title=''):
     x, y, v,
     colormap='jet',
     auto_scale=False,
-    lateral_scale=0.9*d,
+    lateral_scale=1.0*d,
     extent=[0,1,0,1,0,max((maxx-minx, maxy-miny))/(maxv-minv)]
   )
   mlab.axes(h,
-    ranges=[minx, maxx, miny, maxy, minv, maxv]
+    ranges=[minx, maxx, miny, maxy, minv, maxv],x_axis_visibility=False, y_axis_visibility=False, z_axis_visibility=False
   ) 
-  mlab.outline(h)
+  #mlab.outline(h)
   mlab.colorbar(h,orientation='vertical')
   mlab.title(title)
+  h.scene.isometric_view()
+  mlab.view(azimuth=135, distance='auto')
+  h.scene.background = (1.0,1.0,1.0)
+  h.scene.foreground = (0.4,0.4,0.4)
+  mlab.savefig(filename=fname+'.png', magnification=3)
   mlab.show()
+
 
 if __name__ == "__main__":
   import sys
