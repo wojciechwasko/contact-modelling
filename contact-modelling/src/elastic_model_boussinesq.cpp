@@ -188,7 +188,7 @@ arma::mat f2d_33(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
       const double b_xx = bouss_xx(skin_attr, cb, x, y);
       const double a_xx = appro_xx(skin_attr, cb);
       if ((x == 0 && y == 0) || std::fabs(a_xx) < std::fabs(b_xx)) {
-        ret(3*ind_d +0, 3*ind_f +0) = appro_xx(skin_attr, cb);
+        ret(3*ind_d +0, 3*ind_f +0) = a_xx;
         ret(3*ind_d +0, 3*ind_f +1) = 0;
         ret(3*ind_d +0, 3*ind_f +2) = 0;
       } else {
@@ -201,7 +201,7 @@ arma::mat f2d_33(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
       const double a_yy = appro_yy(skin_attr, cb);
       if ((x == 0 && y == 0) || std::fabs(a_yy) < std::fabs(b_yy)) {
         ret(3*ind_d +1, 3*ind_f +0) = 0;
-        ret(3*ind_d +1, 3*ind_f +1) = appro_yy(skin_attr, cb);
+        ret(3*ind_d +1, 3*ind_f +1) = a_yy;
         ret(3*ind_d +1, 3*ind_f +2) = 0;
       } else {
         ret(3*ind_d +1, 3*ind_f +0) = bouss_yx(skin_attr, cb,  x, y);
