@@ -33,7 +33,7 @@ boost::any AlgDisplacementsToForces::impl_offline(
 
   const params_type& p = boost::any_cast<const params_type&>(params);
   using cm::details::displacements_to_forces_matrix;
-  return displacements_to_forces_matrix(disps, forces, p.skin_props);
+  return displacements_to_forces_matrix(disps, forces, p.skin_props, p.psi_exact);
 }
 
 void AlgDisplacementsToForces::impl_run(

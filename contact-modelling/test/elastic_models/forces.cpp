@@ -45,6 +45,7 @@ BOOST_AUTO_TEST_CASE(test_alg_force1_disp1)
   cm::AlgForcesToDisplacements alg;
   cm::AlgForcesToDisplacements::params_type   params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   boost::any pre = alg.offline(*force11_grid, *disps11_grid, params);
   alg.run(*force11_grid, *disps11_grid, params, pre);
@@ -58,6 +59,7 @@ BOOST_AUTO_TEST_CASE(test_alg_force1_disp3)
   cm::AlgForcesToDisplacements alg;
   cm::AlgForcesToDisplacements::params_type   params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   boost::any pre = alg.offline(*force13_grid, *disps13_grid, params);
   alg.run(*force13_grid, *disps13_grid, params, pre);
@@ -71,6 +73,7 @@ BOOST_AUTO_TEST_CASE(test_alg_force3_disp1)
   cm::AlgForcesToDisplacements alg;
   cm::AlgForcesToDisplacements::params_type   params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   boost::any pre = alg.offline(*force31_grid, *disps31_grid, params);
   alg.run(*force31_grid, *disps31_grid, params, pre);
@@ -84,6 +87,7 @@ BOOST_AUTO_TEST_CASE(test_alg_force3_disp3)
   cm::AlgForcesToDisplacements alg;
   cm::AlgForcesToDisplacements::params_type   params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   boost::any pre = alg.offline(*force33_grid, *disps33_grid, params);
   alg.run(*force33_grid, *disps33_grid, params, pre);
@@ -97,6 +101,7 @@ BOOST_AUTO_TEST_CASE(test_alg_disps1_force1)
   cm::AlgDisplacementsToForces alg;
   cm::AlgDisplacementsToForces::params_type   params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   boost::any pre = alg.offline(*disps11_grid, *force11_grid, params);
   alg.run(*disps11_grid, *force11_grid, params, pre);
@@ -110,6 +115,7 @@ BOOST_AUTO_TEST_CASE(test_alg_disps3_force1)
   cm::AlgDisplacementsToForces alg;
   cm::AlgDisplacementsToForces::params_type   params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   boost::any pre = alg.offline(*disps13_grid, *force13_grid, params);
   alg.run(*disps13_grid, *force13_grid, params, pre);
@@ -123,6 +129,7 @@ BOOST_AUTO_TEST_CASE(test_alg_disps3_force3)
   cm::AlgDisplacementsToForces alg;
   cm::AlgDisplacementsToForces::params_type   params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   boost::any pre = alg.offline(*disps33_grid, *force33_grid, params);
   alg.run(*disps33_grid, *force33_grid, params, pre);
@@ -135,11 +142,13 @@ BOOST_AUTO_TEST_CASE(test_matrix_force1_disps1)
   cm::AlgForcesToDisplacements alg;
   cm::AlgForcesToDisplacements::params_type params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   arma::mat calc_mat = cm::details::forces_to_displacements_matrix(
       *force11_grid,
       *disps11_grid,
-      skin_attr);
+      skin_attr,
+      true);
 
   BOOST_REQUIRE_EQUAL(force1_disps1.n_rows, calc_mat.n_rows);
   BOOST_REQUIRE_EQUAL(force1_disps1.n_cols, calc_mat.n_cols);
@@ -151,11 +160,13 @@ BOOST_AUTO_TEST_CASE(test_matrix_force3_disps1)
   cm::AlgForcesToDisplacements alg;
   cm::AlgForcesToDisplacements::params_type params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   arma::mat calc_mat = cm::details::forces_to_displacements_matrix(
       *force31_grid,
       *disps31_grid,
-      skin_attr);
+      skin_attr,
+      true);
 
   BOOST_REQUIRE_EQUAL(force3_disps1.n_rows, calc_mat.n_rows);
   BOOST_REQUIRE_EQUAL(force3_disps1.n_cols, calc_mat.n_cols);
@@ -167,11 +178,13 @@ BOOST_AUTO_TEST_CASE(test_matrix_force1_disps3)
   cm::AlgForcesToDisplacements alg;
   cm::AlgForcesToDisplacements::params_type params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   arma::mat calc_mat = cm::details::forces_to_displacements_matrix(
       *force13_grid,
       *disps13_grid,
-      skin_attr);
+      skin_attr,
+      true);
 
   BOOST_REQUIRE_EQUAL(force1_disps3.n_rows, calc_mat.n_rows);
   BOOST_REQUIRE_EQUAL(force1_disps3.n_cols, calc_mat.n_cols);
@@ -184,11 +197,13 @@ BOOST_AUTO_TEST_CASE(test_matrix_force3_disps3)
   cm::AlgForcesToDisplacements alg;
   cm::AlgForcesToDisplacements::params_type params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   arma::mat calc_mat = cm::details::forces_to_displacements_matrix(
       *force33_grid,
       *disps33_grid,
-      skin_attr);
+      skin_attr,
+      true);
 
   BOOST_REQUIRE_EQUAL(force3_disps3.n_rows, calc_mat.n_rows);
   BOOST_REQUIRE_EQUAL(force3_disps3.n_cols, calc_mat.n_cols);
@@ -201,11 +216,13 @@ BOOST_AUTO_TEST_CASE(test_matrix_disps1_force1)
   cm::AlgDisplacementsToForces alg;
   cm::AlgDisplacementsToForces::params_type params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   arma::mat calc_mat = cm::details::displacements_to_forces_matrix(
       *disps11_grid,
       *force11_grid,
-      skin_attr);
+      skin_attr,
+      true);
 
   BOOST_REQUIRE_EQUAL(disps1_force1.n_rows, calc_mat.n_rows);
   BOOST_REQUIRE_EQUAL(disps1_force1.n_cols, calc_mat.n_cols);
@@ -218,11 +235,13 @@ BOOST_AUTO_TEST_CASE(test_matrix_disps3_force1)
   cm::AlgDisplacementsToForces alg;
   cm::AlgDisplacementsToForces::params_type params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   arma::mat calc_mat = cm::details::displacements_to_forces_matrix(
       *disps13_grid,
       *force13_grid,
-      skin_attr);
+      skin_attr,
+      true);
 
   BOOST_REQUIRE_EQUAL(disps3_force1.n_rows, calc_mat.n_rows);
   BOOST_REQUIRE_EQUAL(disps3_force1.n_cols, calc_mat.n_cols);
@@ -235,11 +254,13 @@ BOOST_AUTO_TEST_CASE(test_matrix_disps1_force3)
   cm::AlgDisplacementsToForces alg;
   cm::AlgDisplacementsToForces::params_type params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   arma::mat calc_mat = cm::details::displacements_to_forces_matrix(
       *disps31_grid,
       *force31_grid,
-      skin_attr);
+      skin_attr,
+      true);
 
   BOOST_REQUIRE_EQUAL(disps1_force3.n_rows, calc_mat.n_rows);
   BOOST_REQUIRE_EQUAL(disps1_force3.n_cols, calc_mat.n_cols);
@@ -252,11 +273,13 @@ BOOST_AUTO_TEST_CASE(test_matrix_disps3_force3)
   cm::AlgDisplacementsToForces alg;
   cm::AlgDisplacementsToForces::params_type params;
   params.skin_props = skin_attr;
+  params.psi_exact = true;
 
   arma::mat calc_mat = cm::details::displacements_to_forces_matrix(
       *disps33_grid,
       *force33_grid,
-      skin_attr);
+      skin_attr,
+      true);
 
   BOOST_REQUIRE_EQUAL(disps3_force3.n_rows, calc_mat.n_rows);
   BOOST_REQUIRE_EQUAL(disps3_force3.n_cols, calc_mat.n_cols);

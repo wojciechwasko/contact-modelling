@@ -50,7 +50,7 @@ boost::any AlgDisplacementsToNonnegativeNormalForces::impl_offline(
 
   using cm::details::forces_to_displacements_matrix;
   const params_type& p = boost::any_cast<const params_type&>(params);
-  arma::mat fd_matrix  = forces_to_displacements_matrix(forces, disps, p.skin_props);
+  arma::mat fd_matrix  = forces_to_displacements_matrix(forces, disps, p.skin_props, p.psi_exact);
   // 1st : taucs_construct_sorted_ccs_matrix requires row-major ordering (as per README of
   // libtsnnls).
   std::vector<double> tempvec;

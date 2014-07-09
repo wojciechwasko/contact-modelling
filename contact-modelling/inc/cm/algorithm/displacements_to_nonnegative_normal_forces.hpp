@@ -26,7 +26,16 @@ public:
    * \brief   Parameters for the algorithm -- attributes of the skin
    */
   typedef struct params_type {
+    /**
+     * \brief   Properties of the skin
+     */
     SkinAttributes skin_props;
+    /**
+     * \brief   Whether to calculate the function Psi(x) according to the exact
+     * formula by Muscari et al. or just set it to 0.25
+     * \sa      See the thesis report for details
+     */
+    bool  psi_exact;
   } params_type;
 
 private:

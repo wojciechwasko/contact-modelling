@@ -20,14 +20,20 @@ CoeffsBouss::CoeffsBouss(
   const double x,
   const double y,
   const double h,
-  const double s
+  const double s,
+  const bool   psi_exact
 )
 :
   c_3_4_pi_E(3.0/(4.0 * M_PI * E)),
   c_3_4_pi_E_xy(c_3_4_pi_E / sqrt(x*x + y*y)),
   c_3_4_pi_E_xy3(c_3_4_pi_E_xy / (x*x + y*y)),
   c_3_4_pi_E_xyh3(c_3_4_pi_E / pow(x*x + y*y + h*h, 1.5)),
-  c_9_4_pi_E_psi_z0h((9.0/(4*M_PI*E)) * (psi(h/z0h(s))/z0h(s))),
+  c_9_4_pi_E_psi_z0h(
+    (psi_exact) ? 
+      ((9.0/(4*M_PI*E)) * (psi(h/z0h(s))/z0h(s)))
+      : 
+      ((9.0/(4*M_PI*E)) * (0.25/z0h(s)))
+  ),
   c_9_2_pi_E_psi_z0h(2*c_9_4_pi_E_psi_z0h)
 {
 
@@ -103,14 +109,14 @@ double appro_zz(const SkinAttributes& sa, const CoeffsBouss& cb)
   return cb.c_9_2_pi_E_psi_z0h;
 }
 
-arma::mat f2d_11(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
+arma::mat f2d_11(const Grid& f, const Grid& d, const SkinAttributes& skin_attr, const bool psi_exact)
 {
   arma::mat ret(d.num_cells(), f.num_cells());
   for (size_t ind_d = 0; ind_d < d.num_cells(); ++ind_d) {
     for (size_t ind_f = 0; ind_f < f.num_cells(); ++ind_f) {
       const double x = d.cell(ind_d).x - f.cell(ind_f).x;
       const double y = d.cell(ind_d).y - f.cell(ind_f).y;
-      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area());
+      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area(), psi_exact);
       const double a_zz = appro_zz(skin_attr, cb);
       const double b_zz = bouss_zz(skin_attr, cb, x,y);
       if ((x == 0 && y == 0) || std::fabs(a_zz) < std::fabs(b_zz)) {
@@ -124,14 +130,14 @@ arma::mat f2d_11(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
   return ret;
 }
 
-arma::mat f2d_13(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
+arma::mat f2d_13(const Grid& f, const Grid& d, const SkinAttributes& skin_attr, const bool psi_exact)
 {
   arma::mat ret(3*d.num_cells(), f.num_cells());
   for (size_t ind_d = 0; ind_d < d.num_cells(); ++ind_d) {
     for (size_t ind_f = 0; ind_f < f.num_cells(); ++ind_f) {
       const double x = d.cell(ind_d).x - f.cell(ind_f).x;
       const double y = d.cell(ind_d).y - f.cell(ind_f).y;
-      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area());
+      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area(), psi_exact);
       const double b_zz = bouss_zz(skin_attr, cb, x, y);
       const double a_zz = appro_zz(skin_attr, cb);
 
@@ -150,14 +156,14 @@ arma::mat f2d_13(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
   return ret;
 }
 
-arma::mat f2d_31(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
+arma::mat f2d_31(const Grid& f, const Grid& d, const SkinAttributes& skin_attr, const bool psi_exact)
 {
   arma::mat ret(d.num_cells(), 3*f.num_cells());
   for (size_t ind_d = 0; ind_d < d.num_cells(); ++ind_d) {
     for (size_t ind_f = 0; ind_f < f.num_cells(); ++ind_f) {
       const double x = d.cell(ind_d).x - f.cell(ind_f).x;
       const double y = d.cell(ind_d).y - f.cell(ind_f).y;
-      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area());
+      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area(), psi_exact);
       const double b_zz = bouss_zz(skin_attr, cb, x, y);
       const double a_zz = appro_zz(skin_attr, cb);
 
@@ -176,14 +182,14 @@ arma::mat f2d_31(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
   return ret;
 }
 
-arma::mat f2d_33(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
+arma::mat f2d_33(const Grid& f, const Grid& d, const SkinAttributes& skin_attr, const bool psi_exact)
 {
   arma::mat ret(3*d.num_cells(), 3*f.num_cells());
   for (size_t ind_d = 0; ind_d < d.num_cells(); ++ind_d) {
     for (size_t ind_f = 0; ind_f < f.num_cells(); ++ind_f) {
       const double x = d.cell(ind_d).x - f.cell(ind_f).x;
       const double y = d.cell(ind_d).y - f.cell(ind_f).y;
-      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area());
+      const CoeffsBouss cb(skin_attr.E, x, y, skin_attr.h, f.getCellShape().area(), psi_exact);
 
       const double b_xx = bouss_xx(skin_attr, cb, x, y);
       const double a_xx = appro_xx(skin_attr, cb);
@@ -231,7 +237,8 @@ arma::mat f2d_33(const Grid& f, const Grid& d, const SkinAttributes& skin_attr)
 arma::mat forces_to_displacements_matrix(
   const Grid& f,
   const Grid& d,
-  const SkinAttributes& skin_attr
+  const SkinAttributes& skin_attr,
+  const bool psi_exact
 )
 {
   using cm::details::eq_almost;
@@ -244,27 +251,28 @@ arma::mat forces_to_displacements_matrix(
   const size_t d_dim = d.dim();
 
   if (1 == f_dim && 1 == d_dim) {
-    return impl::f2d_11(f,d,skin_attr);
+    return impl::f2d_11(f,d,skin_attr,psi_exact);
   }
   
   if (1 == f_dim && 3 == d_dim) {
-    return impl::f2d_13(f,d,skin_attr);
+    return impl::f2d_13(f,d,skin_attr,psi_exact);
   }
   
   if (3 == f_dim && 1 == d_dim) {
-    return impl::f2d_31(f,d,skin_attr);
+    return impl::f2d_31(f,d,skin_attr,psi_exact);
   }
   
-  return impl::f2d_33(f,d,skin_attr);
+  return impl::f2d_33(f,d,skin_attr,psi_exact);
 }
 
 arma::mat displacements_to_forces_matrix(
   const Grid& d,
   const Grid& f,
-  const SkinAttributes& skin_attr
+  const SkinAttributes& skin_attr,
+  const bool psi_exact
 )
 {
-  arma::mat orig = forces_to_displacements_matrix(f,d,skin_attr);
+  arma::mat orig = forces_to_displacements_matrix(f,d,skin_attr,psi_exact);
   arma::mat ret = arma::pinv(orig);
   IFLOG(DEBUG2) {
     static size_t sn = 0;

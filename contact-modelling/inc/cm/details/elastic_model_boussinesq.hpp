@@ -25,11 +25,14 @@ namespace details {
  *          displacements vector.
  * \param  f    forces grid. Required for length and locations and such
  * \tparam d    displacements grid. Required for number of cells, locations, etc.
+ * \param psi_exact   whether to calculate the Psi function for the approximate
+ *                    solution using the exact formula or just set it to 0.25
  */
 arma::mat forces_to_displacements_matrix(
   const Grid& f,
   const Grid& d,
-  const SkinAttributes& skin_attr
+  const SkinAttributes& skin_attr,
+  const bool  psi_exact
 );
 
 /**
@@ -37,13 +40,16 @@ arma::mat forces_to_displacements_matrix(
  *          forces vector. (in least RMSE sense)
  * \param d    displacements grid. Required for number of cells, locations, etc.
  * \param f    forces grid. Required for length and locations and such
+ * \param psi_exact   whether to calculate the Psi function for the approximate
+ *                    solution using the exact formula or just set it to 0.25
  *
  * Basically returns a pinv of forces_to_displacements_matrix()
  */
 arma::mat displacements_to_forces_matrix(
   const Grid& d,
   const Grid& f,
-  const SkinAttributes& skin_attr
+  const SkinAttributes& skin_attr,
+  const bool  psi_exact
 );
 
 /**
@@ -68,14 +74,23 @@ void sanity_checks_forces_to_displacements(
 
 struct CoeffsBouss {
   /**
-   * \todo document parameters
+   * \brief   Precalculate the various coefficients which are commonly used
+   * \param   E   Elastic (Young's) modulus of the skin
+   * \param   x   distance between the points along the x axis
+   * \param   y   distance between the points along the y axis
+   * \param   h   thickness of the skin
+   * \param   s   area of the discretisation element (for approximate solution)
+   * \param   psi_exact   whether to use the exact formula (true) or just set
+   *                      Psi to 0.25, as propose in Muscari et al.;
+   *                      default: true
    */
   CoeffsBouss(
     const double E,
     const double x,
     const double y,
     const double h,
-    const double s
+    const double s,
+    const bool   psi_exact = true
   );
   /**
    * \brief Eq: $\frac{3}{4\pi E}$

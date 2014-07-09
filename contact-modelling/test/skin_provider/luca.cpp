@@ -60,7 +60,7 @@ BOOST_FIXTURE_TEST_CASE(good_luca, GoodLuca)
   for (size_t iy = 0; iy < 10; ++iy) {
     for (size_t ix = 0; ix < 10; ++ix) {
       BOOST_CHECK_CLOSE(grid->cell(i_cell).x, ix*x_spacing, 1e-4);
-      BOOST_CHECK_CLOSE(grid->cell(i_cell).y, iy*y_spacing, 1e-4);
+      BOOST_CHECK_CLOSE(grid->cell(i_cell).y, -(iy*y_spacing), 1e-4);
       ++i_cell;
     }
   }
