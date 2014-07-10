@@ -34,3 +34,16 @@ target_link_libraries(reconstruction
   ContactModelling
   ${Boost_LIBRARIES}
 )
+
+add_executable(timeit
+  timeit.cpp
+)
+
+set_target_properties(timeit
+  PROPERTIES COMPILE_DEFINITIONS "MAX_LOGGING_LEVEL=ERROR"
+)
+
+target_link_libraries(timeit
+  ContactModelling
+)
+
